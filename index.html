@@ -1,0 +1,1676 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Finesse Dental Care</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        dental: { DEFAULT:'#007bff', dark:'#0056b3', light:'#e8f4ff' }
+      }
+    }
+  }
+}
+</script>
+<style>
+  :root { --dental:#007bff; --dental-dark:#0056b3; --dental-light:#e8f4ff; }
+  * { box-sizing:border-box; }
+  body { font-size:16px; min-height:100vh; }
+  [dir="rtl"] * { font-family:'Segoe UI', Tahoma, Arial, sans-serif; }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width:6px; }
+  ::-webkit-scrollbar-thumb { background:#cbd5e1; border-radius:3px; }
+
+  /* Lock screen */
+  #lockScreen { position:fixed; inset:0; background:linear-gradient(135deg,#007bff 0%,#0056b3 100%); z-index:9999; display:flex; align-items:center; justify-content:center; }
+
+  /* Sidebar */
+  #sidebar { width:240px; min-height:100vh; background:#fff; border-right:1px solid #e2e8f0; position:fixed; top:0; left:0; z-index:100; transition:transform .3s; }
+  [dir="rtl"] #sidebar { left:auto; right:0; border-right:none; border-left:1px solid #e2e8f0; }
+  #mainContent { margin-left:240px; }
+  [dir="rtl"] #mainContent { margin-left:0; margin-right:240px; }
+  @media(max-width:768px) {
+    #sidebar { transform:translateX(-100%); }
+    [dir="rtl"] #sidebar { transform:translateX(100%); }
+    #sidebar.open { transform:translateX(0); }
+    #mainContent { margin:0 !important; padding-bottom:80px; }
+    #bottomNav { display:flex !important; }
+    #topBar { display:flex !important; }
+  }
+  #bottomNav { display:none; position:fixed; bottom:0; left:0; right:0; background:#fff; border-top:1px solid #e2e8f0; z-index:100; height:64px; }
+  #topBar { display:none; position:sticky; top:0; background:#fff; border-bottom:1px solid #e2e8f0; z-index:99; padding:0 16px; height:56px; align-items:center; }
+
+  /* Modal */
+  .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:200; display:flex; align-items:flex-end; justify-content:center; }
+  @media(min-width:769px) { .modal-overlay { align-items:center; } }
+  .modal-box { background:#fff; border-radius:16px 16px 0 0; width:100%; max-width:600px; max-height:90vh; overflow-y:auto; padding:24px; animation:slideUp .3s ease; }
+  @media(min-width:769px) { .modal-box { border-radius:16px; } }
+  @keyframes slideUp { from{transform:translateY(100%)} to{transform:translateY(0)} }
+
+  /* Toast */
+  #toastContainer { position:fixed; top:16px; right:16px; z-index:9999; display:flex; flex-direction:column; gap:8px; }
+  [dir="rtl"] #toastContainer { right:auto; left:16px; }
+  .toast { padding:12px 20px; border-radius:8px; color:#fff; font-size:14px; font-weight:500; animation:fadeIn .3s; min-width:200px; }
+  .toast.success { background:#10b981; }
+  .toast.error { background:#ef4444; }
+  .toast.info { background:#007bff; }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(-10px)} to{opacity:1;transform:translateY(0)} }
+
+  /* FAB */
+  #fab { position:fixed; bottom:80px; right:20px; width:56px; height:56px; border-radius:50%; background:#007bff; color:#fff; border:none; font-size:28px; cursor:pointer; box-shadow:0 4px 16px rgba(0,123,255,.4); z-index:150; display:none; align-items:center; justify-content:center; transition:transform .2s; }
+  #fab:hover { transform:scale(1.1); }
+  [dir="rtl"] #fab { right:auto; left:20px; }
+  @media(max-width:768px) { #fab { display:flex; } }
+
+  /* Calendar */
+  .cal-day { aspect-ratio:1; display:flex; flex-direction:column; align-items:center; justify-content:center; border-radius:8px; cursor:pointer; transition:background .15s; font-size:14px; position:relative; }
+  .cal-day:hover { background:#e8f4ff; }
+  .cal-day.today { background:#007bff; color:#fff; font-weight:700; }
+  .cal-day.has-appt::after { content:''; position:absolute; bottom:4px; width:6px; height:6px; border-radius:50%; background:#10b981; }
+  .cal-day.today.has-appt::after { background:#fff; }
+  .cal-day.other-month { opacity:.3; }
+
+  /* Nav item active */
+  .nav-item.active { color:#007bff; background:#e8f4ff; }
+  .nav-item.active .nav-icon { color:#007bff; }
+
+  /* Input focus */
+  input:focus, select:focus, textarea:focus { outline:none; border-color:#007bff !important; box-shadow:0 0 0 3px rgba(0,123,255,.15); }
+
+  /* Card */
+  .card { background:#fff; border-radius:12px; border:1px solid #e2e8f0; padding:20px; }
+
+  /* Stats card */
+  .stat-card { background:linear-gradient(135deg,var(--from),var(--to)); border-radius:12px; padding:20px; color:#fff; }
+
+  /* Table */
+  .data-table { width:100%; border-collapse:collapse; }
+  .data-table th { background:#f8fafc; padding:10px 12px; text-align:left; font-size:13px; color:#64748b; font-weight:600; border-bottom:1px solid #e2e8f0; }
+  [dir="rtl"] .data-table th { text-align:right; }
+  .data-table td { padding:12px; border-bottom:1px solid #f1f5f9; font-size:14px; }
+  .data-table tr:hover td { background:#f8fafc; }
+
+  /* Badge */
+  .badge { display:inline-block; padding:2px 10px; border-radius:99px; font-size:12px; font-weight:600; }
+
+  /* Scrollable section */
+  .section { display:none; }
+  .section.active { display:block; }
+
+  /* Setup bar */
+  #setupBar { background:#fff3cd; border-bottom:1px solid #ffc107; padding:10px 16px; font-size:13px; }
+
+  /* Overlay for mobile sidebar */
+  #sidebarOverlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.4); z-index:99; }
+  #sidebarOverlay.show { display:block; }
+</style>
+</head>
+<body class="bg-gray-50 text-gray-800" id="app">
+
+<!-- ===== LOCK SCREEN ===== -->
+<div id="lockScreen">
+  <div class="bg-white rounded-2xl p-8 w-full max-w-sm mx-4 shadow-2xl text-center">
+    <div class="w-16 h-16 bg-dental rounded-full flex items-center justify-center mx-auto mb-4">
+      <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c0-1.1.9-2 2-2s2 .9 2 2v1h1a1 1 0 011 1v4a1 1 0 01-1 1H7a1 1 0 01-1-1v-4a1 1 0 011-1h1v-1c0-1.1.9-2 2-2s2 .9 2 2v1h2v-1z"/>
+      </svg>
+    </div>
+    <h1 class="text-2xl font-bold text-gray-800 mb-1">Finesse Dental Care</h1>
+    <p class="text-gray-500 text-sm mb-6">Enter your password to continue</p>
+    <div class="relative mb-4">
+      <input id="pwInput" type="password" placeholder="Password" class="w-full border border-gray-200 rounded-xl px-4 py-3 text-base pr-12" onkeydown="if(event.key==='Enter')doLogin()"/>
+      <button onclick="togglePw()" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+        <svg id="eyeIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+      </button>
+    </div>
+    <p id="pwError" class="text-red-500 text-sm mb-3 hidden">Incorrect password. Try again.</p>
+    <button onclick="doLogin()" class="w-full bg-dental text-white rounded-xl py-3 font-semibold text-base hover:bg-dental-dark transition">Unlock</button>
+  </div>
+</div>
+
+<!-- ===== TOAST ===== -->
+<div id="toastContainer"></div>
+
+<!-- ===== SETUP BAR ===== -->
+<div id="setupBar">
+  <div class="flex flex-wrap items-center gap-2 max-w-5xl mx-auto">
+    <svg class="w-4 h-4 text-yellow-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+    <span class="text-yellow-800 font-medium text-sm" id="setupLabel">Google Sheets URL:</span>
+    <input id="scriptUrl" type="url" placeholder="Paste your Apps Script Web App URL here..." class="flex-1 border border-yellow-300 rounded-lg px-3 py-1.5 text-sm min-w-48 bg-white" />
+    <button onclick="saveScriptUrl()" class="bg-yellow-500 text-white px-4 py-1.5 rounded-lg text-sm font-medium hover:bg-yellow-600">Save & Connect</button>
+    <span id="connectionStatus" class="text-xs font-medium"></span>
+  </div>
+</div>
+
+<!-- ===== SIDEBAR OVERLAY ===== -->
+<div id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+<!-- ===== SIDEBAR (desktop/mobile) ===== -->
+<div id="sidebar">
+  <div class="p-5 border-b border-gray-100">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 bg-dental rounded-xl flex items-center justify-center flex-shrink-0">
+        <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C8 2 5 5.5 5 9c0 2.5 1 4.5 2.5 6L9 22h6l1.5-7C18 13.5 19 11.5 19 9c0-3.5-3-7-7-7z"/></svg>
+      </div>
+      <div>
+        <h1 class="font-bold text-gray-800 text-sm leading-tight" id="clinicNameDisplay">Finesse Dental</h1>
+        <p class="text-xs text-gray-400">Care Management</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Language + Currency toggles -->
+  <div class="px-4 py-3 border-b border-gray-100 flex gap-2">
+    <button onclick="toggleLang()" id="langBtn" class="flex-1 text-xs border border-gray-200 rounded-lg py-1.5 font-medium hover:bg-gray-50 transition">🌐 العربية</button>
+    <button onclick="toggleCurrency()" id="currBtn" class="flex-1 text-xs border border-gray-200 rounded-lg py-1.5 font-medium hover:bg-gray-50 transition">💱 EGP</button>
+  </div>
+
+  <nav class="p-3 space-y-1" id="sideNav">
+    <button class="nav-item active w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition" onclick="showTab('dashboard',this)">
+      <svg class="nav-icon w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      <span data-i18n="dashboard">Dashboard</span>
+    </button>
+    <button class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition" onclick="showTab('patients',this)">
+      <svg class="nav-icon w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M23 21v-2a4 4 0 00-3-3.87"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 3.13a4 4 0 010 7.75"/></svg>
+      <span data-i18n="patients">Patients</span>
+    </button>
+    <button class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition" onclick="showTab('appointments',this)">
+      <svg class="nav-icon w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      <span data-i18n="appointments">Appointments</span>
+    </button>
+    <button class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition" onclick="showTab('invoices',this)">
+      <svg class="nav-icon w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg>
+      <span data-i18n="invoices">Invoices</span>
+    </button>
+    <button class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition" onclick="showTab('doctors',this)">
+      <svg class="nav-icon w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+      <span data-i18n="doctors">Doctors</span>
+    </button>
+    <button class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition" onclick="showTab('settings',this)">
+      <svg class="nav-icon w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+      <span data-i18n="settings">Settings</span>
+    </button>
+  </nav>
+
+  <div class="absolute bottom-4 left-4 right-4">
+    <button onclick="doLogout()" class="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-500 hover:bg-red-50 rounded-xl transition">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+      <span data-i18n="logout">Logout</span>
+    </button>
+  </div>
+</div>
+
+<!-- ===== MAIN CONTENT ===== -->
+<div id="mainContent" class="min-h-screen">
+
+  <!-- Mobile Top Bar -->
+  <div id="topBar">
+    <button onclick="openSidebar()" class="p-2 rounded-lg hover:bg-gray-100">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+    <span class="font-semibold text-dental mx-auto" id="pageTitle">Dashboard</span>
+    <div class="flex gap-1">
+      <button onclick="toggleLang()" class="p-2 text-xs font-bold text-gray-500 hover:bg-gray-100 rounded-lg">🌐</button>
+      <button onclick="toggleCurrency()" class="p-2 text-xs font-bold text-gray-500 hover:bg-gray-100 rounded-lg">💱</button>
+    </div>
+  </div>
+
+  <div class="p-4 md:p-6 max-w-5xl mx-auto">
+
+    <!-- ===== DASHBOARD ===== -->
+    <div id="tab-dashboard" class="section active">
+      <h2 class="text-xl font-bold mb-5" data-i18n="dashboard">Dashboard</h2>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+        <div class="stat-card" style="--from:#007bff;--to:#0056b3">
+          <p class="text-blue-100 text-xs mb-1" data-i18n="totalPatients">Total Patients</p>
+          <p class="text-3xl font-bold" id="statPatients">0</p>
+        </div>
+        <div class="stat-card" style="--from:#10b981;--to:#059669">
+          <p class="text-green-100 text-xs mb-1" data-i18n="todayAppts">Today's Appts</p>
+          <p class="text-3xl font-bold" id="statToday">0</p>
+        </div>
+        <div class="stat-card" style="--from:#8b5cf6;--to:#6d28d9">
+          <p class="text-purple-100 text-xs mb-1" data-i18n="totalRevenue">Revenue</p>
+          <p class="text-2xl font-bold" id="statRevenue">0</p>
+        </div>
+        <div class="stat-card" style="--from:#f59e0b;--to:#d97706">
+          <p class="text-yellow-100 text-xs mb-1" data-i18n="doctors">Doctors</p>
+          <p class="text-3xl font-bold" id="statDoctors">0</p>
+        </div>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-4">
+        <div class="card">
+          <h3 class="font-semibold mb-3 text-sm text-gray-500 uppercase tracking-wide" data-i18n="upcomingAppts">Upcoming Appointments</h3>
+          <div id="dashAppts" class="space-y-2 text-sm text-gray-600">
+            <p class="text-gray-400 text-center py-4" data-i18n="noData">No data yet</p>
+          </div>
+        </div>
+        <div class="card">
+          <h3 class="font-semibold mb-3 text-sm text-gray-500 uppercase tracking-wide" data-i18n="recentPatients">Recent Patients</h3>
+          <div id="dashPatients" class="space-y-2 text-sm text-gray-600">
+            <p class="text-gray-400 text-center py-4" data-i18n="noData">No data yet</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== PATIENTS ===== -->
+    <div id="tab-patients" class="section">
+      <div class="flex items-center justify-between mb-5">
+        <h2 class="text-xl font-bold" data-i18n="patients">Patients</h2>
+        <button onclick="openModal('patientModal')" class="hidden md:flex items-center gap-2 bg-dental text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-dental-dark transition">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          <span data-i18n="addPatient">Add Patient</span>
+        </button>
+      </div>
+      <div class="card mb-4">
+        <div class="flex gap-2">
+          <input id="patientSearch" type="text" placeholder="Search by name or phone..." class="flex-1 border border-gray-200 rounded-xl px-4 py-2.5 text-sm" oninput="renderPatients()" data-i18n-placeholder="searchPatient"/>
+          <button onclick="loadData()" class="p-2.5 border border-gray-200 rounded-xl hover:bg-gray-50" title="Refresh">
+            <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="card overflow-x-auto">
+        <table class="data-table" id="patientsTable">
+          <thead><tr>
+            <th data-i18n="name">Name</th>
+            <th data-i18n="phone">Phone</th>
+            <th data-i18n="age">Age</th>
+            <th data-i18n="gender">Gender</th>
+            <th data-i18n="notes">Notes</th>
+            <th data-i18n="actions">Actions</th>
+          </tr></thead>
+          <tbody id="patientsTbody">
+            <tr><td colspan="6" class="text-center text-gray-400 py-8" data-i18n="noData">No data yet</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ===== APPOINTMENTS ===== -->
+    <div id="tab-appointments" class="section">
+      <div class="flex items-center justify-between mb-5">
+        <h2 class="text-xl font-bold" data-i18n="appointments">Appointments</h2>
+        <button onclick="openModal('apptModal')" class="hidden md:flex items-center gap-2 bg-dental text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-dental-dark transition">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          <span data-i18n="addAppt">Add Appointment</span>
+        </button>
+      </div>
+
+      <!-- Calendar -->
+      <div class="card mb-4">
+        <div class="flex items-center justify-between mb-4">
+          <button onclick="prevMonth()" class="p-2 hover:bg-gray-100 rounded-lg"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
+          <h3 class="font-semibold" id="calTitle"></h3>
+          <button onclick="nextMonth()" class="p-2 hover:bg-gray-100 rounded-lg"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>
+        </div>
+        <div class="grid grid-cols-7 gap-1 mb-2">
+          <div class="text-center text-xs text-gray-400 font-medium py-1">Sun</div>
+          <div class="text-center text-xs text-gray-400 font-medium py-1">Mon</div>
+          <div class="text-center text-xs text-gray-400 font-medium py-1">Tue</div>
+          <div class="text-center text-xs text-gray-400 font-medium py-1">Wed</div>
+          <div class="text-center text-xs text-gray-400 font-medium py-1">Thu</div>
+          <div class="text-center text-xs text-gray-400 font-medium py-1">Fri</div>
+          <div class="text-center text-xs text-gray-400 font-medium py-1">Sat</div>
+        </div>
+        <div class="grid grid-cols-7 gap-1" id="calGrid"></div>
+      </div>
+
+      <!-- Appointments list -->
+      <div class="card overflow-x-auto">
+        <h3 class="font-semibold mb-3 text-sm" id="apptListTitle">All Appointments</h3>
+        <table class="data-table" id="apptsTable">
+          <thead><tr>
+            <th data-i18n="date">Date</th>
+            <th data-i18n="time">Time</th>
+            <th data-i18n="patient">Patient</th>
+            <th data-i18n="doctor">Doctor</th>
+            <th data-i18n="treatment">Treatment</th>
+            <th data-i18n="status">Status</th>
+            <th data-i18n="actions">Actions</th>
+          </tr></thead>
+          <tbody id="apptsTbody">
+            <tr><td colspan="7" class="text-center text-gray-400 py-8" data-i18n="noData">No data yet</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ===== INVOICES ===== -->
+    <div id="tab-invoices" class="section">
+      <div class="flex items-center justify-between mb-5">
+        <h2 class="text-xl font-bold" data-i18n="invoices">Invoices</h2>
+        <button onclick="openModal('invoiceModal')" class="hidden md:flex items-center gap-2 bg-dental text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-dental-dark transition">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          <span data-i18n="newInvoice">New Invoice</span>
+        </button>
+      </div>
+
+      <!-- Price Guide -->
+      <div class="card mb-4">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="font-semibold text-sm" data-i18n="priceGuide">Treatment Price Guide</h3>
+          <button onclick="savePriceGuide()" class="text-dental text-xs font-medium hover:underline" data-i18n="save">Save</button>
+        </div>
+        <div id="priceGuideList" class="space-y-2"></div>
+        <button onclick="addPriceRow()" class="mt-3 text-dental text-xs font-medium flex items-center gap-1 hover:underline">
+          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          <span data-i18n="addTreatment">Add Treatment</span>
+        </button>
+      </div>
+
+      <!-- Invoices list -->
+      <div class="card overflow-x-auto">
+        <table class="data-table">
+          <thead><tr>
+            <th>#</th>
+            <th data-i18n="patient">Patient</th>
+            <th data-i18n="treatment">Treatment</th>
+            <th data-i18n="amount">Amount</th>
+            <th data-i18n="date">Date</th>
+            <th data-i18n="status">Status</th>
+            <th data-i18n="actions">Actions</th>
+          </tr></thead>
+          <tbody id="invoicesTbody">
+            <tr><td colspan="7" class="text-center text-gray-400 py-8" data-i18n="noData">No data yet</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ===== DOCTORS VIEW ===== -->
+    <div id="tab-doctors" class="section">
+      <h2 class="text-xl font-bold mb-5" data-i18n="doctorsView">Doctors View</h2>
+      <div class="card mb-4">
+        <div class="flex flex-wrap gap-3 items-center">
+          <div class="flex-1 min-w-40">
+            <label class="text-xs text-gray-500 mb-1 block" data-i18n="selectDoctor">Select Doctor</label>
+            <select id="doctorFilter" class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm" onchange="renderDoctorView()">
+              <option value="">-- All Doctors --</option>
+            </select>
+          </div>
+          <div class="flex-1 min-w-40">
+            <label class="text-xs text-gray-500 mb-1 block" data-i18n="viewPeriod">Period</label>
+            <select id="doctorPeriod" class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm" onchange="renderDoctorView()">
+              <option value="today" data-i18n="today">Today</option>
+              <option value="week" data-i18n="thisWeek">This Week</option>
+              <option value="all" data-i18n="allTime">All Time</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="card overflow-x-auto">
+        <table class="data-table">
+          <thead><tr>
+            <th data-i18n="date">Date</th>
+            <th data-i18n="time">Time</th>
+            <th data-i18n="patient">Patient</th>
+            <th data-i18n="treatment">Treatment</th>
+            <th data-i18n="status">Status</th>
+          </tr></thead>
+          <tbody id="doctorViewTbody">
+            <tr><td colspan="5" class="text-center text-gray-400 py-8" data-i18n="noData">No data yet</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ===== SETTINGS ===== -->
+    <div id="tab-settings" class="section">
+      <h2 class="text-xl font-bold mb-5" data-i18n="settings">Settings</h2>
+      <div class="grid md:grid-cols-2 gap-4">
+        <div class="card">
+          <h3 class="font-semibold mb-4 text-sm uppercase text-gray-500 tracking-wide" data-i18n="clinicInfo">Clinic Info</h3>
+          <div class="space-y-3">
+            <div>
+              <label class="text-xs text-gray-500 mb-1 block" data-i18n="clinicName">Clinic Name</label>
+              <input id="settingClinicName" type="text" class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm" placeholder="Finesse Dental Care"/>
+            </div>
+            <div>
+              <label class="text-xs text-gray-500 mb-1 block" data-i18n="workingHours">Working Hours</label>
+              <div class="flex gap-2">
+                <input id="settingHoursFrom" type="time" class="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-sm" value="09:00"/>
+                <span class="self-center text-gray-400">-</span>
+                <input id="settingHoursTo" type="time" class="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-sm" value="17:00"/>
+              </div>
+            </div>
+            <div>
+              <label class="text-xs text-gray-500 mb-1 block" data-i18n="defaultCurrency">Currency</label>
+              <select id="settingCurrency" class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm" onchange="setCurrency(this.value)">
+                <option value="USD">USD ($)</option>
+                <option value="EGP">EGP (ج.م)</option>
+              </select>
+            </div>
+            <div>
+              <label class="text-xs text-gray-500 mb-1 block" data-i18n="language">Language</label>
+              <select id="settingLang" class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm" onchange="setLang(this.value)">
+                <option value="en">English</option>
+                <option value="ar">العربية</option>
+              </select>
+            </div>
+            <button onclick="saveSettings()" class="w-full bg-dental text-white rounded-xl py-2.5 text-sm font-medium hover:bg-dental-dark transition" data-i18n="saveSettings">Save Settings</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 class="font-semibold mb-4 text-sm uppercase text-gray-500 tracking-wide" data-i18n="manageDoctors">Manage Doctors</h3>
+          <div id="doctorsList" class="space-y-2 mb-3"></div>
+          <div class="flex gap-2">
+            <input id="newDoctorName" type="text" placeholder="Doctor name..." class="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-sm" data-i18n-placeholder="doctorName"/>
+            <input id="newDoctorSpec" type="text" placeholder="Specialization..." class="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-sm" data-i18n-placeholder="specialization"/>
+            <button onclick="addDoctor()" class="bg-dental text-white px-3 py-2 rounded-xl text-sm hover:bg-dental-dark transition">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end .p-4 -->
+</div><!-- end #mainContent -->
+
+<!-- ===== FAB ===== -->
+<button id="fab" onclick="openFabModal()">+</button>
+
+<!-- ===== BOTTOM NAV ===== -->
+<nav id="bottomNav" class="items-center justify-around px-2">
+  <button class="flex flex-col items-center gap-0.5 py-2 px-3 text-xs nav-item active" onclick="showTab('dashboard',this)" data-tab="dashboard">
+    <svg class="w-5 h-5 nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+    <span data-i18n="dashboard">Dashboard</span>
+  </button>
+  <button class="flex flex-col items-center gap-0.5 py-2 px-3 text-xs nav-item" onclick="showTab('patients',this)" data-tab="patients">
+    <svg class="w-5 h-5 nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+    <span data-i18n="patients">Patients</span>
+  </button>
+  <button class="flex flex-col items-center gap-0.5 py-2 px-3 text-xs nav-item" onclick="showTab('appointments',this)" data-tab="appointments">
+    <svg class="w-5 h-5 nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+    <span data-i18n="appts">Appts</span>
+  </button>
+  <button class="flex flex-col items-center gap-0.5 py-2 px-3 text-xs nav-item" onclick="showTab('invoices',this)" data-tab="invoices">
+    <svg class="w-5 h-5 nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/></svg>
+    <span data-i18n="invoices">Invoices</span>
+  </button>
+  <button class="flex flex-col items-center gap-0.5 py-2 px-3 text-xs nav-item" onclick="showTab('settings',this)" data-tab="settings">
+    <svg class="w-5 h-5 nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+    <span data-i18n="settings">Settings</span>
+  </button>
+</nav>
+
+<!-- ============================================================ -->
+<!--  MODALS  -->
+<!-- ============================================================ -->
+
+<!-- Patient Modal -->
+<div id="patientModal" class="modal-overlay hidden" onclick="closeModalOnOverlay(event,'patientModal')">
+  <div class="modal-box">
+    <div class="flex items-center justify-between mb-5">
+      <h3 class="font-bold text-lg" id="patientModalTitle" data-i18n="addPatient">Add Patient</h3>
+      <button onclick="closeModal('patientModal')" class="p-1 hover:bg-gray-100 rounded-lg">✕</button>
+    </div>
+    <div class="space-y-3">
+      <input type="hidden" id="editPatientId"/>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="text-xs text-gray-500 mb-1 block" data-i18n="name">Name *</label>
+          <input id="pName" type="text" class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm" placeholder="Full name"/>
+        </div>
+        <div>
+          <label class="text-xs text-gray-500 mb-1 block" data-i18n="phone">Phone *</label>
+          <input id="pPhone" type="tel" class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm" placeholder="+20..."/>
+        </div>
+        <div>
+          <label class="text-xs text-gray-500 mb-1 block" data-i18n="age">Age</label>
+          <input id="pAge" type="number" class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm" placeholder="25"/>
+        </div>
+        <div>
+          <label class="text-xs text-gray-500 mb-1 block" data-i18n="gender">Gender</label>
+          <select id="pGender" class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm">
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+          </select>
+        </div>
+      </div>
+      <div>
+        <label class="text-xs text-gray-500 mb-1 block" data-i18n="medicalNotes">Medical Notes</label>
+        <textarea id="pNotes" rows="3" class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm resize-none" placeholder="Allergies, conditions, medications..."></textarea>
+      </div>
+      <div class="flex gap-3 pt-2">
+        <button onclick="closeModal('patientModal')" class="flex-1 border border-gray-200 rounded-xl py-2.5 text-sm font-medium hover:bg-gray-50" data-i18n="cancel">Cancel</button>
+        <button onclick="savePatient()" class="flex-1 bg-dental text-white rounded-xl py-2.5 text-sm font-medium hover:bg-dental-dark" data-i18n="save">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Appointment Modal -->
+<div id="apptModal" class="modal-overlay hidden" onclick="closeModalOnOverlay(event,'apptModal')">
+  <div class="modal-box">
+    <div class="flex items-center justify-between mb-5">
+      <h3 class="font-bold text-lg" id="apptModalTitle" data-i18n="addAppt">Add Appointment</h3>
+      <button onclick="closeModal('apptModal')" class="p-1 hover:bg-gray-100 rounded-lg">✕</button>
+    </div>
+    <div class="space-y-3">
+      <input type="hidden" id="editApptId"/>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="text-xs text-gray-500 mb-1 block" data-i18n="date">Date *</label>
+          <input id="aDate" type="date" class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm"/>
+        </div>
+        <div>
+          <label class="text-xs text-gray-500 mb-1 block" data-i18n="time">Time *</label>
+          <select id="aTime" class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm"></select>
+        </div>
+        <div class="col-span-2">
+          <label class="text-xs text-gray-500 mb-1 block" data-i18n="patient">Patient *</label>
+          <input id="aPatientSearch" type="text" placeholder="Search patient..." class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm mb-1" oninput="searchPatientForAppt()"/>
+          <div id="patientSuggestions" class="border border-gray-200 rounded-xl overflow-hidden hidden max-h-40 overflow-y-auto"></div>
+          <input type="hidden" id="aPatientId"/>
+          <input type="hidden" id="aPatientName"/>
+          <p id="selectedPatientDisplay" class="text-xs text-dental mt-1"></p>
+        </div>
+        <div>
+          <label class="text-xs text-gray-500 mb-1 block" data-i18n="doctor">Doctor</label>
+          <select id="aDoctor" class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm"></select>
+        </div>
+        <div>
+          <label class="text-xs text-gray-500 mb-1 block" data-i18n="treatment">Treatment</label>
+          <select id="aTreatment" class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm"></select>
+        </div>
+        <div class="col-span-2">
+          <label class="text-xs text-gray-500 mb-1 block" data-i18n="status">Status</label>
+          <select id="aStatus" class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm">
+            <option value="Scheduled">Scheduled</option>
+            <option value="Confirmed">Confirmed</option>
+            <option value="Completed">Completed</option>
+            <option value="Cancelled">Cancelled</option>
+          </select>
+        </div>
+        <div class="col-span-2">
+          <label class="text-xs text-gray-500 mb-1 block" data-i18n="notes">Notes</label>
+          <textarea id="aNotes" rows="2" class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm resize-none" placeholder="Additional notes..."></textarea>
+        </div>
+      </div>
+      <div class="flex gap-3 pt-2">
+        <button onclick="closeModal('apptModal')" class="flex-1 border border-gray-200 rounded-xl py-2.5 text-sm font-medium hover:bg-gray-50" data-i18n="cancel">Cancel</button>
+        <button onclick="saveAppt()" class="flex-1 bg-dental text-white rounded-xl py-2.5 text-sm font-medium hover:bg-dental-dark" data-i18n="save">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Invoice Modal -->
+<div id="invoiceModal" class="modal-overlay hidden" onclick="closeModalOnOverlay(event,'invoiceModal')">
+  <div class="modal-box">
+    <div class="flex items-center justify-between mb-5">
+      <h3 class="font-bold text-lg" data-i18n="newInvoice">New Invoice</h3>
+      <button onclick="closeModal('invoiceModal')" class="p-1 hover:bg-gray-100 rounded-lg">✕</button>
+    </div>
+    <div class="space-y-3">
+      <input type="hidden" id="editInvoiceId"/>
+      <div>
+        <label class="text-xs text-gray-500 mb-1 block" data-i18n="patient">Patient *</label>
+        <input id="iPatientSearch" type="text" placeholder="Search patient..." class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm mb-1" oninput="searchPatientForInvoice()"/>
+        <div id="invPatientSuggestions" class="border border-gray-200 rounded-xl overflow-hidden hidden max-h-40 overflow-y-auto"></div>
+        <input type="hidden" id="iPatientId"/>
+        <input type="hidden" id="iPatientName"/>
+        <p id="selectedInvPatientDisplay" class="text-xs text-dental mt-1"></p>
+      </div>
+      <div>
+        <label class="text-xs text-gray-500 mb-1 block" data-i18n="treatment">Treatment *</label>
+        <select id="iTreatment" class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm" onchange="updateInvoicePrice()">
+          <option value="">-- Select --</option>
+        </select>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="text-xs text-gray-500 mb-1 block" data-i18n="amount">Amount</label>
+          <input id="iAmount" type="number" class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm" placeholder="0"/>
+        </div>
+        <div>
+          <label class="text-xs text-gray-500 mb-1 block" data-i18n="date">Date</label>
+          <input id="iDate" type="date" class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm"/>
+        </div>
+      </div>
+      <div>
+        <label class="text-xs text-gray-500 mb-1 block" data-i18n="status">Status</label>
+        <select id="iStatus" class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm">
+          <option value="Paid">Paid</option>
+          <option value="Pending">Pending</option>
+          <option value="Cancelled">Cancelled</option>
+        </select>
+      </div>
+      <div class="bg-gray-50 rounded-xl p-3 text-sm">
+        <div class="flex justify-between font-semibold">
+          <span data-i18n="total">Total:</span>
+          <span id="invoiceTotal" class="text-dental">0</span>
+        </div>
+      </div>
+      <div class="flex gap-3 pt-2">
+        <button onclick="closeModal('invoiceModal')" class="flex-1 border border-gray-200 rounded-xl py-2.5 text-sm font-medium hover:bg-gray-50" data-i18n="cancel">Cancel</button>
+        <button onclick="saveInvoice()" class="flex-1 bg-dental text-white rounded-xl py-2.5 text-sm font-medium hover:bg-dental-dark" data-i18n="save">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!--  APPS SCRIPT SETUP INSTRUCTIONS (in HTML comments)
+=================================================================
+HOW TO SET UP GOOGLE SHEETS BACKEND:
+
+1. Create a new Google Spreadsheet with these sheets:
+   - Patients  (cols: ID, Name, Phone, Age, Gender, Notes, CreatedAt)
+   - Appointments (cols: ID, Date, Time, PatientID, PatientName, Doctor, Treatment, Status, Notes, CreatedAt)
+   - Invoices (cols: ID, PatientID, PatientName, Treatment, Amount, Date, Status, CreatedAt)
+   - Doctors (cols: ID, Name, Specialization)
+   - Settings (cols: Key, Value)
+
+2. Open Tools > Apps Script in the spreadsheet
+
+3. Paste this code:
+---
+const SHEET_ID = SpreadsheetApp.getActiveSpreadsheet().getId();
+
+function doGet(e) {
+  const sheet = e.parameter.sheet;
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const ws = ss.getSheetByName(sheet);
+  if (!ws) return jsonResponse({error:'Sheet not found'});
+  const data = ws.getDataRange().getValues();
+  const headers = data[0];
+  const rows = data.slice(1).map(row => {
+    const obj = {};
+    headers.forEach((h,i) => obj[h] = row[i]);
+    return obj;
+  });
+  return jsonResponse({data: rows, sheet: sheet});
+}
+
+function doPost(e) {
+  const payload = JSON.parse(e.postData.contents);
+  const {sheet, action, row, id} = payload;
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const ws = ss.getSheetByName(sheet);
+  if (!ws) return jsonResponse({error:'Sheet not found'});
+  
+  if (action === 'append') {
+    ws.appendRow(row);
+    return jsonResponse({success:true});
+  }
+  if (action === 'update') {
+    const data = ws.getDataRange().getValues();
+    for (let i=1;i<data.length;i++) {
+      if (String(data[i][0]) === String(id)) {
+        row.forEach((v,j) => ws.getRange(i+1,j+1).setValue(v));
+        return jsonResponse({success:true});
+      }
+    }
+    return jsonResponse({error:'Row not found'});
+  }
+  if (action === 'delete') {
+    const data = ws.getDataRange().getValues();
+    for (let i=1;i<data.length;i++) {
+      if (String(data[i][0]) === String(id)) {
+        ws.deleteRow(i+1);
+        return jsonResponse({success:true});
+      }
+    }
+    return jsonResponse({error:'Row not found'});
+  }
+  return jsonResponse({error:'Unknown action'});
+}
+
+function jsonResponse(data) {
+  return ContentService.createTextOutput(JSON.stringify(data))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+---
+
+4. Deploy: Click Deploy > New Deployment > Web App
+   - Execute as: Me
+   - Who has access: Anyone
+   - Copy the Web App URL
+
+5. Paste the URL in the Setup Bar at the top of this app
+================================================================= -->
+
+<script>
+// ===================================================
+//  STATE
+// ===================================================
+const STATE = {
+  patients: [],
+  appointments: [],
+  invoices: [],
+  doctors: [],
+  settings: { clinicName:'Finesse Dental Care', hoursFrom:'09:00', hoursTo:'17:00', currency:'USD', lang:'en' },
+  priceGuide: [
+    { treatment:'Cleaning', price:50 },
+    { treatment:'Filling', price:80 },
+    { treatment:'Root Canal', price:300 },
+    { treatment:'Crown', price:500 },
+    { treatment:'Extraction', price:100 },
+    { treatment:'Whitening', price:150 },
+    { treatment:'Braces Consult', price:200 },
+  ],
+  calYear: new Date().getFullYear(),
+  calMonth: new Date().getMonth(),
+  scriptUrl: '',
+  currency: 'USD',
+  lang: 'en',
+};
+
+const TRANSLATIONS = {
+  en: {
+    dashboard:'Dashboard', patients:'Patients', appointments:'Appointments', invoices:'Invoices',
+    doctors:'Doctors', settings:'Settings', logout:'Logout', addPatient:'Add Patient',
+    addAppt:'Add Appointment', newInvoice:'New Invoice', save:'Save', cancel:'Cancel',
+    totalPatients:'Total Patients', todayAppts:"Today's Appts", totalRevenue:'Revenue',
+    name:'Name', phone:'Phone', age:'Age', gender:'Gender', notes:'Notes', actions:'Actions',
+    date:'Date', time:'Time', patient:'Patient', doctor:'Doctor', treatment:'Treatment',
+    status:'Status', amount:'Amount', priceGuide:'Treatment Price Guide', addTreatment:'Add Treatment',
+    medicalNotes:'Medical Notes', upcomingAppts:'Upcoming Appointments', recentPatients:'Recent Patients',
+    noData:'No data yet', clinicInfo:'Clinic Info', clinicName:'Clinic Name', workingHours:'Working Hours',
+    defaultCurrency:'Currency', language:'Language', saveSettings:'Save Settings', manageDoctors:'Manage Doctors',
+    selectDoctor:'Select Doctor', viewPeriod:'Period', today:'Today', thisWeek:'This Week', allTime:'All Time',
+    doctorsView:"Doctors' View", total:'Total:', searchPatient:'Search by name or phone...',
+    doctorName:'Doctor name', specialization:'Specialization', edit:'Edit', delete:'Delete',
+    appts:'Appts', setupLabel:'Google Sheets URL:',
+  },
+  ar: {
+    dashboard:'لوحة التحكم', patients:'المرضى', appointments:'المواعيد', invoices:'الفواتير',
+    doctors:'الأطباء', settings:'الإعدادات', logout:'تسجيل الخروج', addPatient:'إضافة مريض',
+    addAppt:'إضافة موعد', newInvoice:'فاتورة جديدة', save:'حفظ', cancel:'إلغاء',
+    totalPatients:'إجمالي المرضى', todayAppts:'مواعيد اليوم', totalRevenue:'الإيرادات',
+    name:'الاسم', phone:'الهاتف', age:'العمر', gender:'الجنس', notes:'ملاحظات', actions:'إجراءات',
+    date:'التاريخ', time:'الوقت', patient:'المريض', doctor:'الطبيب', treatment:'العلاج',
+    status:'الحالة', amount:'المبلغ', priceGuide:'دليل أسعار العلاج', addTreatment:'إضافة علاج',
+    medicalNotes:'الملاحظات الطبية', upcomingAppts:'المواعيد القادمة', recentPatients:'المرضى الأخيرون',
+    noData:'لا توجد بيانات', clinicInfo:'معلومات العيادة', clinicName:'اسم العيادة',
+    workingHours:'ساعات العمل', defaultCurrency:'العملة', language:'اللغة', saveSettings:'حفظ الإعدادات',
+    manageDoctors:'إدارة الأطباء', selectDoctor:'اختر طبيباً', viewPeriod:'الفترة الزمنية',
+    today:'اليوم', thisWeek:'هذا الأسبوع', allTime:'كل الوقت', doctorsView:'عرض الأطباء',
+    total:'الإجمالي:', searchPatient:'ابحث بالاسم أو الهاتف...', doctorName:'اسم الطبيب',
+    specialization:'التخصص', edit:'تعديل', delete:'حذف', appts:'مواعيد', setupLabel:'رابط Apps Script:',
+  }
+};
+
+const CURRENCY_SYMBOLS = { USD:'$', EGP:'ج.م' };
+
+// ===================================================
+//  AUTH
+// ===================================================
+const CORRECT_PW = 'MOSTAFA_saad44';
+
+function doLogin() {
+  const val = document.getElementById('pwInput').value;
+  if (val === CORRECT_PW) {
+    sessionStorage.setItem('dental_auth','1');
+    document.getElementById('lockScreen').style.display = 'none';
+    init();
+  } else {
+    document.getElementById('pwError').classList.remove('hidden');
+    document.getElementById('pwInput').value = '';
+  }
+}
+
+function doLogout() {
+  sessionStorage.removeItem('dental_auth');
+  location.reload();
+}
+
+function togglePw() {
+  const inp = document.getElementById('pwInput');
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+}
+
+// ===================================================
+//  INIT
+// ===================================================
+function init() {
+  // Load stored script URL
+  STATE.scriptUrl = localStorage.getItem('dental_script_url') || '';
+  if (STATE.scriptUrl) {
+    document.getElementById('scriptUrl').value = STATE.scriptUrl;
+    document.getElementById('connectionStatus').textContent = '✅ Connected';
+    document.getElementById('connectionStatus').className = 'text-xs font-medium text-green-600';
+  }
+
+  // Load local settings
+  const storedSettings = localStorage.getItem('dental_settings');
+  if (storedSettings) Object.assign(STATE.settings, JSON.parse(storedSettings));
+  const storedPrices = localStorage.getItem('dental_prices');
+  if (storedPrices) STATE.priceGuide = JSON.parse(storedPrices);
+  const storedDoctors = localStorage.getItem('dental_doctors');
+  if (storedDoctors) STATE.doctors = JSON.parse(storedDoctors);
+  const storedPatients = localStorage.getItem('dental_patients');
+  if (storedPatients) STATE.patients = JSON.parse(storedPatients);
+  const storedAppts = localStorage.getItem('dental_appointments');
+  if (storedAppts) STATE.appointments = JSON.parse(storedAppts);
+  const storedInvoices = localStorage.getItem('dental_invoices');
+  if (storedInvoices) STATE.invoices = JSON.parse(storedInvoices);
+
+  setLang(STATE.settings.lang, false);
+  setCurrency(STATE.settings.currency, false);
+  applySettings();
+  renderAll();
+  renderCalendar();
+  generateTimeSlots();
+
+  if (STATE.scriptUrl) loadData();
+}
+
+// ===================================================
+//  GOOGLE SHEETS
+// ===================================================
+function saveScriptUrl() {
+  const url = document.getElementById('scriptUrl').value.trim();
+  if (!url) { showToast('Please enter a URL','error'); return; }
+  STATE.scriptUrl = url;
+  localStorage.setItem('dental_script_url', url);
+  document.getElementById('connectionStatus').textContent = 'Connecting...';
+  loadData();
+}
+
+async function gsGet(sheet) {
+  if (!STATE.scriptUrl) return null;
+  try {
+    const r = await fetch(`${STATE.scriptUrl}?sheet=${sheet}`);
+    const data = await r.json();
+    return data.data || [];
+  } catch { return null; }
+}
+
+async function gsPost(payload) {
+  if (!STATE.scriptUrl) return false;
+  try {
+    await fetch(STATE.scriptUrl, {
+      method:'POST',
+      body: JSON.stringify(payload),
+      headers: { 'Content-Type':'application/json' },
+      mode: 'no-cors'
+    });
+    return true;
+  } catch { return false; }
+}
+
+async function loadData() {
+  showToast('Syncing data...','info');
+  try {
+    const [pts, appts, invs, docs, setts] = await Promise.all([
+      gsGet('Patients'), gsGet('Appointments'), gsGet('Invoices'),
+      gsGet('Doctors'), gsGet('Settings')
+    ]);
+
+    if (pts) { STATE.patients = pts.filter(r=>r.ID||r.Name); localStorage.setItem('dental_patients', JSON.stringify(STATE.patients)); }
+    if (appts) { STATE.appointments = appts.filter(r=>r.ID||r.Date); localStorage.setItem('dental_appointments', JSON.stringify(STATE.appointments)); }
+    if (invs) { STATE.invoices = invs.filter(r=>r.ID||r.PatientName); localStorage.setItem('dental_invoices', JSON.stringify(STATE.invoices)); }
+    if (docs) { STATE.doctors = docs.filter(r=>r.ID||r.Name); localStorage.setItem('dental_doctors', JSON.stringify(STATE.doctors)); }
+    if (setts && setts.length) {
+      setts.forEach(r => { if(r.Key && r.Value !== undefined) STATE.settings[r.Key] = r.Value; });
+      localStorage.setItem('dental_settings', JSON.stringify(STATE.settings));
+    }
+
+    renderAll();
+    document.getElementById('connectionStatus').textContent = '✅ Connected';
+    document.getElementById('connectionStatus').className = 'text-xs font-medium text-green-600';
+    showToast('Data synced successfully!','success');
+  } catch(e) {
+    document.getElementById('connectionStatus').textContent = '❌ Error';
+    document.getElementById('connectionStatus').className = 'text-xs font-medium text-red-500';
+    showToast('Sync failed. Using local data.','error');
+  }
+}
+
+// ===================================================
+//  RENDER ALL
+// ===================================================
+function renderAll() {
+  applySettings();
+  renderDashboard();
+  renderPatients();
+  renderAppointments();
+  renderInvoices();
+  renderDoctorView();
+  renderDoctorsList();
+  renderDoctorFilter();
+  renderPriceGuide();
+  renderTreatmentSelects();
+  renderCalendar();
+}
+
+// ===================================================
+//  SETTINGS / LANG / CURRENCY
+// ===================================================
+function applySettings() {
+  document.getElementById('clinicNameDisplay').textContent = STATE.settings.clinicName || 'Finesse Dental';
+  document.getElementById('settingClinicName').value = STATE.settings.clinicName || '';
+  document.getElementById('settingHoursFrom').value = STATE.settings.hoursFrom || '09:00';
+  document.getElementById('settingHoursTo').value = STATE.settings.hoursTo || '17:00';
+  document.getElementById('settingCurrency').value = STATE.settings.currency || 'USD';
+  document.getElementById('settingLang').value = STATE.settings.lang || 'en';
+}
+
+function saveSettings() {
+  STATE.settings.clinicName = document.getElementById('settingClinicName').value;
+  STATE.settings.hoursFrom = document.getElementById('settingHoursFrom').value;
+  STATE.settings.hoursTo = document.getElementById('settingHoursTo').value;
+  localStorage.setItem('dental_settings', JSON.stringify(STATE.settings));
+  applySettings();
+  gsPost({ sheet:'Settings', action:'update', id:'clinicName', row:['clinicName', STATE.settings.clinicName] });
+  showToast('Settings saved!','success');
+}
+
+function setLang(lang, persist=true) {
+  STATE.lang = lang;
+  STATE.settings.lang = lang;
+  if (persist) localStorage.setItem('dental_settings', JSON.stringify(STATE.settings));
+  document.documentElement.lang = lang;
+  document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+  document.getElementById('langBtn').textContent = lang === 'en' ? '🌐 العربية' : '🌐 English';
+  document.getElementById('settingLang').value = lang;
+  translateAll();
+}
+
+function toggleLang() {
+  setLang(STATE.lang === 'en' ? 'ar' : 'en');
+}
+
+function setCurrency(cur, persist=true) {
+  STATE.currency = cur;
+  STATE.settings.currency = cur;
+  if (persist) localStorage.setItem('dental_settings', JSON.stringify(STATE.settings));
+  document.getElementById('currBtn').textContent = cur === 'USD' ? '💱 EGP' : '💱 USD';
+  document.getElementById('settingCurrency').value = cur;
+  renderAll();
+}
+
+function toggleCurrency() {
+  setCurrency(STATE.currency === 'USD' ? 'EGP' : 'USD');
+}
+
+function fmtCurrency(val) {
+  const sym = CURRENCY_SYMBOLS[STATE.currency] || '$';
+  const num = parseFloat(val) || 0;
+  return `${sym}${num.toLocaleString()}`;
+}
+
+function translateAll() {
+  const t = TRANSLATIONS[STATE.lang] || TRANSLATIONS.en;
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (t[key]) el.textContent = t[key];
+  });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    const key = el.getAttribute('data-i18n-placeholder');
+    if (t[key]) el.placeholder = t[key];
+  });
+}
+
+// ===================================================
+//  DASHBOARD
+// ===================================================
+function renderDashboard() {
+  document.getElementById('statPatients').textContent = STATE.patients.length;
+  document.getElementById('statDoctors').textContent = STATE.doctors.length;
+
+  const today = new Date().toISOString().slice(0,10);
+  const todayAppts = STATE.appointments.filter(a => String(a.Date||'').slice(0,10) === today);
+  document.getElementById('statToday').textContent = todayAppts.length;
+
+  const revenue = STATE.invoices.filter(i => i.Status === 'Paid').reduce((s,i) => s + (parseFloat(i.Amount)||0), 0);
+  document.getElementById('statRevenue').textContent = fmtCurrency(revenue);
+
+  // Upcoming appointments
+  const upcoming = STATE.appointments
+    .filter(a => (a.Date||'') >= today && a.Status !== 'Cancelled')
+    .sort((a,b) => (a.Date||'') > (b.Date||'') ? 1 : -1)
+    .slice(0,5);
+  const dashAppts = document.getElementById('dashAppts');
+  if (upcoming.length === 0) {
+    dashAppts.innerHTML = `<p class="text-gray-400 text-center py-4">${TRANSLATIONS[STATE.lang].noData}</p>`;
+  } else {
+    dashAppts.innerHTML = upcoming.map(a => `
+      <div class="flex items-center justify-between py-2 border-b border-gray-50 last:border-0">
+        <div>
+          <p class="font-medium text-sm">${esc(a.PatientName||a['PatientName']||'')}</p>
+          <p class="text-xs text-gray-400">${a.Date||''} ${a.Time||''} · ${esc(a.Doctor||'')}</p>
+        </div>
+        <span class="badge ${statusBadge(a.Status)}">${a.Status||''}</span>
+      </div>`).join('');
+  }
+
+  // Recent patients
+  const recents = [...STATE.patients].reverse().slice(0,5);
+  const dashPats = document.getElementById('dashPatients');
+  if (recents.length === 0) {
+    dashPats.innerHTML = `<p class="text-gray-400 text-center py-4">${TRANSLATIONS[STATE.lang].noData}</p>`;
+  } else {
+    dashPats.innerHTML = recents.map(p => `
+      <div class="flex items-center gap-3 py-2 border-b border-gray-50 last:border-0">
+        <div class="w-8 h-8 rounded-full bg-dental-light flex items-center justify-center text-dental font-bold text-sm flex-shrink-0">
+          ${esc(String(p.Name||p.name||'?').charAt(0).toUpperCase())}
+        </div>
+        <div>
+          <p class="font-medium text-sm">${esc(p.Name||p.name||'')}</p>
+          <p class="text-xs text-gray-400">${p.Phone||p.phone||''}</p>
+        </div>
+      </div>`).join('');
+  }
+}
+
+// ===================================================
+//  PATIENTS
+// ===================================================
+function renderPatients() {
+  const q = (document.getElementById('patientSearch').value||'').toLowerCase();
+  const filtered = STATE.patients.filter(p =>
+    (p.Name||p.name||'').toLowerCase().includes(q) ||
+    (p.Phone||p.phone||'').toLowerCase().includes(q)
+  );
+  const tbody = document.getElementById('patientsTbody');
+  if (filtered.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="6" class="text-center text-gray-400 py-8">${TRANSLATIONS[STATE.lang].noData}</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = filtered.map((p,i) => `
+    <tr>
+      <td><div class="flex items-center gap-2">
+        <div class="w-7 h-7 rounded-full bg-dental-light flex items-center justify-center text-dental font-bold text-xs flex-shrink-0">${esc(String(p.Name||p.name||'?').charAt(0).toUpperCase())}</div>
+        <span class="font-medium">${esc(p.Name||p.name||'')}</span>
+      </div></td>
+      <td>${esc(p.Phone||p.phone||'')}</td>
+      <td>${p.Age||p.age||'-'}</td>
+      <td>${p.Gender||p.gender||'-'}</td>
+      <td class="max-w-xs truncate text-gray-500">${esc(p.Notes||p.notes||'-')}</td>
+      <td><div class="flex gap-1">
+        <button onclick="editPatient(${i})" class="text-xs text-dental hover:underline px-2 py-1 rounded hover:bg-dental-light">${TRANSLATIONS[STATE.lang].edit}</button>
+        <button onclick="deletePatient(${i})" class="text-xs text-red-500 hover:underline px-2 py-1 rounded hover:bg-red-50">${TRANSLATIONS[STATE.lang].delete}</button>
+      </div></td>
+    </tr>`).join('');
+}
+
+function openPatientModal() {
+  document.getElementById('editPatientId').value = '';
+  document.getElementById('pName').value = '';
+  document.getElementById('pPhone').value = '';
+  document.getElementById('pAge').value = '';
+  document.getElementById('pGender').value = 'Male';
+  document.getElementById('pNotes').value = '';
+  document.getElementById('patientModalTitle').textContent = TRANSLATIONS[STATE.lang].addPatient;
+  openModal('patientModal');
+}
+
+function editPatient(idx) {
+  const p = STATE.patients[idx];
+  document.getElementById('editPatientId').value = idx;
+  document.getElementById('pName').value = p.Name||p.name||'';
+  document.getElementById('pPhone').value = p.Phone||p.phone||'';
+  document.getElementById('pAge').value = p.Age||p.age||'';
+  document.getElementById('pGender').value = p.Gender||p.gender||'Male';
+  document.getElementById('pNotes').value = p.Notes||p.notes||'';
+  document.getElementById('patientModalTitle').textContent = TRANSLATIONS[STATE.lang].edit+' '+TRANSLATIONS[STATE.lang].patient;
+  openModal('patientModal');
+}
+
+function savePatient() {
+  const name = document.getElementById('pName').value.trim();
+  const phone = document.getElementById('pPhone').value.trim();
+  if (!name || !phone) { showToast('Name and phone are required','error'); return; }
+  const patient = {
+    ID: Date.now().toString(),
+    Name: name, Phone: phone,
+    Age: document.getElementById('pAge').value,
+    Gender: document.getElementById('pGender').value,
+    Notes: document.getElementById('pNotes').value,
+    CreatedAt: new Date().toISOString()
+  };
+  const editIdx = document.getElementById('editPatientId').value;
+  if (editIdx !== '') {
+    patient.ID = STATE.patients[editIdx].ID || patient.ID;
+    STATE.patients[editIdx] = patient;
+    gsPost({ sheet:'Patients', action:'update', id:patient.ID, row:Object.values(patient) });
+  } else {
+    STATE.patients.push(patient);
+    gsPost({ sheet:'Patients', action:'append', row:Object.values(patient) });
+  }
+  localStorage.setItem('dental_patients', JSON.stringify(STATE.patients));
+  closeModal('patientModal');
+  renderAll();
+  showToast('Patient saved!','success');
+}
+
+function deletePatient(idx) {
+  if (!confirm('Delete this patient?')) return;
+  const p = STATE.patients[idx];
+  STATE.patients.splice(idx,1);
+  localStorage.setItem('dental_patients', JSON.stringify(STATE.patients));
+  gsPost({ sheet:'Patients', action:'delete', id:p.ID });
+  renderAll();
+  showToast('Patient deleted','info');
+}
+
+// ===================================================
+//  APPOINTMENTS
+// ===================================================
+function generateTimeSlots() {
+  const from = STATE.settings.hoursFrom || '09:00';
+  const to = STATE.settings.hoursTo || '17:00';
+  const sel = document.getElementById('aTime');
+  sel.innerHTML = '';
+  let [h,m] = from.split(':').map(Number);
+  const [endH, endM] = to.split(':').map(Number);
+  while (h < endH || (h === endH && m <= endM)) {
+    const t = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+    sel.innerHTML += `<option value="${t}">${t}</option>`;
+    m += 30; if (m >= 60) { m = 0; h++; }
+  }
+}
+
+function renderAppointments() {
+  const tbody = document.getElementById('apptsTbody');
+  const sorted = [...STATE.appointments].sort((a,b) => ((b.Date||'') > (a.Date||'') ? 1 : -1));
+  if (sorted.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="7" class="text-center text-gray-400 py-8">${TRANSLATIONS[STATE.lang].noData}</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = sorted.map((a,i) => `
+    <tr>
+      <td>${a.Date||''}</td>
+      <td>${a.Time||''}</td>
+      <td class="font-medium">${esc(a.PatientName||'')}</td>
+      <td>${esc(a.Doctor||'')}</td>
+      <td>${esc(a.Treatment||'')}</td>
+      <td><span class="badge ${statusBadge(a.Status)}">${a.Status||''}</span></td>
+      <td><div class="flex gap-1">
+        <button onclick="editAppt(${STATE.appointments.indexOf(a)})" class="text-xs text-dental hover:underline px-2 py-1 rounded hover:bg-dental-light">${TRANSLATIONS[STATE.lang].edit}</button>
+        <button onclick="deleteAppt(${STATE.appointments.indexOf(a)})" class="text-xs text-red-500 hover:underline px-2 py-1 rounded hover:bg-red-50">${TRANSLATIONS[STATE.lang].delete}</button>
+      </div></td>
+    </tr>`).join('');
+  renderCalendar();
+}
+
+function openApptModal(prefillDate) {
+  document.getElementById('editApptId').value = '';
+  document.getElementById('aDate').value = prefillDate || new Date().toISOString().slice(0,10);
+  document.getElementById('aPatientSearch').value = '';
+  document.getElementById('aPatientId').value = '';
+  document.getElementById('aPatientName').value = '';
+  document.getElementById('selectedPatientDisplay').textContent = '';
+  document.getElementById('aStatus').value = 'Scheduled';
+  document.getElementById('aNotes').value = '';
+  document.getElementById('patientSuggestions').classList.add('hidden');
+  document.getElementById('apptModalTitle').textContent = TRANSLATIONS[STATE.lang].addAppt;
+  populateDoctorSelects();
+  openModal('apptModal');
+}
+
+function editAppt(idx) {
+  const a = STATE.appointments[idx];
+  document.getElementById('editApptId').value = idx;
+  document.getElementById('aDate').value = a.Date||'';
+  document.getElementById('aPatientSearch').value = a.PatientName||'';
+  document.getElementById('aPatientId').value = a.PatientID||'';
+  document.getElementById('aPatientName').value = a.PatientName||'';
+  document.getElementById('selectedPatientDisplay').textContent = a.PatientName ? '✓ '+a.PatientName : '';
+  document.getElementById('aStatus').value = a.Status||'Scheduled';
+  document.getElementById('aNotes').value = a.Notes||'';
+  populateDoctorSelects();
+  setTimeout(() => {
+    document.getElementById('aDoctor').value = a.Doctor||'';
+    document.getElementById('aTreatment').value = a.Treatment||'';
+    document.getElementById('aTime').value = a.Time||'';
+  }, 50);
+  document.getElementById('apptModalTitle').textContent = TRANSLATIONS[STATE.lang].edit;
+  openModal('apptModal');
+}
+
+function saveAppt() {
+  const date = document.getElementById('aDate').value;
+  const patName = document.getElementById('aPatientName').value || document.getElementById('aPatientSearch').value;
+  if (!date || !patName) { showToast('Date and patient are required','error'); return; }
+  const appt = {
+    ID: Date.now().toString(),
+    Date: date,
+    Time: document.getElementById('aTime').value,
+    PatientID: document.getElementById('aPatientId').value,
+    PatientName: patName,
+    Doctor: document.getElementById('aDoctor').value,
+    Treatment: document.getElementById('aTreatment').value,
+    Status: document.getElementById('aStatus').value,
+    Notes: document.getElementById('aNotes').value,
+    CreatedAt: new Date().toISOString()
+  };
+  const editIdx = document.getElementById('editApptId').value;
+  if (editIdx !== '') {
+    appt.ID = STATE.appointments[editIdx].ID || appt.ID;
+    STATE.appointments[editIdx] = appt;
+    gsPost({ sheet:'Appointments', action:'update', id:appt.ID, row:Object.values(appt) });
+  } else {
+    STATE.appointments.push(appt);
+    gsPost({ sheet:'Appointments', action:'append', row:Object.values(appt) });
+  }
+  localStorage.setItem('dental_appointments', JSON.stringify(STATE.appointments));
+  closeModal('apptModal');
+  renderAll();
+  showToast('Appointment saved!','success');
+}
+
+function deleteAppt(idx) {
+  if (!confirm('Delete this appointment?')) return;
+  const a = STATE.appointments[idx];
+  STATE.appointments.splice(idx,1);
+  localStorage.setItem('dental_appointments', JSON.stringify(STATE.appointments));
+  gsPost({ sheet:'Appointments', action:'delete', id:a.ID });
+  renderAll();
+  showToast('Appointment deleted','info');
+}
+
+function searchPatientForAppt() {
+  const q = document.getElementById('aPatientSearch').value.toLowerCase();
+  const sugg = document.getElementById('patientSuggestions');
+  if (!q) { sugg.classList.add('hidden'); return; }
+  const matches = STATE.patients.filter(p => (p.Name||p.name||'').toLowerCase().includes(q)).slice(0,6);
+  if (!matches.length) { sugg.classList.add('hidden'); return; }
+  sugg.innerHTML = matches.map(p => `
+    <div class="px-3 py-2.5 text-sm hover:bg-dental-light cursor-pointer border-b border-gray-100 last:border-0" onclick="selectPatientForAppt('${esc(p.ID||'')}','${esc(p.Name||p.name||'')}')">
+      <span class="font-medium">${esc(p.Name||p.name||'')}</span>
+      <span class="text-gray-400 text-xs ml-2">${p.Phone||p.phone||''}</span>
+    </div>`).join('');
+  sugg.classList.remove('hidden');
+}
+
+function selectPatientForAppt(id, name) {
+  document.getElementById('aPatientId').value = id;
+  document.getElementById('aPatientName').value = name;
+  document.getElementById('aPatientSearch').value = name;
+  document.getElementById('selectedPatientDisplay').textContent = '✓ '+name;
+  document.getElementById('patientSuggestions').classList.add('hidden');
+}
+
+function searchPatientForInvoice() {
+  const q = document.getElementById('iPatientSearch').value.toLowerCase();
+  const sugg = document.getElementById('invPatientSuggestions');
+  if (!q) { sugg.classList.add('hidden'); return; }
+  const matches = STATE.patients.filter(p => (p.Name||p.name||'').toLowerCase().includes(q)).slice(0,6);
+  if (!matches.length) { sugg.classList.add('hidden'); return; }
+  sugg.innerHTML = matches.map(p => `
+    <div class="px-3 py-2.5 text-sm hover:bg-dental-light cursor-pointer border-b border-gray-100 last:border-0" onclick="selectPatientForInvoice('${esc(p.ID||'')}','${esc(p.Name||p.name||'')}')">
+      <span class="font-medium">${esc(p.Name||p.name||'')}</span>
+      <span class="text-gray-400 text-xs ml-2">${p.Phone||p.phone||''}</span>
+    </div>`).join('');
+  sugg.classList.remove('hidden');
+}
+
+function selectPatientForInvoice(id, name) {
+  document.getElementById('iPatientId').value = id;
+  document.getElementById('iPatientName').value = name;
+  document.getElementById('iPatientSearch').value = name;
+  document.getElementById('selectedInvPatientDisplay').textContent = '✓ '+name;
+  document.getElementById('invPatientSuggestions').classList.add('hidden');
+}
+
+// ===================================================
+//  CALENDAR
+// ===================================================
+function renderCalendar() {
+  const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const monthsAr = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+  const y = STATE.calYear; const m = STATE.calMonth;
+  const mNames = STATE.lang === 'ar' ? monthsAr : months;
+  document.getElementById('calTitle').textContent = `${mNames[m]} ${y}`;
+
+  const firstDay = new Date(y,m,1).getDay();
+  const daysInMonth = new Date(y,m+1,0).getDate();
+  const today = new Date();
+  const todayStr = today.toISOString().slice(0,10);
+
+  // Get days with appointments
+  const apptDays = new Set(STATE.appointments
+    .filter(a => { const d = a.Date||''; return d.slice(0,7) === `${y}-${String(m+1).padStart(2,'0')}`; })
+    .map(a => parseInt((a.Date||'').slice(8,10))));
+
+  const grid = document.getElementById('calGrid');
+  grid.innerHTML = '';
+
+  // Empty cells before first day
+  for (let i=0;i<firstDay;i++) {
+    const el = document.createElement('div');
+    el.className = 'cal-day other-month';
+    grid.appendChild(el);
+  }
+  // Days
+  for (let d=1;d<=daysInMonth;d++) {
+    const dateStr = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const el = document.createElement('div');
+    el.className = 'cal-day' + (dateStr===todayStr?' today':'') + (apptDays.has(d)?' has-appt':'');
+    el.textContent = d;
+    el.onclick = () => { openApptModal(dateStr); };
+    grid.appendChild(el);
+  }
+}
+
+function prevMonth() {
+  STATE.calMonth--; if(STATE.calMonth<0){STATE.calMonth=11;STATE.calYear--;}
+  renderCalendar();
+}
+function nextMonth() {
+  STATE.calMonth++; if(STATE.calMonth>11){STATE.calMonth=0;STATE.calYear++;}
+  renderCalendar();
+}
+
+// ===================================================
+//  INVOICES
+// ===================================================
+function renderInvoices() {
+  const tbody = document.getElementById('invoicesTbody');
+  if (STATE.invoices.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="7" class="text-center text-gray-400 py-8">${TRANSLATIONS[STATE.lang].noData}</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = [...STATE.invoices].reverse().map((inv,i) => {
+    const realIdx = STATE.invoices.length - 1 - i;
+    return `<tr>
+      <td class="text-gray-400 text-xs">#${realIdx+1}</td>
+      <td class="font-medium">${esc(inv.PatientName||'')}</td>
+      <td>${esc(inv.Treatment||'')}</td>
+      <td class="font-semibold text-dental">${fmtCurrency(inv.Amount||0)}</td>
+      <td>${inv.Date||''}</td>
+      <td><span class="badge ${invStatusBadge(inv.Status)}">${inv.Status||''}</span></td>
+      <td><div class="flex gap-1">
+        <button onclick="deleteInvoice(${realIdx})" class="text-xs text-red-500 hover:underline px-2 py-1 rounded hover:bg-red-50">${TRANSLATIONS[STATE.lang].delete}</button>
+      </div></td>
+    </tr>`;
+  }).join('');
+}
+
+function renderPriceGuide() {
+  const list = document.getElementById('priceGuideList');
+  list.innerHTML = STATE.priceGuide.map((item,i) => `
+    <div class="flex gap-2 items-center">
+      <input type="text" value="${esc(item.treatment)}" class="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-sm" onchange="STATE.priceGuide[${i}].treatment=this.value"/>
+      <input type="number" value="${item.price}" class="w-24 border border-gray-200 rounded-xl px-3 py-2 text-sm" onchange="STATE.priceGuide[${i}].price=parseFloat(this.value)||0"/>
+      <button onclick="STATE.priceGuide.splice(${i},1);renderPriceGuide();renderTreatmentSelects();" class="text-red-400 hover:text-red-600 p-1">✕</button>
+    </div>`).join('');
+}
+
+function addPriceRow() {
+  STATE.priceGuide.push({ treatment:'New Treatment', price:0 });
+  renderPriceGuide();
+  renderTreatmentSelects();
+}
+
+function savePriceGuide() {
+  localStorage.setItem('dental_prices', JSON.stringify(STATE.priceGuide));
+  renderTreatmentSelects();
+  showToast('Price guide saved!','success');
+}
+
+function renderTreatmentSelects() {
+  ['aTreatment','iTreatment'].forEach(id => {
+    const sel = document.getElementById(id);
+    if (!sel) return;
+    const cur = sel.value;
+    sel.innerHTML = '<option value="">-- Select --</option>' +
+      STATE.priceGuide.map(t => `<option value="${esc(t.treatment)}">${esc(t.treatment)}</option>`).join('');
+    sel.value = cur;
+  });
+}
+
+function updateInvoicePrice() {
+  const t = document.getElementById('iTreatment').value;
+  const item = STATE.priceGuide.find(p => p.treatment === t);
+  if (item) {
+    document.getElementById('iAmount').value = item.price;
+    document.getElementById('invoiceTotal').textContent = fmtCurrency(item.price);
+  }
+}
+
+function openInvoiceModal() {
+  document.getElementById('editInvoiceId').value = '';
+  document.getElementById('iPatientSearch').value = '';
+  document.getElementById('iPatientId').value = '';
+  document.getElementById('iPatientName').value = '';
+  document.getElementById('selectedInvPatientDisplay').textContent = '';
+  document.getElementById('iAmount').value = '';
+  document.getElementById('iDate').value = new Date().toISOString().slice(0,10);
+  document.getElementById('iStatus').value = 'Paid';
+  document.getElementById('invoiceTotal').textContent = fmtCurrency(0);
+  document.getElementById('invPatientSuggestions').classList.add('hidden');
+  renderTreatmentSelects();
+  openModal('invoiceModal');
+}
+
+function saveInvoice() {
+  const patName = document.getElementById('iPatientName').value || document.getElementById('iPatientSearch').value;
+  const treatment = document.getElementById('iTreatment').value;
+  const amount = document.getElementById('iAmount').value;
+  if (!patName || !treatment) { showToast('Patient and treatment are required','error'); return; }
+  const inv = {
+    ID: Date.now().toString(),
+    PatientID: document.getElementById('iPatientId').value,
+    PatientName: patName,
+    Treatment: treatment,
+    Amount: amount,
+    Date: document.getElementById('iDate').value,
+    Status: document.getElementById('iStatus').value,
+    CreatedAt: new Date().toISOString()
+  };
+  STATE.invoices.push(inv);
+  localStorage.setItem('dental_invoices', JSON.stringify(STATE.invoices));
+  gsPost({ sheet:'Invoices', action:'append', row:Object.values(inv) });
+  closeModal('invoiceModal');
+  renderAll();
+  showToast('Invoice saved!','success');
+}
+
+function deleteInvoice(idx) {
+  if (!confirm('Delete this invoice?')) return;
+  const inv = STATE.invoices[idx];
+  STATE.invoices.splice(idx,1);
+  localStorage.setItem('dental_invoices', JSON.stringify(STATE.invoices));
+  gsPost({ sheet:'Invoices', action:'delete', id:inv.ID });
+  renderAll();
+  showToast('Invoice deleted','info');
+}
+
+// ===================================================
+//  DOCTORS
+// ===================================================
+function renderDoctorsList() {
+  const list = document.getElementById('doctorsList');
+  if (STATE.doctors.length === 0) {
+    list.innerHTML = `<p class="text-gray-400 text-sm py-2">${TRANSLATIONS[STATE.lang].noData}</p>`;
+    return;
+  }
+  list.innerHTML = STATE.doctors.map((d,i) => `
+    <div class="flex items-center justify-between py-2 px-3 bg-gray-50 rounded-xl">
+      <div>
+        <p class="font-medium text-sm">${esc(d.Name||d.name||'')}</p>
+        <p class="text-xs text-gray-400">${esc(d.Specialization||d.spec||'')}</p>
+      </div>
+      <button onclick="deleteDoctor(${i})" class="text-red-400 hover:text-red-600 text-xs">✕</button>
+    </div>`).join('');
+}
+
+function renderDoctorFilter() {
+  const sel = document.getElementById('doctorFilter');
+  const cur = sel.value;
+  sel.innerHTML = `<option value="">-- All Doctors --</option>` +
+    STATE.doctors.map(d => `<option value="${esc(d.Name||d.name||'')}">${esc(d.Name||d.name||'')}</option>`).join('');
+  sel.value = cur;
+  populateDoctorSelects();
+}
+
+function populateDoctorSelects() {
+  const sel = document.getElementById('aDoctor');
+  sel.innerHTML = '<option value="">-- Select Doctor --</option>' +
+    STATE.doctors.map(d => `<option value="${esc(d.Name||d.name||'')}">${esc(d.Name||d.name||'')} ${d.Specialization ? '· '+d.Specialization : ''}</option>`).join('');
+}
+
+function addDoctor() {
+  const name = document.getElementById('newDoctorName').value.trim();
+  const spec = document.getElementById('newDoctorSpec').value.trim();
+  if (!name) { showToast('Doctor name required','error'); return; }
+  const doc = { ID:Date.now().toString(), Name:name, Specialization:spec };
+  STATE.doctors.push(doc);
+  localStorage.setItem('dental_doctors', JSON.stringify(STATE.doctors));
+  gsPost({ sheet:'Doctors', action:'append', row:Object.values(doc) });
+  document.getElementById('newDoctorName').value = '';
+  document.getElementById('newDoctorSpec').value = '';
+  renderAll();
+  showToast('Doctor added!','success');
+}
+
+function deleteDoctor(idx) {
+  if (!confirm('Remove this doctor?')) return;
+  const d = STATE.doctors[idx];
+  STATE.doctors.splice(idx,1);
+  localStorage.setItem('dental_doctors', JSON.stringify(STATE.doctors));
+  gsPost({ sheet:'Doctors', action:'delete', id:d.ID });
+  renderAll();
+  showToast('Doctor removed','info');
+}
+
+function renderDoctorView() {
+  const filter = document.getElementById('doctorFilter').value;
+  const period = document.getElementById('doctorPeriod').value;
+  const today = new Date().toISOString().slice(0,10);
+  const weekEnd = new Date(Date.now() + 7*24*60*60*1000).toISOString().slice(0,10);
+
+  let appts = STATE.appointments;
+  if (filter) appts = appts.filter(a => a.Doctor === filter);
+  if (period === 'today') appts = appts.filter(a => (a.Date||'').slice(0,10) === today);
+  else if (period === 'week') appts = appts.filter(a => (a.Date||'') >= today && (a.Date||'') <= weekEnd);
+
+  const tbody = document.getElementById('doctorViewTbody');
+  if (appts.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="5" class="text-center text-gray-400 py-8">${TRANSLATIONS[STATE.lang].noData}</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = appts.sort((a,b) => ((a.Date||'')+(a.Time||'')) > ((b.Date||'')+(b.Time||'')) ? 1 : -1)
+    .map(a => `<tr>
+      <td>${a.Date||''}</td>
+      <td>${a.Time||''}</td>
+      <td class="font-medium">${esc(a.PatientName||'')}</td>
+      <td>${esc(a.Treatment||'')}</td>
+      <td><span class="badge ${statusBadge(a.Status)}">${a.Status||''}</span></td>
+    </tr>`).join('');
+}
+
+// ===================================================
+//  NAVIGATION
+// ===================================================
+function showTab(name, btn) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+
+  // Sidebar nav
+  document.querySelectorAll('#sideNav .nav-item').forEach(b => b.classList.remove('active'));
+  // Bottom nav
+  document.querySelectorAll('#bottomNav .nav-item').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+
+  const titles = {dashboard:'Dashboard',patients:'Patients',appointments:'Appointments',invoices:'Invoices',doctors:'Doctors',settings:'Settings'};
+  document.getElementById('pageTitle').textContent = TRANSLATIONS[STATE.lang][name] || titles[name] || name;
+  closeSidebar();
+
+  if (name === 'appointments') renderCalendar();
+  if (name === 'invoices') { renderPriceGuide(); renderTreatmentSelects(); }
+  if (name === 'settings') { renderDoctorsList(); applySettings(); }
+  if (name === 'doctors') renderDoctorView();
+}
+
+function openFabModal() {
+  const active = document.querySelector('.section.active');
+  if (!active) return;
+  const id = active.id;
+  if (id === 'tab-patients') openPatientModal();
+  else if (id === 'tab-appointments') openApptModal(null);
+  else if (id === 'tab-invoices') openInvoiceModal();
+  else if (id === 'tab-settings') document.getElementById('newDoctorName').focus();
+  else openPatientModal();
+}
+
+function openSidebar() {
+  document.getElementById('sidebar').classList.add('open');
+  document.getElementById('sidebarOverlay').classList.add('show');
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebarOverlay').classList.remove('show');
+}
+
+// ===================================================
+//  MODALS
+// ===================================================
+function openModal(id) {
+  document.getElementById(id).classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+}
+function closeModal(id) {
+  document.getElementById(id).classList.add('hidden');
+  document.body.style.overflow = '';
+}
+function closeModalOnOverlay(e, id) {
+  if (e.target === e.currentTarget) closeModal(id);
+}
+
+// ===================================================
+//  TOAST
+// ===================================================
+function showToast(msg, type='info') {
+  const c = document.getElementById('toastContainer');
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  t.textContent = msg;
+  c.appendChild(t);
+  setTimeout(() => { t.style.opacity='0'; t.style.transition='opacity .3s'; setTimeout(()=>t.remove(),300); }, 3000);
+}
+
+// ===================================================
+//  HELPERS
+// ===================================================
+function esc(str) {
+  return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function statusBadge(s) {
+  const map = { Scheduled:'bg-blue-100 text-blue-700', Confirmed:'bg-green-100 text-green-700',
+    Completed:'bg-gray-100 text-gray-600', Cancelled:'bg-red-100 text-red-600' };
+  return map[s] || 'bg-gray-100 text-gray-600';
+}
+
+function invStatusBadge(s) {
+  const map = { Paid:'bg-green-100 text-green-700', Pending:'bg-yellow-100 text-yellow-700', Cancelled:'bg-red-100 text-red-600' };
+  return map[s] || 'bg-gray-100 text-gray-600';
+}
+
+// ===================================================
+//  STARTUP
+// ===================================================
+window.addEventListener('DOMContentLoaded', () => {
+  if (sessionStorage.getItem('dental_auth') === '1') {
+    document.getElementById('lockScreen').style.display = 'none';
+    init();
+  }
+  // Today's date default
+  const today = new Date().toISOString().slice(0,10);
+  document.getElementById('aDate').value = today;
+  document.getElementById('iDate').value = today;
+
+  // iAmount live update
+  document.getElementById('iAmount').addEventListener('input', function() {
+    document.getElementById('invoiceTotal').textContent = fmtCurrency(this.value||0);
+  });
+});
+</script>
+</body>
+</html>
