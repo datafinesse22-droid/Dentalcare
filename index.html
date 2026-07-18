@@ -7,125 +7,96 @@
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
 tailwind.config = {
-  theme: {
-    extend: {
-      colors: {
-        dental: { DEFAULT:'#007bff', dark:'#0056b3', light:'#e8f4ff' }
-      }
-    }
-  }
+  theme: { extend: { colors: { dental: { DEFAULT:'#007bff', dark:'#0056b3', light:'#e8f4ff' } } } }
 }
 </script>
 <style>
-  :root { --dental:#007bff; --dental-dark:#0056b3; --dental-light:#e8f4ff; }
-  * { box-sizing:border-box; }
-  body { font-size:16px; min-height:100vh; }
-  [dir="rtl"] * { font-family:'Segoe UI', Tahoma, Arial, sans-serif; }
-
-  /* Scrollbar */
-  ::-webkit-scrollbar { width:6px; }
-  ::-webkit-scrollbar-thumb { background:#cbd5e1; border-radius:3px; }
-
-  /* Lock screen */
-  #lockScreen { position:fixed; inset:0; background:linear-gradient(135deg,#007bff 0%,#0056b3 100%); z-index:9999; display:flex; align-items:center; justify-content:center; }
-
-  /* Sidebar */
-  #sidebar { width:240px; min-height:100vh; background:#fff; border-right:1px solid #e2e8f0; position:fixed; top:0; left:0; z-index:100; transition:transform .3s; }
-  [dir="rtl"] #sidebar { left:auto; right:0; border-right:none; border-left:1px solid #e2e8f0; }
-  #mainContent { margin-left:240px; }
-  [dir="rtl"] #mainContent { margin-left:0; margin-right:240px; }
-  @media(max-width:768px) {
-    #sidebar { transform:translateX(-100%); }
-    [dir="rtl"] #sidebar { transform:translateX(100%); }
-    #sidebar.open { transform:translateX(0); }
-    #mainContent { margin:0 !important; padding-bottom:80px; }
-    #bottomNav { display:flex !important; }
-    #topBar { display:flex !important; }
-  }
-  #bottomNav { display:none; position:fixed; bottom:0; left:0; right:0; background:#fff; border-top:1px solid #e2e8f0; z-index:100; height:64px; }
-  #topBar { display:none; position:sticky; top:0; background:#fff; border-bottom:1px solid #e2e8f0; z-index:99; padding:0 16px; height:56px; align-items:center; }
-
-  /* Modal */
-  .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:200; display:flex; align-items:flex-end; justify-content:center; }
-  @media(min-width:769px) { .modal-overlay { align-items:center; } }
-  .modal-box { background:#fff; border-radius:16px 16px 0 0; width:100%; max-width:600px; max-height:90vh; overflow-y:auto; padding:24px; animation:slideUp .3s ease; }
-  @media(min-width:769px) { .modal-box { border-radius:16px; } }
-  @keyframes slideUp { from{transform:translateY(100%)} to{transform:translateY(0)} }
-
-  /* Toast */
-  #toastContainer { position:fixed; top:16px; right:16px; z-index:9999; display:flex; flex-direction:column; gap:8px; }
-  [dir="rtl"] #toastContainer { right:auto; left:16px; }
-  .toast { padding:12px 20px; border-radius:8px; color:#fff; font-size:14px; font-weight:500; animation:fadeIn .3s; min-width:200px; }
-  .toast.success { background:#10b981; }
-  .toast.error { background:#ef4444; }
-  .toast.info { background:#007bff; }
-  @keyframes fadeIn { from{opacity:0;transform:translateY(-10px)} to{opacity:1;transform:translateY(0)} }
-
-  /* FAB */
-  #fab { position:fixed; bottom:80px; right:20px; width:56px; height:56px; border-radius:50%; background:#007bff; color:#fff; border:none; font-size:28px; cursor:pointer; box-shadow:0 4px 16px rgba(0,123,255,.4); z-index:150; display:none; align-items:center; justify-content:center; transition:transform .2s; }
-  #fab:hover { transform:scale(1.1); }
-  [dir="rtl"] #fab { right:auto; left:20px; }
-  @media(max-width:768px) { #fab { display:flex; } }
-
-  /* Calendar */
-  .cal-day { aspect-ratio:1; display:flex; flex-direction:column; align-items:center; justify-content:center; border-radius:8px; cursor:pointer; transition:background .15s; font-size:14px; position:relative; }
-  .cal-day:hover { background:#e8f4ff; }
-  .cal-day.today { background:#007bff; color:#fff; font-weight:700; }
-  .cal-day.has-appt::after { content:''; position:absolute; bottom:4px; width:6px; height:6px; border-radius:50%; background:#10b981; }
-  .cal-day.today.has-appt::after { background:#fff; }
-  .cal-day.other-month { opacity:.3; }
-
-  /* Nav item active */
-  .nav-item.active { color:#007bff; background:#e8f4ff; }
-  .nav-item.active .nav-icon { color:#007bff; }
-
-  /* Input focus */
-  input:focus, select:focus, textarea:focus { outline:none; border-color:#007bff !important; box-shadow:0 0 0 3px rgba(0,123,255,.15); }
-
-  /* Card */
-  .card { background:#fff; border-radius:12px; border:1px solid #e2e8f0; padding:20px; }
-
-  /* Stats card */
-  .stat-card { background:linear-gradient(135deg,var(--from),var(--to)); border-radius:12px; padding:20px; color:#fff; }
-
-  /* Table */
-  .data-table { width:100%; border-collapse:collapse; }
-  .data-table th { background:#f8fafc; padding:10px 12px; text-align:left; font-size:13px; color:#64748b; font-weight:600; border-bottom:1px solid #e2e8f0; }
-  [dir="rtl"] .data-table th { text-align:right; }
-  .data-table td { padding:12px; border-bottom:1px solid #f1f5f9; font-size:14px; }
-  .data-table tr:hover td { background:#f8fafc; }
-
-  /* Badge */
-  .badge { display:inline-block; padding:2px 10px; border-radius:99px; font-size:12px; font-weight:600; }
-
-  /* Scrollable section */
-  .section { display:none; }
-  .section.active { display:block; }
-
-  /* Setup bar */
-  #setupBar { background:#fff3cd; border-bottom:1px solid #ffc107; padding:10px 16px; font-size:13px; }
-
-  /* Overlay for mobile sidebar */
-  #sidebarOverlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.4); z-index:99; }
-  #sidebarOverlay.show { display:block; }
+:root{--dental:#007bff;--dental-dark:#0056b3;--dental-light:#e8f4ff;}
+*{box-sizing:border-box;}
+body{font-size:16px;min-height:100vh;}
+[dir="rtl"] *{font-family:'Segoe UI',Tahoma,Arial,sans-serif;}
+::-webkit-scrollbar{width:6px;}
+::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:3px;}
+#lockScreen{position:fixed;inset:0;background:linear-gradient(135deg,#007bff,#0056b3);z-index:9999;display:flex;align-items:center;justify-content:center;}
+#sidebar{width:240px;min-height:100vh;background:#fff;border-right:1px solid #e2e8f0;position:fixed;top:0;left:0;z-index:100;transition:transform .3s;}
+[dir="rtl"] #sidebar{left:auto;right:0;border-right:none;border-left:1px solid #e2e8f0;}
+#mainContent{margin-left:240px;}
+[dir="rtl"] #mainContent{margin-left:0;margin-right:240px;}
+@media(max-width:768px){
+  #sidebar{transform:translateX(-100%);}
+  [dir="rtl"] #sidebar{transform:translateX(100%);}
+  #sidebar.open{transform:translateX(0);}
+  #mainContent{margin:0!important;padding-bottom:80px;}
+  #bottomNav{display:flex!important;}
+  #topBar{display:flex!important;}
+}
+#bottomNav{display:none;position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #e2e8f0;z-index:100;height:64px;}
+#topBar{display:none;position:sticky;top:0;background:#fff;border-bottom:1px solid #e2e8f0;z-index:99;padding:0 16px;height:56px;align-items:center;}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:flex;align-items:flex-end;justify-content:center;}
+@media(min-width:769px){.modal-overlay{align-items:center;}}
+.modal-box{background:#fff;border-radius:16px 16px 0 0;width:100%;max-width:680px;max-height:92vh;overflow-y:auto;padding:24px;animation:slideUp .3s ease;}
+@media(min-width:769px){.modal-box{border-radius:16px;}}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+#toastContainer{position:fixed;top:16px;right:16px;z-index:9999;display:flex;flex-direction:column;gap:8px;}
+[dir="rtl"] #toastContainer{right:auto;left:16px;}
+.toast{padding:12px 20px;border-radius:8px;color:#fff;font-size:14px;font-weight:500;animation:fadeIn .3s;min-width:200px;}
+.toast.success{background:#10b981;}.toast.error{background:#ef4444;}.toast.info{background:#007bff;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
+#fab{position:fixed;bottom:80px;right:20px;width:56px;height:56px;border-radius:50%;background:#007bff;color:#fff;border:none;font-size:28px;cursor:pointer;box-shadow:0 4px 16px rgba(0,123,255,.4);z-index:150;display:none;align-items:center;justify-content:center;transition:transform .2s;}
+#fab:hover{transform:scale(1.1);}
+[dir="rtl"] #fab{right:auto;left:20px;}
+@media(max-width:768px){#fab{display:flex;}}
+.cal-day{aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:8px;cursor:pointer;transition:background .15s;font-size:14px;position:relative;}
+.cal-day:hover{background:#e8f4ff;}
+.cal-day.today{background:#007bff;color:#fff;font-weight:700;}
+.cal-day.has-appt::after{content:'';position:absolute;bottom:4px;width:6px;height:6px;border-radius:50%;background:#10b981;}
+.cal-day.today.has-appt::after{background:#fff;}
+.cal-day.other-month{opacity:.3;}
+.nav-item.active{color:#007bff;background:#e8f4ff;}
+.nav-item.active .nav-icon{color:#007bff;}
+input:focus,select:focus,textarea:focus{outline:none;border-color:#007bff!important;box-shadow:0 0 0 3px rgba(0,123,255,.15);}
+.card{background:#fff;border-radius:12px;border:1px solid #e2e8f0;padding:20px;}
+.stat-card{background:linear-gradient(135deg,var(--from),var(--to));border-radius:12px;padding:20px;color:#fff;}
+.data-table{width:100%;border-collapse:collapse;}
+.data-table th{background:#f8fafc;padding:10px 12px;text-align:left;font-size:13px;color:#64748b;font-weight:600;border-bottom:1px solid #e2e8f0;}
+[dir="rtl"] .data-table th{text-align:right;}
+.data-table td{padding:12px;border-bottom:1px solid #f1f5f9;font-size:14px;}
+.data-table tr:hover td{background:#f8fafc;}
+.badge{display:inline-block;padding:2px 10px;border-radius:99px;font-size:12px;font-weight:600;}
+.section{display:none;}.section.active{display:block;}
+#setupBar{background:#fff3cd;border-bottom:1px solid #ffc107;padding:10px 16px;font-size:13px;}
+#sidebarOverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:99;}
+#sidebarOverlay.show{display:block;}
+/* ---- DENTAL CHART ---- */
+.tooth-svg{cursor:pointer;transition:all .15s;}
+.tooth-svg:hover{filter:brightness(0.85);}
+/* ---- DAILY CALENDAR ---- */
+.time-slot{border-bottom:1px solid #f1f5f9;display:flex;gap:8px;min-height:48px;align-items:flex-start;padding:6px 0;}
+.time-label{width:52px;font-size:12px;color:#94a3b8;flex-shrink:0;padding-top:4px;}
+.appt-chip{border-radius:8px;padding:4px 8px;font-size:12px;font-weight:500;flex:1;cursor:pointer;}
+.appt-chip.Scheduled{background:#dbeafe;color:#1e40af;border-left:3px solid #3b82f6;}
+.appt-chip.Confirmed{background:#d1fae5;color:#065f46;border-left:3px solid #10b981;}
+.appt-chip.Completed{background:#f1f5f9;color:#475569;border-left:3px solid #94a3b8;}
+.appt-chip.Cancelled{background:#fee2e2;color:#991b1b;border-left:3px solid #ef4444;}
+/* ---- INVOICE ITEMS ---- */
+.inv-item-row{display:grid;grid-template-columns:1fr auto auto;gap:6px;align-items:center;}
+@media(max-width:500px){.inv-item-row{grid-template-columns:1fr auto auto;}}
 </style>
 </head>
 <body class="bg-gray-50 text-gray-800" id="app">
 
-<!-- ===== LOCK SCREEN ===== -->
+<!-- LOCK SCREEN -->
 <div id="lockScreen">
   <div class="bg-white rounded-2xl p-8 w-full max-w-sm mx-4 shadow-2xl text-center">
     <div class="w-16 h-16 bg-dental rounded-full flex items-center justify-center mx-auto mb-4">
-      <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c0-1.1.9-2 2-2s2 .9 2 2v1h1a1 1 0 011 1v4a1 1 0 01-1 1H7a1 1 0 01-1-1v-4a1 1 0 011-1h1v-1c0-1.1.9-2 2-2s2 .9 2 2v1h2v-1z"/>
-      </svg>
+      <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C8 2 5 5.5 5 9c0 2.5 1 4.5 2.5 6L9 22h6l1.5-7C18 13.5 19 11.5 19 9c0-3.5-3-7-7-7z"/></svg>
     </div>
     <h1 class="text-2xl font-bold text-gray-800 mb-1">Finesse Dental Care</h1>
     <p class="text-gray-500 text-sm mb-6">Enter your password to continue</p>
     <div class="relative mb-4">
       <input id="pwInput" type="password" placeholder="Password" class="w-full border border-gray-200 rounded-xl px-4 py-3 text-base pr-12" onkeydown="if(event.key==='Enter')doLogin()"/>
       <button onclick="togglePw()" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
-        <svg id="eyeIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
       </button>
     </div>
     <p id="pwError" class="text-red-500 text-sm mb-3 hidden">Incorrect password. Try again.</p>
@@ -133,24 +104,22 @@ tailwind.config = {
   </div>
 </div>
 
-<!-- ===== TOAST ===== -->
 <div id="toastContainer"></div>
 
-<!-- ===== SETUP BAR ===== -->
+<!-- SETUP BAR -->
 <div id="setupBar">
-  <div class="flex flex-wrap items-center gap-2 max-w-5xl mx-auto">
+  <div class="flex flex-wrap items-center gap-2 max-w-6xl mx-auto">
     <svg class="w-4 h-4 text-yellow-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-    <span class="text-yellow-800 font-medium text-sm" id="setupLabel">Google Sheets URL:</span>
-    <input id="scriptUrl" type="url" placeholder="Paste your Apps Script Web App URL here..." class="flex-1 border border-yellow-300 rounded-lg px-3 py-1.5 text-sm min-w-48 bg-white" />
+    <span class="text-yellow-800 font-medium text-sm">Google Sheets URL:</span>
+    <input id="scriptUrl" type="url" placeholder="Paste your Apps Script Web App URL here..." class="flex-1 border border-yellow-300 rounded-lg px-3 py-1.5 text-sm min-w-48 bg-white"/>
     <button onclick="saveScriptUrl()" class="bg-yellow-500 text-white px-4 py-1.5 rounded-lg text-sm font-medium hover:bg-yellow-600">Save & Connect</button>
     <span id="connectionStatus" class="text-xs font-medium"></span>
   </div>
 </div>
 
-<!-- ===== SIDEBAR OVERLAY ===== -->
 <div id="sidebarOverlay" onclick="closeSidebar()"></div>
 
-<!-- ===== SIDEBAR (desktop/mobile) ===== -->
+<!-- SIDEBAR -->
 <div id="sidebar">
   <div class="p-5 border-b border-gray-100">
     <div class="flex items-center gap-3">
@@ -163,52 +132,54 @@ tailwind.config = {
       </div>
     </div>
   </div>
-
-  <!-- Language + Currency toggles -->
   <div class="px-4 py-3 border-b border-gray-100 flex gap-2">
     <button onclick="toggleLang()" id="langBtn" class="flex-1 text-xs border border-gray-200 rounded-lg py-1.5 font-medium hover:bg-gray-50 transition">🌐 العربية</button>
     <button onclick="toggleCurrency()" id="currBtn" class="flex-1 text-xs border border-gray-200 rounded-lg py-1.5 font-medium hover:bg-gray-50 transition">💱 EGP</button>
   </div>
-
   <nav class="p-3 space-y-1" id="sideNav">
     <button class="nav-item active w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition" onclick="showTab('dashboard',this)">
       <svg class="nav-icon w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-      <span data-i18n="dashboard">Dashboard</span>
+      <span>Dashboard</span>
     </button>
     <button class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition" onclick="showTab('patients',this)">
-      <svg class="nav-icon w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M23 21v-2a4 4 0 00-3-3.87"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 3.13a4 4 0 010 7.75"/></svg>
-      <span data-i18n="patients">Patients</span>
+      <svg class="nav-icon w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+      <span>Patients</span>
     </button>
     <button class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition" onclick="showTab('appointments',this)">
       <svg class="nav-icon w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-      <span data-i18n="appointments">Appointments</span>
+      <span>Appointments</span>
+    </button>
+    <button class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition" onclick="showTab('daily',this)">
+      <svg class="nav-icon w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      <span>Daily View</span>
     </button>
     <button class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition" onclick="showTab('invoices',this)">
       <svg class="nav-icon w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg>
-      <span data-i18n="invoices">Invoices</span>
+      <span>Invoices</span>
+    </button>
+    <button class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition" onclick="showTab('dental-chart',this)">
+      <svg class="nav-icon w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18"/></svg>
+      <span>Dental Chart</span>
     </button>
     <button class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition" onclick="showTab('doctors',this)">
       <svg class="nav-icon w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
-      <span data-i18n="doctors">Doctors</span>
+      <span>Doctors</span>
     </button>
     <button class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition" onclick="showTab('settings',this)">
-      <svg class="nav-icon w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
-      <span data-i18n="settings">Settings</span>
+      <svg class="nav-icon w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l-.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+      <span>Settings</span>
     </button>
   </nav>
-
   <div class="absolute bottom-4 left-4 right-4">
     <button onclick="doLogout()" class="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-500 hover:bg-red-50 rounded-xl transition">
       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
-      <span data-i18n="logout">Logout</span>
+      <span>Logout</span>
     </button>
   </div>
 </div>
 
-<!-- ===== MAIN CONTENT ===== -->
+<!-- MAIN -->
 <div id="mainContent" class="min-h-screen">
-
-  <!-- Mobile Top Bar -->
   <div id="topBar">
     <button onclick="openSidebar()" class="p-2 rounded-lg hover:bg-gray-100">
       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
@@ -220,251 +191,227 @@ tailwind.config = {
     </div>
   </div>
 
-  <div class="p-4 md:p-6 max-w-5xl mx-auto">
+  <div class="p-4 md:p-6 max-w-6xl mx-auto">
 
-    <!-- ===== DASHBOARD ===== -->
+    <!-- DASHBOARD -->
     <div id="tab-dashboard" class="section active">
-      <h2 class="text-xl font-bold mb-5" data-i18n="dashboard">Dashboard</h2>
+      <h2 class="text-xl font-bold mb-5">Dashboard</h2>
       <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-        <div class="stat-card" style="--from:#007bff;--to:#0056b3">
-          <p class="text-blue-100 text-xs mb-1" data-i18n="totalPatients">Total Patients</p>
-          <p class="text-3xl font-bold" id="statPatients">0</p>
-        </div>
-        <div class="stat-card" style="--from:#10b981;--to:#059669">
-          <p class="text-green-100 text-xs mb-1" data-i18n="todayAppts">Today's Appts</p>
-          <p class="text-3xl font-bold" id="statToday">0</p>
-        </div>
-        <div class="stat-card" style="--from:#8b5cf6;--to:#6d28d9">
-          <p class="text-purple-100 text-xs mb-1" data-i18n="totalRevenue">Revenue</p>
-          <p class="text-2xl font-bold" id="statRevenue">0</p>
-        </div>
-        <div class="stat-card" style="--from:#f59e0b;--to:#d97706">
-          <p class="text-yellow-100 text-xs mb-1" data-i18n="doctors">Doctors</p>
-          <p class="text-3xl font-bold" id="statDoctors">0</p>
-        </div>
+        <div class="stat-card" style="--from:#007bff;--to:#0056b3"><p class="text-blue-100 text-xs mb-1">Total Patients</p><p class="text-3xl font-bold" id="statPatients">0</p></div>
+        <div class="stat-card" style="--from:#10b981;--to:#059669"><p class="text-green-100 text-xs mb-1">Today's Appts</p><p class="text-3xl font-bold" id="statToday">0</p></div>
+        <div class="stat-card" style="--from:#8b5cf6;--to:#6d28d9"><p class="text-purple-100 text-xs mb-1">Revenue</p><p class="text-2xl font-bold" id="statRevenue">0</p></div>
+        <div class="stat-card" style="--from:#f59e0b;--to:#d97706"><p class="text-yellow-100 text-xs mb-1">Doctors</p><p class="text-3xl font-bold" id="statDoctors">0</p></div>
       </div>
-
       <div class="grid md:grid-cols-2 gap-4">
-        <div class="card">
-          <h3 class="font-semibold mb-3 text-sm text-gray-500 uppercase tracking-wide" data-i18n="upcomingAppts">Upcoming Appointments</h3>
-          <div id="dashAppts" class="space-y-2 text-sm text-gray-600">
-            <p class="text-gray-400 text-center py-4" data-i18n="noData">No data yet</p>
-          </div>
-        </div>
-        <div class="card">
-          <h3 class="font-semibold mb-3 text-sm text-gray-500 uppercase tracking-wide" data-i18n="recentPatients">Recent Patients</h3>
-          <div id="dashPatients" class="space-y-2 text-sm text-gray-600">
-            <p class="text-gray-400 text-center py-4" data-i18n="noData">No data yet</p>
-          </div>
-        </div>
+        <div class="card"><h3 class="font-semibold mb-3 text-sm text-gray-500 uppercase tracking-wide">Upcoming Appointments</h3><div id="dashAppts"><p class="text-gray-400 text-center py-4">No data yet</p></div></div>
+        <div class="card"><h3 class="font-semibold mb-3 text-sm text-gray-500 uppercase tracking-wide">Recent Patients</h3><div id="dashPatients"><p class="text-gray-400 text-center py-4">No data yet</p></div></div>
       </div>
     </div>
 
-    <!-- ===== PATIENTS ===== -->
+    <!-- PATIENTS -->
     <div id="tab-patients" class="section">
       <div class="flex items-center justify-between mb-5">
-        <h2 class="text-xl font-bold" data-i18n="patients">Patients</h2>
-        <button onclick="openModal('patientModal')" class="hidden md:flex items-center gap-2 bg-dental text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-dental-dark transition">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          <span data-i18n="addPatient">Add Patient</span>
+        <h2 class="text-xl font-bold">Patients</h2>
+        <button onclick="openPatientModal()" class="hidden md:flex items-center gap-2 bg-dental text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-dental-dark transition">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add Patient
         </button>
       </div>
-      <div class="card mb-4">
-        <div class="flex gap-2">
-          <input id="patientSearch" type="text" placeholder="Search by name or phone..." class="flex-1 border border-gray-200 rounded-xl px-4 py-2.5 text-sm" oninput="renderPatients()" data-i18n-placeholder="searchPatient"/>
-          <button onclick="loadData()" class="p-2.5 border border-gray-200 rounded-xl hover:bg-gray-50" title="Refresh">
-            <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
-          </button>
-        </div>
+      <div class="card mb-4 flex gap-2">
+        <input id="patientSearch" type="text" placeholder="Search by name or phone..." class="flex-1 border border-gray-200 rounded-xl px-4 py-2.5 text-sm" oninput="renderPatients()"/>
+        <button onclick="loadData()" class="p-2.5 border border-gray-200 rounded-xl hover:bg-gray-50" title="Refresh">
+          <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
+        </button>
       </div>
       <div class="card overflow-x-auto">
-        <table class="data-table" id="patientsTable">
-          <thead><tr>
-            <th data-i18n="name">Name</th>
-            <th data-i18n="phone">Phone</th>
-            <th data-i18n="age">Age</th>
-            <th data-i18n="gender">Gender</th>
-            <th data-i18n="notes">Notes</th>
-            <th data-i18n="actions">Actions</th>
-          </tr></thead>
-          <tbody id="patientsTbody">
-            <tr><td colspan="6" class="text-center text-gray-400 py-8" data-i18n="noData">No data yet</td></tr>
-          </tbody>
+        <table class="data-table">
+          <thead><tr><th>Name</th><th>Phone</th><th>Age</th><th>Gender</th><th>Notes</th><th>Actions</th></tr></thead>
+          <tbody id="patientsTbody"><tr><td colspan="6" class="text-center text-gray-400 py-8">No data yet</td></tr></tbody>
         </table>
       </div>
     </div>
 
-    <!-- ===== APPOINTMENTS ===== -->
+    <!-- APPOINTMENTS -->
     <div id="tab-appointments" class="section">
       <div class="flex items-center justify-between mb-5">
-        <h2 class="text-xl font-bold" data-i18n="appointments">Appointments</h2>
-        <button onclick="openModal('apptModal')" class="hidden md:flex items-center gap-2 bg-dental text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-dental-dark transition">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          <span data-i18n="addAppt">Add Appointment</span>
+        <h2 class="text-xl font-bold">Appointments</h2>
+        <button onclick="openApptModal(null)" class="hidden md:flex items-center gap-2 bg-dental text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-dental-dark transition">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add Appointment
         </button>
       </div>
-
-      <!-- Calendar -->
       <div class="card mb-4">
         <div class="flex items-center justify-between mb-4">
           <button onclick="prevMonth()" class="p-2 hover:bg-gray-100 rounded-lg"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
           <h3 class="font-semibold" id="calTitle"></h3>
           <button onclick="nextMonth()" class="p-2 hover:bg-gray-100 rounded-lg"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>
         </div>
-        <div class="grid grid-cols-7 gap-1 mb-2">
-          <div class="text-center text-xs text-gray-400 font-medium py-1">Sun</div>
-          <div class="text-center text-xs text-gray-400 font-medium py-1">Mon</div>
-          <div class="text-center text-xs text-gray-400 font-medium py-1">Tue</div>
-          <div class="text-center text-xs text-gray-400 font-medium py-1">Wed</div>
-          <div class="text-center text-xs text-gray-400 font-medium py-1">Thu</div>
-          <div class="text-center text-xs text-gray-400 font-medium py-1">Fri</div>
-          <div class="text-center text-xs text-gray-400 font-medium py-1">Sat</div>
-        </div>
+        <div class="grid grid-cols-7 gap-1 mb-2" id="calHeaders"></div>
         <div class="grid grid-cols-7 gap-1" id="calGrid"></div>
       </div>
-
-      <!-- Appointments list -->
       <div class="card overflow-x-auto">
-        <h3 class="font-semibold mb-3 text-sm" id="apptListTitle">All Appointments</h3>
-        <table class="data-table" id="apptsTable">
-          <thead><tr>
-            <th data-i18n="date">Date</th>
-            <th data-i18n="time">Time</th>
-            <th data-i18n="patient">Patient</th>
-            <th data-i18n="doctor">Doctor</th>
-            <th data-i18n="treatment">Treatment</th>
-            <th data-i18n="status">Status</th>
-            <th data-i18n="actions">Actions</th>
-          </tr></thead>
-          <tbody id="apptsTbody">
-            <tr><td colspan="7" class="text-center text-gray-400 py-8" data-i18n="noData">No data yet</td></tr>
-          </tbody>
+        <h3 class="font-semibold mb-3 text-sm">All Appointments</h3>
+        <table class="data-table">
+          <thead><tr><th>Date</th><th>Time</th><th>Patient</th><th>Doctor</th><th>Treatment</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="apptsTbody"><tr><td colspan="7" class="text-center text-gray-400 py-8">No data yet</td></tr></tbody>
         </table>
       </div>
     </div>
 
-    <!-- ===== INVOICES ===== -->
+    <!-- DAILY VIEW -->
+    <div id="tab-daily" class="section">
+      <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
+        <h2 class="text-xl font-bold">Daily Calendar</h2>
+        <div class="flex items-center gap-2">
+          <button onclick="prevDay()" class="p-2 hover:bg-gray-100 rounded-lg border border-gray-200"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
+          <input id="dailyDate" type="date" class="border border-gray-200 rounded-xl px-3 py-2 text-sm" onchange="renderDaily()"/>
+          <button onclick="nextDay()" class="p-2 hover:bg-gray-100 rounded-lg border border-gray-200"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>
+          <button onclick="goToday()" class="px-3 py-2 bg-dental text-white rounded-xl text-xs font-medium hover:bg-dental-dark">Today</button>
+        </div>
+      </div>
+      <div class="flex flex-wrap gap-3 mb-4">
+        <span class="flex items-center gap-1.5 text-xs"><span class="w-3 h-3 rounded-full bg-blue-400 inline-block"></span>Scheduled</span>
+        <span class="flex items-center gap-1.5 text-xs"><span class="w-3 h-3 rounded-full bg-green-400 inline-block"></span>Confirmed</span>
+        <span class="flex items-center gap-1.5 text-xs"><span class="w-3 h-3 rounded-full bg-gray-400 inline-block"></span>Completed</span>
+        <span class="flex items-center gap-1.5 text-xs"><span class="w-3 h-3 rounded-full bg-red-400 inline-block"></span>Cancelled</span>
+      </div>
+      <div class="card mb-4">
+        <div class="flex gap-3 flex-wrap items-end">
+          <div class="flex-1 min-w-40">
+            <label class="text-xs text-gray-500 mb-1 block">Filter by Doctor</label>
+            <select id="dailyDoctorFilter" class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm" onchange="renderDaily()"><option value="">All Doctors</option></select>
+          </div>
+          <div class="text-sm text-gray-500 self-center"><span id="dailySummary"></span></div>
+        </div>
+      </div>
+      <div class="card" id="dailyTimeline"></div>
+    </div>
+
+    <!-- INVOICES -->
     <div id="tab-invoices" class="section">
       <div class="flex items-center justify-between mb-5">
-        <h2 class="text-xl font-bold" data-i18n="invoices">Invoices</h2>
-        <button onclick="openModal('invoiceModal')" class="hidden md:flex items-center gap-2 bg-dental text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-dental-dark transition">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          <span data-i18n="newInvoice">New Invoice</span>
+        <h2 class="text-xl font-bold">Invoices</h2>
+        <button onclick="openInvoiceModal()" class="hidden md:flex items-center gap-2 bg-dental text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-dental-dark transition">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> New Invoice
         </button>
       </div>
-
-      <!-- Price Guide -->
       <div class="card mb-4">
         <div class="flex items-center justify-between mb-3">
-          <h3 class="font-semibold text-sm" data-i18n="priceGuide">Treatment Price Guide</h3>
-          <button onclick="savePriceGuide()" class="text-dental text-xs font-medium hover:underline" data-i18n="save">Save</button>
+          <h3 class="font-semibold text-sm">Treatment Price Guide</h3>
+          <button onclick="savePriceGuide()" class="text-dental text-xs font-medium hover:underline">Save</button>
         </div>
         <div id="priceGuideList" class="space-y-2"></div>
         <button onclick="addPriceRow()" class="mt-3 text-dental text-xs font-medium flex items-center gap-1 hover:underline">
-          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          <span data-i18n="addTreatment">Add Treatment</span>
+          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add Treatment
         </button>
       </div>
-
-      <!-- Invoices list -->
       <div class="card overflow-x-auto">
         <table class="data-table">
-          <thead><tr>
-            <th>#</th>
-            <th data-i18n="patient">Patient</th>
-            <th data-i18n="treatment">Treatment</th>
-            <th data-i18n="amount">Amount</th>
-            <th data-i18n="date">Date</th>
-            <th data-i18n="status">Status</th>
-            <th data-i18n="actions">Actions</th>
-          </tr></thead>
-          <tbody id="invoicesTbody">
-            <tr><td colspan="7" class="text-center text-gray-400 py-8" data-i18n="noData">No data yet</td></tr>
-          </tbody>
+          <thead><tr><th>#</th><th>Patient</th><th>Treatments</th><th>Total</th><th>Date</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="invoicesTbody"><tr><td colspan="7" class="text-center text-gray-400 py-8">No data yet</td></tr></tbody>
         </table>
       </div>
     </div>
 
-    <!-- ===== DOCTORS VIEW ===== -->
-    <div id="tab-doctors" class="section">
-      <h2 class="text-xl font-bold mb-5" data-i18n="doctorsView">Doctors View</h2>
+    <!-- DENTAL CHART -->
+    <div id="tab-dental-chart" class="section">
+      <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
+        <h2 class="text-xl font-bold">Dental Chart</h2>
+      </div>
       <div class="card mb-4">
-        <div class="flex flex-wrap gap-3 items-center">
-          <div class="flex-1 min-w-40">
-            <label class="text-xs text-gray-500 mb-1 block" data-i18n="selectDoctor">Select Doctor</label>
-            <select id="doctorFilter" class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm" onchange="renderDoctorView()">
-              <option value="">-- All Doctors --</option>
-            </select>
-          </div>
-          <div class="flex-1 min-w-40">
-            <label class="text-xs text-gray-500 mb-1 block" data-i18n="viewPeriod">Period</label>
+        <label class="text-xs text-gray-500 mb-1 block">Select Patient to view/edit chart</label>
+        <div class="flex gap-2">
+          <input id="chartPatientSearch" type="text" placeholder="Search patient name..." class="flex-1 border border-gray-200 rounded-xl px-3 py-2.5 text-sm" oninput="searchPatientForChart()"/>
+          <button onclick="clearChartPatient()" class="px-3 py-2 border border-gray-200 rounded-xl text-sm text-gray-500 hover:bg-gray-50">Clear</button>
+        </div>
+        <div id="chartPatientSuggestions" class="border border-gray-200 rounded-xl overflow-hidden hidden max-h-40 overflow-y-auto mt-1"></div>
+        <p id="chartPatientDisplay" class="text-sm text-dental font-medium mt-2"></p>
+      </div>
+      <div class="flex flex-wrap gap-2 mb-4 text-xs">
+        <span class="flex items-center gap-1 px-2 py-1 bg-white border border-gray-200 rounded-lg"><span class="w-3 h-3 rounded-sm bg-white border border-gray-400 inline-block"></span>Healthy</span>
+        <span class="flex items-center gap-1 px-2 py-1 bg-white border border-gray-200 rounded-lg"><span class="w-3 h-3 rounded-sm bg-red-500 inline-block"></span>Cavity</span>
+        <span class="flex items-center gap-1 px-2 py-1 bg-white border border-gray-200 rounded-lg"><span class="w-3 h-3 rounded-sm bg-yellow-500 inline-block"></span>Filled</span>
+        <span class="flex items-center gap-1 px-2 py-1 bg-white border border-gray-200 rounded-lg"><span class="w-3 h-3 rounded-sm bg-blue-500 inline-block"></span>Crown</span>
+        <span class="flex items-center gap-1 px-2 py-1 bg-white border border-gray-200 rounded-lg"><span class="w-3 h-3 rounded-sm bg-gray-400 inline-block"></span>Extracted</span>
+        <span class="flex items-center gap-1 px-2 py-1 bg-white border border-gray-200 rounded-lg"><span class="w-3 h-3 rounded-sm bg-purple-500 inline-block"></span>Root Canal</span>
+        <span class="flex items-center gap-1 px-2 py-1 bg-white border border-gray-200 rounded-lg"><span class="w-3 h-3 rounded-sm bg-green-500 inline-block"></span>Implant</span>
+      </div>
+      <div class="card mb-4">
+        <div class="text-center text-xs text-gray-400 mb-3 font-medium uppercase tracking-wide">Upper Jaw (Maxillary)</div>
+        <div class="overflow-x-auto">
+          <div class="flex justify-center gap-1 mb-1 flex-wrap min-w-max mx-auto px-2" id="upperTeeth"></div>
+          <div class="border-t-2 border-dashed border-gray-300 my-3 mx-4"></div>
+          <div class="flex justify-center gap-1 mt-1 flex-wrap min-w-max mx-auto px-2" id="lowerTeeth"></div>
+        </div>
+        <div class="text-center text-xs text-gray-400 mt-3 font-medium uppercase tracking-wide">Lower Jaw (Mandibular)</div>
+      </div>
+      <div class="card">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="font-semibold text-sm">Treatment Plan</h3>
+          <button onclick="addTreatmentPlanRow()" class="text-dental text-xs font-medium flex items-center gap-1 hover:underline">
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add Row
+          </button>
+        </div>
+        <div id="treatmentPlanRows" class="space-y-2 mb-3"></div>
+        <button onclick="saveTreatmentPlan()" class="bg-dental text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-dental-dark">Save Plan</button>
+      </div>
+    </div>
+
+    <!-- DOCTORS VIEW -->
+    <div id="tab-doctors" class="section">
+      <h2 class="text-xl font-bold mb-5">Doctors View</h2>
+      <div class="card mb-4">
+        <label class="text-xs text-gray-500 mb-1 block font-medium">Search Doctor</label>
+        <div class="flex gap-2 mb-3">
+          <input id="doctorSearchInput" type="text" placeholder="Type doctor name to filter appointments..." class="flex-1 border border-gray-200 rounded-xl px-3 py-2.5 text-sm" oninput="renderDoctorView()"/>
+          <select id="doctorFilter" class="border border-gray-200 rounded-xl px-3 py-2 text-sm" onchange="syncDoctorSearch()"><option value="">All Doctors</option></select>
+        </div>
+        <div class="flex gap-3">
+          <div class="flex-1">
+            <label class="text-xs text-gray-500 mb-1 block">Period</label>
             <select id="doctorPeriod" class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm" onchange="renderDoctorView()">
-              <option value="today" data-i18n="today">Today</option>
-              <option value="week" data-i18n="thisWeek">This Week</option>
-              <option value="all" data-i18n="allTime">All Time</option>
+              <option value="today">Today</option><option value="week">This Week</option><option value="all">All Time</option>
             </select>
           </div>
+          <div id="doctorStatsBox" class="flex-1 bg-dental-light rounded-xl p-3 text-sm text-dental font-medium flex items-center justify-center"></div>
         </div>
       </div>
       <div class="card overflow-x-auto">
         <table class="data-table">
-          <thead><tr>
-            <th data-i18n="date">Date</th>
-            <th data-i18n="time">Time</th>
-            <th data-i18n="patient">Patient</th>
-            <th data-i18n="treatment">Treatment</th>
-            <th data-i18n="status">Status</th>
-          </tr></thead>
-          <tbody id="doctorViewTbody">
-            <tr><td colspan="5" class="text-center text-gray-400 py-8" data-i18n="noData">No data yet</td></tr>
-          </tbody>
+          <thead><tr><th>Date</th><th>Time</th><th>Patient</th><th>Treatment</th><th>Status</th></tr></thead>
+          <tbody id="doctorViewTbody"><tr><td colspan="5" class="text-center text-gray-400 py-8">No data yet</td></tr></tbody>
         </table>
       </div>
     </div>
 
-    <!-- ===== SETTINGS ===== -->
+    <!-- SETTINGS -->
     <div id="tab-settings" class="section">
-      <h2 class="text-xl font-bold mb-5" data-i18n="settings">Settings</h2>
+      <h2 class="text-xl font-bold mb-5">Settings</h2>
       <div class="grid md:grid-cols-2 gap-4">
         <div class="card">
-          <h3 class="font-semibold mb-4 text-sm uppercase text-gray-500 tracking-wide" data-i18n="clinicInfo">Clinic Info</h3>
+          <h3 class="font-semibold mb-4 text-sm uppercase text-gray-500 tracking-wide">Clinic Info</h3>
           <div class="space-y-3">
-            <div>
-              <label class="text-xs text-gray-500 mb-1 block" data-i18n="clinicName">Clinic Name</label>
-              <input id="settingClinicName" type="text" class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm" placeholder="Finesse Dental Care"/>
-            </div>
-            <div>
-              <label class="text-xs text-gray-500 mb-1 block" data-i18n="workingHours">Working Hours</label>
+            <div><label class="text-xs text-gray-500 mb-1 block">Clinic Name</label><input id="settingClinicName" type="text" class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm" placeholder="Finesse Dental Care"/></div>
+            <div><label class="text-xs text-gray-500 mb-1 block">Working Hours</label>
               <div class="flex gap-2">
                 <input id="settingHoursFrom" type="time" class="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-sm" value="09:00"/>
                 <span class="self-center text-gray-400">-</span>
                 <input id="settingHoursTo" type="time" class="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-sm" value="17:00"/>
               </div>
             </div>
-            <div>
-              <label class="text-xs text-gray-500 mb-1 block" data-i18n="defaultCurrency">Currency</label>
-              <select id="settingCurrency" class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm" onchange="setCurrency(this.value)">
-                <option value="USD">USD ($)</option>
-                <option value="EGP">EGP (ج.م)</option>
-              </select>
+            <div><label class="text-xs text-gray-500 mb-1 block">Currency</label>
+              <select id="settingCurrency" class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm" onchange="setCurrency(this.value)"><option value="USD">USD ($)</option><option value="EGP">EGP (ج.م)</option></select>
             </div>
-            <div>
-              <label class="text-xs text-gray-500 mb-1 block" data-i18n="language">Language</label>
-              <select id="settingLang" class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm" onchange="setLang(this.value)">
-                <option value="en">English</option>
-                <option value="ar">العربية</option>
-              </select>
+            <div><label class="text-xs text-gray-500 mb-1 block">Language</label>
+              <select id="settingLang" class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm" onchange="setLang(this.value)"><option value="en">English</option><option value="ar">العربية</option></select>
             </div>
-            <button onclick="saveSettings()" class="w-full bg-dental text-white rounded-xl py-2.5 text-sm font-medium hover:bg-dental-dark transition" data-i18n="saveSettings">Save Settings</button>
+            <button onclick="saveSettings()" class="w-full bg-dental text-white rounded-xl py-2.5 text-sm font-medium hover:bg-dental-dark transition">Save Settings</button>
           </div>
         </div>
-
         <div class="card">
-          <h3 class="font-semibold mb-4 text-sm uppercase text-gray-500 tracking-wide" data-i18n="manageDoctors">Manage Doctors</h3>
+          <h3 class="font-semibold mb-4 text-sm uppercase text-gray-500 tracking-wide">Manage Doctors</h3>
           <div id="doctorsList" class="space-y-2 mb-3"></div>
           <div class="flex gap-2">
-            <input id="newDoctorName" type="text" placeholder="Doctor name..." class="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-sm" data-i18n-placeholder="doctorName"/>
-            <input id="newDoctorSpec" type="text" placeholder="Specialization..." class="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-sm" data-i18n-placeholder="specialization"/>
+            <input id="newDoctorName" type="text" placeholder="Doctor name..." class="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-sm"/>
+            <input id="newDoctorSpec" type="text" placeholder="Specialization..." class="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-sm"/>
             <button onclick="addDoctor()" class="bg-dental text-white px-3 py-2 rounded-xl text-sm hover:bg-dental-dark transition">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
             </button>
@@ -473,78 +420,55 @@ tailwind.config = {
       </div>
     </div>
 
-  </div><!-- end .p-4 -->
-</div><!-- end #mainContent -->
+  </div>
+</div>
 
-<!-- ===== FAB ===== -->
 <button id="fab" onclick="openFabModal()">+</button>
 
-<!-- ===== BOTTOM NAV ===== -->
-<nav id="bottomNav" class="items-center justify-around px-2">
-  <button class="flex flex-col items-center gap-0.5 py-2 px-3 text-xs nav-item active" onclick="showTab('dashboard',this)" data-tab="dashboard">
+<!-- BOTTOM NAV -->
+<nav id="bottomNav" class="items-center justify-around px-1">
+  <button class="flex flex-col items-center gap-0.5 py-2 px-2 text-xs nav-item active" onclick="showTab('dashboard',this)">
     <svg class="w-5 h-5 nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-    <span data-i18n="dashboard">Dashboard</span>
+    <span>Home</span>
   </button>
-  <button class="flex flex-col items-center gap-0.5 py-2 px-3 text-xs nav-item" onclick="showTab('patients',this)" data-tab="patients">
+  <button class="flex flex-col items-center gap-0.5 py-2 px-2 text-xs nav-item" onclick="showTab('patients',this)">
     <svg class="w-5 h-5 nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
-    <span data-i18n="patients">Patients</span>
+    <span>Patients</span>
   </button>
-  <button class="flex flex-col items-center gap-0.5 py-2 px-3 text-xs nav-item" onclick="showTab('appointments',this)" data-tab="appointments">
-    <svg class="w-5 h-5 nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-    <span data-i18n="appts">Appts</span>
+  <button class="flex flex-col items-center gap-0.5 py-2 px-2 text-xs nav-item" onclick="showTab('daily',this)">
+    <svg class="w-5 h-5 nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+    <span>Daily</span>
   </button>
-  <button class="flex flex-col items-center gap-0.5 py-2 px-3 text-xs nav-item" onclick="showTab('invoices',this)" data-tab="invoices">
+  <button class="flex flex-col items-center gap-0.5 py-2 px-2 text-xs nav-item" onclick="showTab('dental-chart',this)">
+    <svg class="w-5 h-5 nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18"/></svg>
+    <span>Chart</span>
+  </button>
+  <button class="flex flex-col items-center gap-0.5 py-2 px-2 text-xs nav-item" onclick="showTab('invoices',this)">
     <svg class="w-5 h-5 nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/></svg>
-    <span data-i18n="invoices">Invoices</span>
-  </button>
-  <button class="flex flex-col items-center gap-0.5 py-2 px-3 text-xs nav-item" onclick="showTab('settings',this)" data-tab="settings">
-    <svg class="w-5 h-5 nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
-    <span data-i18n="settings">Settings</span>
+    <span>Invoices</span>
   </button>
 </nav>
 
-<!-- ============================================================ -->
-<!--  MODALS  -->
-<!-- ============================================================ -->
+<!-- ====== MODALS ====== -->
 
 <!-- Patient Modal -->
 <div id="patientModal" class="modal-overlay hidden" onclick="closeModalOnOverlay(event,'patientModal')">
   <div class="modal-box">
     <div class="flex items-center justify-between mb-5">
-      <h3 class="font-bold text-lg" id="patientModalTitle" data-i18n="addPatient">Add Patient</h3>
+      <h3 class="font-bold text-lg" id="patientModalTitle">Add Patient</h3>
       <button onclick="closeModal('patientModal')" class="p-1 hover:bg-gray-100 rounded-lg">✕</button>
     </div>
-    <div class="space-y-3">
-      <input type="hidden" id="editPatientId"/>
-      <div class="grid grid-cols-2 gap-3">
-        <div>
-          <label class="text-xs text-gray-500 mb-1 block" data-i18n="name">Name *</label>
-          <input id="pName" type="text" class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm" placeholder="Full name"/>
-        </div>
-        <div>
-          <label class="text-xs text-gray-500 mb-1 block" data-i18n="phone">Phone *</label>
-          <input id="pPhone" type="tel" class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm" placeholder="+20..."/>
-        </div>
-        <div>
-          <label class="text-xs text-gray-500 mb-1 block" data-i18n="age">Age</label>
-          <input id="pAge" type="number" class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm" placeholder="25"/>
-        </div>
-        <div>
-          <label class="text-xs text-gray-500 mb-1 block" data-i18n="gender">Gender</label>
-          <select id="pGender" class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm">
-            <option value="Male">Male</option>
-            <option value="Female">Female</option>
-          </select>
-        </div>
-      </div>
-      <div>
-        <label class="text-xs text-gray-500 mb-1 block" data-i18n="medicalNotes">Medical Notes</label>
-        <textarea id="pNotes" rows="3" class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm resize-none" placeholder="Allergies, conditions, medications..."></textarea>
-      </div>
-      <div class="flex gap-3 pt-2">
-        <button onclick="closeModal('patientModal')" class="flex-1 border border-gray-200 rounded-xl py-2.5 text-sm font-medium hover:bg-gray-50" data-i18n="cancel">Cancel</button>
-        <button onclick="savePatient()" class="flex-1 bg-dental text-white rounded-xl py-2.5 text-sm font-medium hover:bg-dental-dark" data-i18n="save">Save</button>
-      </div>
+    <input type="hidden" id="editPatientId"/>
+    <div class="grid grid-cols-2 gap-3 mb-3">
+      <div><label class="text-xs text-gray-500 mb-1 block">Name *</label><input id="pName" type="text" class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm" placeholder="Full name"/></div>
+      <div><label class="text-xs text-gray-500 mb-1 block">Phone *</label><input id="pPhone" type="tel" class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm" placeholder="+20..."/></div>
+      <div><label class="text-xs text-gray-500 mb-1 block">Age</label><input id="pAge" type="number" class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm" placeholder="25"/></div>
+      <div><label class="text-xs text-gray-500 mb-1 block">Gender</label><select id="pGender" class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm"><option>Male</option><option>Female</option></select></div>
+    </div>
+    <div class="mb-4"><label class="text-xs text-gray-500 mb-1 block">Medical Notes</label><textarea id="pNotes" rows="3" class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm resize-none" placeholder="Allergies, conditions..."></textarea></div>
+    <div class="flex gap-3">
+      <button onclick="closeModal('patientModal')" class="flex-1 border border-gray-200 rounded-xl py-2.5 text-sm font-medium hover:bg-gray-50">Cancel</button>
+      <button onclick="savePatient()" class="flex-1 bg-dental text-white rounded-xl py-2.5 text-sm font-medium hover:bg-dental-dark">Save</button>
     </div>
   </div>
 </div>
@@ -553,1123 +477,841 @@ tailwind.config = {
 <div id="apptModal" class="modal-overlay hidden" onclick="closeModalOnOverlay(event,'apptModal')">
   <div class="modal-box">
     <div class="flex items-center justify-between mb-5">
-      <h3 class="font-bold text-lg" id="apptModalTitle" data-i18n="addAppt">Add Appointment</h3>
+      <h3 class="font-bold text-lg" id="apptModalTitle">Add Appointment</h3>
       <button onclick="closeModal('apptModal')" class="p-1 hover:bg-gray-100 rounded-lg">✕</button>
     </div>
-    <div class="space-y-3">
-      <input type="hidden" id="editApptId"/>
-      <div class="grid grid-cols-2 gap-3">
-        <div>
-          <label class="text-xs text-gray-500 mb-1 block" data-i18n="date">Date *</label>
-          <input id="aDate" type="date" class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm"/>
-        </div>
-        <div>
-          <label class="text-xs text-gray-500 mb-1 block" data-i18n="time">Time *</label>
-          <select id="aTime" class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm"></select>
-        </div>
-        <div class="col-span-2">
-          <label class="text-xs text-gray-500 mb-1 block" data-i18n="patient">Patient *</label>
-          <input id="aPatientSearch" type="text" placeholder="Search patient..." class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm mb-1" oninput="searchPatientForAppt()"/>
-          <div id="patientSuggestions" class="border border-gray-200 rounded-xl overflow-hidden hidden max-h-40 overflow-y-auto"></div>
-          <input type="hidden" id="aPatientId"/>
-          <input type="hidden" id="aPatientName"/>
-          <p id="selectedPatientDisplay" class="text-xs text-dental mt-1"></p>
-        </div>
-        <div>
-          <label class="text-xs text-gray-500 mb-1 block" data-i18n="doctor">Doctor</label>
-          <select id="aDoctor" class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm"></select>
-        </div>
-        <div>
-          <label class="text-xs text-gray-500 mb-1 block" data-i18n="treatment">Treatment</label>
-          <select id="aTreatment" class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm"></select>
-        </div>
-        <div class="col-span-2">
-          <label class="text-xs text-gray-500 mb-1 block" data-i18n="status">Status</label>
-          <select id="aStatus" class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm">
-            <option value="Scheduled">Scheduled</option>
-            <option value="Confirmed">Confirmed</option>
-            <option value="Completed">Completed</option>
-            <option value="Cancelled">Cancelled</option>
-          </select>
-        </div>
-        <div class="col-span-2">
-          <label class="text-xs text-gray-500 mb-1 block" data-i18n="notes">Notes</label>
-          <textarea id="aNotes" rows="2" class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm resize-none" placeholder="Additional notes..."></textarea>
-        </div>
+    <input type="hidden" id="editApptId"/>
+    <div class="grid grid-cols-2 gap-3 mb-3">
+      <div><label class="text-xs text-gray-500 mb-1 block">Date *</label><input id="aDate" type="date" class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm"/></div>
+      <div><label class="text-xs text-gray-500 mb-1 block">Time *</label><select id="aTime" class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm"></select></div>
+      <div class="col-span-2">
+        <label class="text-xs text-gray-500 mb-1 block">Patient *</label>
+        <input id="aPatientSearch" type="text" placeholder="Search patient..." class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm mb-1" oninput="searchPatientForAppt()"/>
+        <div id="patientSuggestions" class="border border-gray-200 rounded-xl overflow-hidden hidden max-h-40 overflow-y-auto"></div>
+        <input type="hidden" id="aPatientId"/><input type="hidden" id="aPatientName"/>
+        <p id="selectedPatientDisplay" class="text-xs text-dental mt-1"></p>
       </div>
-      <div class="flex gap-3 pt-2">
-        <button onclick="closeModal('apptModal')" class="flex-1 border border-gray-200 rounded-xl py-2.5 text-sm font-medium hover:bg-gray-50" data-i18n="cancel">Cancel</button>
-        <button onclick="saveAppt()" class="flex-1 bg-dental text-white rounded-xl py-2.5 text-sm font-medium hover:bg-dental-dark" data-i18n="save">Save</button>
+      <div><label class="text-xs text-gray-500 mb-1 block">Doctor</label><select id="aDoctor" class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm"></select></div>
+      <div><label class="text-xs text-gray-500 mb-1 block">Treatment</label><select id="aTreatment" class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm"></select></div>
+      <div class="col-span-2"><label class="text-xs text-gray-500 mb-1 block">Status</label>
+        <select id="aStatus" class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm">
+          <option>Scheduled</option><option>Confirmed</option><option>Completed</option><option>Cancelled</option>
+        </select>
       </div>
+      <div class="col-span-2"><label class="text-xs text-gray-500 mb-1 block">Notes</label><textarea id="aNotes" rows="2" class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm resize-none"></textarea></div>
+    </div>
+    <div class="flex gap-3">
+      <button onclick="closeModal('apptModal')" class="flex-1 border border-gray-200 rounded-xl py-2.5 text-sm font-medium hover:bg-gray-50">Cancel</button>
+      <button onclick="saveAppt()" class="flex-1 bg-dental text-white rounded-xl py-2.5 text-sm font-medium hover:bg-dental-dark">Save</button>
     </div>
   </div>
 </div>
 
-<!-- Invoice Modal -->
+<!-- Invoice Modal — MULTI-TREATMENT -->
 <div id="invoiceModal" class="modal-overlay hidden" onclick="closeModalOnOverlay(event,'invoiceModal')">
   <div class="modal-box">
     <div class="flex items-center justify-between mb-5">
-      <h3 class="font-bold text-lg" data-i18n="newInvoice">New Invoice</h3>
+      <h3 class="font-bold text-lg">New Invoice</h3>
       <button onclick="closeModal('invoiceModal')" class="p-1 hover:bg-gray-100 rounded-lg">✕</button>
     </div>
-    <div class="space-y-3">
-      <input type="hidden" id="editInvoiceId"/>
+    <input type="hidden" id="editInvoiceId"/>
+    <div class="space-y-4 mb-4">
+      <!-- Patient -->
       <div>
-        <label class="text-xs text-gray-500 mb-1 block" data-i18n="patient">Patient *</label>
+        <label class="text-xs text-gray-500 mb-1 block">Patient *</label>
         <input id="iPatientSearch" type="text" placeholder="Search patient..." class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm mb-1" oninput="searchPatientForInvoice()"/>
         <div id="invPatientSuggestions" class="border border-gray-200 rounded-xl overflow-hidden hidden max-h-40 overflow-y-auto"></div>
-        <input type="hidden" id="iPatientId"/>
-        <input type="hidden" id="iPatientName"/>
+        <input type="hidden" id="iPatientId"/><input type="hidden" id="iPatientName"/>
         <p id="selectedInvPatientDisplay" class="text-xs text-dental mt-1"></p>
       </div>
-      <div>
-        <label class="text-xs text-gray-500 mb-1 block" data-i18n="treatment">Treatment *</label>
-        <select id="iTreatment" class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm" onchange="updateInvoicePrice()">
-          <option value="">-- Select --</option>
-        </select>
-      </div>
+      <!-- Date & Status -->
       <div class="grid grid-cols-2 gap-3">
-        <div>
-          <label class="text-xs text-gray-500 mb-1 block" data-i18n="amount">Amount</label>
-          <input id="iAmount" type="number" class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm" placeholder="0"/>
-        </div>
-        <div>
-          <label class="text-xs text-gray-500 mb-1 block" data-i18n="date">Date</label>
-          <input id="iDate" type="date" class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm"/>
+        <div><label class="text-xs text-gray-500 mb-1 block">Date</label><input id="iDate" type="date" class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm"/></div>
+        <div><label class="text-xs text-gray-500 mb-1 block">Status</label>
+          <select id="iStatus" class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm"><option>Paid</option><option>Pending</option><option>Cancelled</option></select>
         </div>
       </div>
+      <!-- Treatment Items -->
       <div>
-        <label class="text-xs text-gray-500 mb-1 block" data-i18n="status">Status</label>
-        <select id="iStatus" class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm">
-          <option value="Paid">Paid</option>
-          <option value="Pending">Pending</option>
-          <option value="Cancelled">Cancelled</option>
-        </select>
-      </div>
-      <div class="bg-gray-50 rounded-xl p-3 text-sm">
-        <div class="flex justify-between font-semibold">
-          <span data-i18n="total">Total:</span>
-          <span id="invoiceTotal" class="text-dental">0</span>
+        <div class="flex items-center justify-between mb-2">
+          <label class="text-xs text-gray-500 font-medium">Treatments *</label>
+          <button onclick="addInvoiceItem()" class="text-dental text-xs font-medium flex items-center gap-1 hover:underline">
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add Treatment
+          </button>
         </div>
+        <!-- column headers -->
+        <div class="inv-item-row mb-1 px-1">
+          <span class="text-xs text-gray-400 font-medium">Treatment</span>
+          <span class="text-xs text-gray-400 font-medium w-24 text-center">Price</span>
+          <span class="w-6"></span>
+        </div>
+        <div id="invoiceItemsContainer" class="space-y-2"></div>
       </div>
-      <div class="flex gap-3 pt-2">
-        <button onclick="closeModal('invoiceModal')" class="flex-1 border border-gray-200 rounded-xl py-2.5 text-sm font-medium hover:bg-gray-50" data-i18n="cancel">Cancel</button>
-        <button onclick="saveInvoice()" class="flex-1 bg-dental text-white rounded-xl py-2.5 text-sm font-medium hover:bg-dental-dark" data-i18n="save">Save</button>
+      <!-- Totals -->
+      <div class="bg-gray-50 rounded-xl p-3 space-y-1">
+        <div class="flex justify-between text-sm text-gray-500"><span>Subtotal</span><span id="invSubtotal">0</span></div>
+        <div class="flex justify-between font-bold text-base border-t border-gray-200 pt-2 mt-1"><span>Total</span><span id="invTotal" class="text-dental">0</span></div>
       </div>
+    </div>
+    <div class="flex gap-3">
+      <button onclick="closeModal('invoiceModal')" class="flex-1 border border-gray-200 rounded-xl py-2.5 text-sm font-medium hover:bg-gray-50">Cancel</button>
+      <button onclick="saveInvoice()" class="flex-1 bg-dental text-white rounded-xl py-2.5 text-sm font-medium hover:bg-dental-dark">Save Invoice</button>
     </div>
   </div>
 </div>
 
-<!-- ============================================================ -->
-<!--  APPS SCRIPT SETUP INSTRUCTIONS (in HTML comments)
-=================================================================
-HOW TO SET UP GOOGLE SHEETS BACKEND:
+<!-- Print Invoice Modal -->
+<div id="printModal" class="modal-overlay hidden" onclick="closeModalOnOverlay(event,'printModal')">
+  <div class="modal-box max-w-lg">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="font-bold text-lg">Invoice Preview</h3>
+      <div class="flex gap-2">
+        <button onclick="window.print()" class="bg-dental text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-dental-dark flex items-center gap-1">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> Print
+        </button>
+        <button onclick="closeModal('printModal')" class="p-1 hover:bg-gray-100 rounded-lg">✕</button>
+      </div>
+    </div>
+    <div id="printContent" class="border border-gray-200 rounded-xl p-6 bg-white"></div>
+  </div>
+</div>
 
-1. Create a new Google Spreadsheet with these sheets:
-   - Patients  (cols: ID, Name, Phone, Age, Gender, Notes, CreatedAt)
-   - Appointments (cols: ID, Date, Time, PatientID, PatientName, Doctor, Treatment, Status, Notes, CreatedAt)
-   - Invoices (cols: ID, PatientID, PatientName, Treatment, Amount, Date, Status, CreatedAt)
-   - Doctors (cols: ID, Name, Specialization)
-   - Settings (cols: Key, Value)
+<!-- Tooth status picker -->
+<div id="toothModal" class="modal-overlay hidden" onclick="closeModalOnOverlay(event,'toothModal')">
+  <div class="modal-box max-w-sm">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="font-bold text-lg" id="toothModalTitle">Tooth #</h3>
+      <button onclick="closeModal('toothModal')" class="p-1 hover:bg-gray-100 rounded-lg">✕</button>
+    </div>
+    <p class="text-sm text-gray-500 mb-4">Select the condition for this tooth:</p>
+    <div class="grid grid-cols-2 gap-2" id="toothStatusBtns"></div>
+    <div class="mt-4">
+      <label class="text-xs text-gray-500 mb-1 block">Notes for this tooth</label>
+      <input id="toothNote" type="text" class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm" placeholder="e.g. pain on chewing"/>
+    </div>
+    <div class="flex gap-3 mt-4">
+      <button onclick="closeModal('toothModal')" class="flex-1 border border-gray-200 rounded-xl py-2.5 text-sm font-medium hover:bg-gray-50">Cancel</button>
+      <button onclick="saveToothStatus()" class="flex-1 bg-dental text-white rounded-xl py-2.5 text-sm font-medium hover:bg-dental-dark">Save</button>
+    </div>
+  </div>
+</div>
 
-2. Open Tools > Apps Script in the spreadsheet
-
-3. Paste this code:
----
-const SHEET_ID = SpreadsheetApp.getActiveSpreadsheet().getId();
-
-function doGet(e) {
-  const sheet = e.parameter.sheet;
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
-  const ws = ss.getSheetByName(sheet);
-  if (!ws) return jsonResponse({error:'Sheet not found'});
-  const data = ws.getDataRange().getValues();
-  const headers = data[0];
-  const rows = data.slice(1).map(row => {
-    const obj = {};
-    headers.forEach((h,i) => obj[h] = row[i]);
-    return obj;
-  });
-  return jsonResponse({data: rows, sheet: sheet});
+<style>
+@media print {
+  body > *:not(#printModal) { display:none!important; }
+  #printModal { position:static!important; background:none!important; z-index:0; }
+  #printModal .modal-box { box-shadow:none!important; border:none!important; max-height:none!important; padding:0!important; }
+  #printModal > div:first-child { display:none; }
 }
-
-function doPost(e) {
-  const payload = JSON.parse(e.postData.contents);
-  const {sheet, action, row, id} = payload;
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
-  const ws = ss.getSheetByName(sheet);
-  if (!ws) return jsonResponse({error:'Sheet not found'});
-  
-  if (action === 'append') {
-    ws.appendRow(row);
-    return jsonResponse({success:true});
-  }
-  if (action === 'update') {
-    const data = ws.getDataRange().getValues();
-    for (let i=1;i<data.length;i++) {
-      if (String(data[i][0]) === String(id)) {
-        row.forEach((v,j) => ws.getRange(i+1,j+1).setValue(v));
-        return jsonResponse({success:true});
-      }
-    }
-    return jsonResponse({error:'Row not found'});
-  }
-  if (action === 'delete') {
-    const data = ws.getDataRange().getValues();
-    for (let i=1;i<data.length;i++) {
-      if (String(data[i][0]) === String(id)) {
-        ws.deleteRow(i+1);
-        return jsonResponse({success:true});
-      }
-    }
-    return jsonResponse({error:'Row not found'});
-  }
-  return jsonResponse({error:'Unknown action'});
-}
-
-function jsonResponse(data) {
-  return ContentService.createTextOutput(JSON.stringify(data))
-    .setMimeType(ContentService.MimeType.JSON);
-}
----
-
-4. Deploy: Click Deploy > New Deployment > Web App
-   - Execute as: Me
-   - Who has access: Anyone
-   - Copy the Web App URL
-
-5. Paste the URL in the Setup Bar at the top of this app
-================================================================= -->
+</style>
 
 <script>
-// ===================================================
-//  STATE
-// ===================================================
+// ===== STATE =====
 const STATE = {
-  patients: [],
-  appointments: [],
-  invoices: [],
-  doctors: [],
-  settings: { clinicName:'Finesse Dental Care', hoursFrom:'09:00', hoursTo:'17:00', currency:'USD', lang:'en' },
-  priceGuide: [
-    { treatment:'Cleaning', price:50 },
-    { treatment:'Filling', price:80 },
-    { treatment:'Root Canal', price:300 },
-    { treatment:'Crown', price:500 },
-    { treatment:'Extraction', price:100 },
-    { treatment:'Whitening', price:150 },
-    { treatment:'Braces Consult', price:200 },
+  patients:[], appointments:[], invoices:[], doctors:[],
+  settings:{ clinicName:'Finesse Dental Care', hoursFrom:'09:00', hoursTo:'17:00', currency:'USD', lang:'en' },
+  priceGuide:[
+    {treatment:'Cleaning',price:50},{treatment:'Filling',price:80},{treatment:'Root Canal',price:300},
+    {treatment:'Crown',price:500},{treatment:'Extraction',price:100},{treatment:'Whitening',price:150},
+    {treatment:'Braces Consult',price:200},
   ],
-  calYear: new Date().getFullYear(),
-  calMonth: new Date().getMonth(),
-  scriptUrl: '',
-  currency: 'USD',
-  lang: 'en',
+  calYear:new Date().getFullYear(), calMonth:new Date().getMonth(),
+  scriptUrl:'', currency:'USD', lang:'en',
+  dentalCharts:{},
+  currentChartPatientId:null,
+  currentChartPatientName:'',
+  currentToothNum:null,
+  pendingToothStatus:'healthy',
+  // invoice builder: array of {treatment, price}
+  invoiceItems:[],
 };
-
-const TRANSLATIONS = {
-  en: {
-    dashboard:'Dashboard', patients:'Patients', appointments:'Appointments', invoices:'Invoices',
-    doctors:'Doctors', settings:'Settings', logout:'Logout', addPatient:'Add Patient',
-    addAppt:'Add Appointment', newInvoice:'New Invoice', save:'Save', cancel:'Cancel',
-    totalPatients:'Total Patients', todayAppts:"Today's Appts", totalRevenue:'Revenue',
-    name:'Name', phone:'Phone', age:'Age', gender:'Gender', notes:'Notes', actions:'Actions',
-    date:'Date', time:'Time', patient:'Patient', doctor:'Doctor', treatment:'Treatment',
-    status:'Status', amount:'Amount', priceGuide:'Treatment Price Guide', addTreatment:'Add Treatment',
-    medicalNotes:'Medical Notes', upcomingAppts:'Upcoming Appointments', recentPatients:'Recent Patients',
-    noData:'No data yet', clinicInfo:'Clinic Info', clinicName:'Clinic Name', workingHours:'Working Hours',
-    defaultCurrency:'Currency', language:'Language', saveSettings:'Save Settings', manageDoctors:'Manage Doctors',
-    selectDoctor:'Select Doctor', viewPeriod:'Period', today:'Today', thisWeek:'This Week', allTime:'All Time',
-    doctorsView:"Doctors' View", total:'Total:', searchPatient:'Search by name or phone...',
-    doctorName:'Doctor name', specialization:'Specialization', edit:'Edit', delete:'Delete',
-    appts:'Appts', setupLabel:'Google Sheets URL:',
-  },
-  ar: {
-    dashboard:'لوحة التحكم', patients:'المرضى', appointments:'المواعيد', invoices:'الفواتير',
-    doctors:'الأطباء', settings:'الإعدادات', logout:'تسجيل الخروج', addPatient:'إضافة مريض',
-    addAppt:'إضافة موعد', newInvoice:'فاتورة جديدة', save:'حفظ', cancel:'إلغاء',
-    totalPatients:'إجمالي المرضى', todayAppts:'مواعيد اليوم', totalRevenue:'الإيرادات',
-    name:'الاسم', phone:'الهاتف', age:'العمر', gender:'الجنس', notes:'ملاحظات', actions:'إجراءات',
-    date:'التاريخ', time:'الوقت', patient:'المريض', doctor:'الطبيب', treatment:'العلاج',
-    status:'الحالة', amount:'المبلغ', priceGuide:'دليل أسعار العلاج', addTreatment:'إضافة علاج',
-    medicalNotes:'الملاحظات الطبية', upcomingAppts:'المواعيد القادمة', recentPatients:'المرضى الأخيرون',
-    noData:'لا توجد بيانات', clinicInfo:'معلومات العيادة', clinicName:'اسم العيادة',
-    workingHours:'ساعات العمل', defaultCurrency:'العملة', language:'اللغة', saveSettings:'حفظ الإعدادات',
-    manageDoctors:'إدارة الأطباء', selectDoctor:'اختر طبيباً', viewPeriod:'الفترة الزمنية',
-    today:'اليوم', thisWeek:'هذا الأسبوع', allTime:'كل الوقت', doctorsView:'عرض الأطباء',
-    total:'الإجمالي:', searchPatient:'ابحث بالاسم أو الهاتف...', doctorName:'اسم الطبيب',
-    specialization:'التخصص', edit:'تعديل', delete:'حذف', appts:'مواعيد', setupLabel:'رابط Apps Script:',
-  }
+const TOOTH_STATUSES = [
+  {key:'healthy',label:'Healthy',color:'#ffffff',border:'#94a3b8'},
+  {key:'cavity',label:'Cavity',color:'#ef4444',border:'#b91c1c'},
+  {key:'filled',label:'Filled',color:'#f59e0b',border:'#d97706'},
+  {key:'crown',label:'Crown',color:'#3b82f6',border:'#1d4ed8'},
+  {key:'extracted',label:'Extracted',color:'#94a3b8',border:'#64748b'},
+  {key:'rootcanal',label:'Root Canal',color:'#8b5cf6',border:'#6d28d9'},
+  {key:'implant',label:'Implant',color:'#10b981',border:'#059669'},
+];
+const TOOTH_NAMES = {
+  11:'UR Central',12:'UR Lateral',13:'UR Canine',14:'UR 1st PM',15:'UR 2nd PM',16:'UR 1st M',17:'UR 2nd M',18:'UR Wisdom',
+  21:'UL Central',22:'UL Lateral',23:'UL Canine',24:'UL 1st PM',25:'UL 2nd PM',26:'UL 1st M',27:'UL 2nd M',28:'UL Wisdom',
+  31:'LL Central',32:'LL Lateral',33:'LL Canine',34:'LL 1st PM',35:'LL 2nd PM',36:'LL 1st M',37:'LL 2nd M',38:'LL Wisdom',
+  41:'LR Central',42:'LR Lateral',43:'LR Canine',44:'LR 1st PM',45:'LR 2nd PM',46:'LR 1st M',47:'LR 2nd M',48:'LR Wisdom',
 };
-
-const CURRENCY_SYMBOLS = { USD:'$', EGP:'ج.م' };
-
-// ===================================================
-//  AUTH
-// ===================================================
+const UPPER_TEETH = [18,17,16,15,14,13,12,11,21,22,23,24,25,26,27,28];
+const LOWER_TEETH = [48,47,46,45,44,43,42,41,31,32,33,34,35,36,37,38];
 const CORRECT_PW = 'MOSTAFA_saad44';
+const CURRENCY_SYMBOLS = {USD:'$',EGP:'ج.م'};
 
-function doLogin() {
-  const val = document.getElementById('pwInput').value;
-  if (val === CORRECT_PW) {
+// helper: get total amount from an invoice (supports both old single-treatment and new multi-item format)
+function invTotal(inv){
+  if(inv.Items && Array.isArray(inv.Items)) return inv.Items.reduce((s,i)=>s+(parseFloat(i.price)||0),0);
+  return parseFloat(inv.Amount||0);
+}
+// helper: get treatments display string
+function invTreatmentsLabel(inv){
+  if(inv.Items && Array.isArray(inv.Items)) return inv.Items.map(i=>esc(i.treatment||'')).join(', ');
+  return esc(inv.Treatment||'');
+}
+
+// ===== AUTH =====
+function doLogin(){
+  if(document.getElementById('pwInput').value===CORRECT_PW){
     sessionStorage.setItem('dental_auth','1');
-    document.getElementById('lockScreen').style.display = 'none';
+    document.getElementById('lockScreen').style.display='none';
     init();
   } else {
     document.getElementById('pwError').classList.remove('hidden');
-    document.getElementById('pwInput').value = '';
+    document.getElementById('pwInput').value='';
   }
 }
+function doLogout(){ sessionStorage.removeItem('dental_auth'); location.reload(); }
+function togglePw(){ const i=document.getElementById('pwInput'); i.type=i.type==='password'?'text':'password'; }
 
-function doLogout() {
-  sessionStorage.removeItem('dental_auth');
-  location.reload();
+// ===== INIT =====
+function init(){
+  STATE.scriptUrl=localStorage.getItem('dental_script_url')||'';
+  if(STATE.scriptUrl){ document.getElementById('scriptUrl').value=STATE.scriptUrl; document.getElementById('connectionStatus').textContent='✅ Connected'; document.getElementById('connectionStatus').className='text-xs font-medium text-green-600'; }
+  const ls=(k,d)=>{ try{ const v=localStorage.getItem(k); return v?JSON.parse(v):d; }catch(e){return d;} };
+  Object.assign(STATE.settings, ls('dental_settings',{}));
+  STATE.priceGuide=ls('dental_prices',STATE.priceGuide);
+  STATE.doctors=ls('dental_doctors',[]);
+  STATE.patients=ls('dental_patients',[]);
+  STATE.appointments=ls('dental_appointments',[]);
+  STATE.invoices=ls('dental_invoices',[]);
+  STATE.dentalCharts=ls('dental_charts',{});
+  setLang(STATE.settings.lang||'en',false);
+  setCurrency(STATE.settings.currency||'USD',false);
+  applySettings(); renderAll(); renderCalendar(); generateTimeSlots();
+  const today=new Date().toISOString().slice(0,10);
+  document.getElementById('dailyDate').value=today;
+  if(STATE.scriptUrl) loadData();
 }
 
-function togglePw() {
-  const inp = document.getElementById('pwInput');
-  inp.type = inp.type === 'password' ? 'text' : 'password';
-}
-
-// ===================================================
-//  INIT
-// ===================================================
-function init() {
-  // Load stored script URL
-  STATE.scriptUrl = localStorage.getItem('dental_script_url') || '';
-  if (STATE.scriptUrl) {
-    document.getElementById('scriptUrl').value = STATE.scriptUrl;
-    document.getElementById('connectionStatus').textContent = '✅ Connected';
-    document.getElementById('connectionStatus').className = 'text-xs font-medium text-green-600';
-  }
-
-  // Load local settings
-  const storedSettings = localStorage.getItem('dental_settings');
-  if (storedSettings) Object.assign(STATE.settings, JSON.parse(storedSettings));
-  const storedPrices = localStorage.getItem('dental_prices');
-  if (storedPrices) STATE.priceGuide = JSON.parse(storedPrices);
-  const storedDoctors = localStorage.getItem('dental_doctors');
-  if (storedDoctors) STATE.doctors = JSON.parse(storedDoctors);
-  const storedPatients = localStorage.getItem('dental_patients');
-  if (storedPatients) STATE.patients = JSON.parse(storedPatients);
-  const storedAppts = localStorage.getItem('dental_appointments');
-  if (storedAppts) STATE.appointments = JSON.parse(storedAppts);
-  const storedInvoices = localStorage.getItem('dental_invoices');
-  if (storedInvoices) STATE.invoices = JSON.parse(storedInvoices);
-
-  setLang(STATE.settings.lang, false);
-  setCurrency(STATE.settings.currency, false);
-  applySettings();
-  renderAll();
-  renderCalendar();
-  generateTimeSlots();
-
-  if (STATE.scriptUrl) loadData();
-}
-
-// ===================================================
-//  GOOGLE SHEETS
-// ===================================================
-function saveScriptUrl() {
-  const url = document.getElementById('scriptUrl').value.trim();
-  if (!url) { showToast('Please enter a URL','error'); return; }
-  STATE.scriptUrl = url;
-  localStorage.setItem('dental_script_url', url);
-  document.getElementById('connectionStatus').textContent = 'Connecting...';
-  loadData();
-}
-
-async function gsGet(sheet) {
-  if (!STATE.scriptUrl) return null;
-  try {
-    const r = await fetch(`${STATE.scriptUrl}?sheet=${sheet}`);
-    const data = await r.json();
-    return data.data || [];
-  } catch { return null; }
-}
-
-async function gsPost(payload) {
-  if (!STATE.scriptUrl) return false;
-  try {
-    await fetch(STATE.scriptUrl, {
-      method:'POST',
-      body: JSON.stringify(payload),
-      headers: { 'Content-Type':'application/json' },
-      mode: 'no-cors'
-    });
-    return true;
-  } catch { return false; }
-}
-
-async function loadData() {
+// ===== GOOGLE SHEETS =====
+function saveScriptUrl(){ const u=document.getElementById('scriptUrl').value.trim(); if(!u){showToast('Please enter a URL','error');return;} STATE.scriptUrl=u; localStorage.setItem('dental_script_url',u); document.getElementById('connectionStatus').textContent='Connecting...'; loadData(); }
+async function gsGet(sheet){ if(!STATE.scriptUrl) return null; try{ const r=await fetch(`${STATE.scriptUrl}?sheet=${sheet}`); const d=await r.json(); return d.data||[]; }catch{return null;} }
+async function gsPost(payload){ if(!STATE.scriptUrl) return false; try{ await fetch(STATE.scriptUrl,{method:'POST',body:JSON.stringify(payload),headers:{'Content-Type':'application/json'},mode:'no-cors'}); return true; }catch{return false;} }
+async function loadData(){
   showToast('Syncing data...','info');
-  try {
-    const [pts, appts, invs, docs, setts] = await Promise.all([
-      gsGet('Patients'), gsGet('Appointments'), gsGet('Invoices'),
-      gsGet('Doctors'), gsGet('Settings')
-    ]);
-
-    if (pts) { STATE.patients = pts.filter(r=>r.ID||r.Name); localStorage.setItem('dental_patients', JSON.stringify(STATE.patients)); }
-    if (appts) { STATE.appointments = appts.filter(r=>r.ID||r.Date); localStorage.setItem('dental_appointments', JSON.stringify(STATE.appointments)); }
-    if (invs) { STATE.invoices = invs.filter(r=>r.ID||r.PatientName); localStorage.setItem('dental_invoices', JSON.stringify(STATE.invoices)); }
-    if (docs) { STATE.doctors = docs.filter(r=>r.ID||r.Name); localStorage.setItem('dental_doctors', JSON.stringify(STATE.doctors)); }
-    if (setts && setts.length) {
-      setts.forEach(r => { if(r.Key && r.Value !== undefined) STATE.settings[r.Key] = r.Value; });
-      localStorage.setItem('dental_settings', JSON.stringify(STATE.settings));
-    }
-
+  try{
+    const [pts,appts,invs,docs]=await Promise.all([gsGet('Patients'),gsGet('Appointments'),gsGet('Invoices'),gsGet('Doctors')]);
+    if(pts){STATE.patients=pts.filter(r=>r.ID||r.Name);localStorage.setItem('dental_patients',JSON.stringify(STATE.patients));}
+    if(appts){STATE.appointments=appts.filter(r=>r.ID||r.Date);localStorage.setItem('dental_appointments',JSON.stringify(STATE.appointments));}
+    if(invs){STATE.invoices=invs.filter(r=>r.ID||r.PatientName);localStorage.setItem('dental_invoices',JSON.stringify(STATE.invoices));}
+    if(docs){STATE.doctors=docs.filter(r=>r.ID||r.Name);localStorage.setItem('dental_doctors',JSON.stringify(STATE.doctors));}
     renderAll();
-    document.getElementById('connectionStatus').textContent = '✅ Connected';
-    document.getElementById('connectionStatus').className = 'text-xs font-medium text-green-600';
-    showToast('Data synced successfully!','success');
-  } catch(e) {
-    document.getElementById('connectionStatus').textContent = '❌ Error';
-    document.getElementById('connectionStatus').className = 'text-xs font-medium text-red-500';
-    showToast('Sync failed. Using local data.','error');
-  }
+    document.getElementById('connectionStatus').textContent='✅ Connected';
+    document.getElementById('connectionStatus').className='text-xs font-medium text-green-600';
+    showToast('Data synced!','success');
+  }catch(e){ document.getElementById('connectionStatus').textContent='❌ Error'; document.getElementById('connectionStatus').className='text-xs font-medium text-red-500'; showToast('Sync failed. Using local data.','error'); }
 }
 
-// ===================================================
-//  RENDER ALL
-// ===================================================
-function renderAll() {
-  applySettings();
-  renderDashboard();
-  renderPatients();
-  renderAppointments();
-  renderInvoices();
-  renderDoctorView();
-  renderDoctorsList();
-  renderDoctorFilter();
-  renderPriceGuide();
-  renderTreatmentSelects();
-  renderCalendar();
+// ===== RENDER ALL =====
+function renderAll(){
+  applySettings(); renderDashboard(); renderPatients(); renderAppointments();
+  renderInvoices(); renderDoctorView(); renderDoctorsList(); renderDoctorFilter();
+  renderPriceGuide(); renderTreatmentSelects(); renderCalendar(); renderDaily();
+  renderDailyDoctorFilter();
 }
 
-// ===================================================
-//  SETTINGS / LANG / CURRENCY
-// ===================================================
-function applySettings() {
-  document.getElementById('clinicNameDisplay').textContent = STATE.settings.clinicName || 'Finesse Dental';
-  document.getElementById('settingClinicName').value = STATE.settings.clinicName || '';
-  document.getElementById('settingHoursFrom').value = STATE.settings.hoursFrom || '09:00';
-  document.getElementById('settingHoursTo').value = STATE.settings.hoursTo || '17:00';
-  document.getElementById('settingCurrency').value = STATE.settings.currency || 'USD';
-  document.getElementById('settingLang').value = STATE.settings.lang || 'en';
+// ===== SETTINGS =====
+function applySettings(){
+  document.getElementById('clinicNameDisplay').textContent=STATE.settings.clinicName||'Finesse Dental';
+  document.getElementById('settingClinicName').value=STATE.settings.clinicName||'';
+  document.getElementById('settingHoursFrom').value=STATE.settings.hoursFrom||'09:00';
+  document.getElementById('settingHoursTo').value=STATE.settings.hoursTo||'17:00';
+  document.getElementById('settingCurrency').value=STATE.settings.currency||'USD';
+  document.getElementById('settingLang').value=STATE.settings.lang||'en';
+}
+function saveSettings(){
+  STATE.settings.clinicName=document.getElementById('settingClinicName').value;
+  STATE.settings.hoursFrom=document.getElementById('settingHoursFrom').value;
+  STATE.settings.hoursTo=document.getElementById('settingHoursTo').value;
+  localStorage.setItem('dental_settings',JSON.stringify(STATE.settings));
+  applySettings(); showToast('Settings saved!','success');
+}
+function setLang(lang,persist=true){
+  STATE.lang=lang; STATE.settings.lang=lang;
+  if(persist) localStorage.setItem('dental_settings',JSON.stringify(STATE.settings));
+  document.documentElement.lang=lang; document.documentElement.dir=lang==='ar'?'rtl':'ltr';
+  document.getElementById('langBtn').textContent=lang==='en'?'🌐 العربية':'🌐 English';
+  document.getElementById('settingLang').value=lang;
+}
+function toggleLang(){ setLang(STATE.lang==='en'?'ar':'en'); }
+function setCurrency(cur,persist=true){
+  STATE.currency=cur; STATE.settings.currency=cur;
+  if(persist) localStorage.setItem('dental_settings',JSON.stringify(STATE.settings));
+  document.getElementById('currBtn').textContent=cur==='USD'?'💱 EGP':'💱 USD';
+  document.getElementById('settingCurrency').value=cur;
+  renderInvoices(); renderDashboard();
+}
+function toggleCurrency(){ setCurrency(STATE.currency==='USD'?'EGP':'USD'); }
+function fmtCurrency(val){ return `${CURRENCY_SYMBOLS[STATE.currency]||'$'}${(parseFloat(val)||0).toLocaleString()}`; }
+
+// ===== DASHBOARD =====
+function renderDashboard(){
+  document.getElementById('statPatients').textContent=STATE.patients.length;
+  document.getElementById('statDoctors').textContent=STATE.doctors.length;
+  const today=new Date().toISOString().slice(0,10);
+  document.getElementById('statToday').textContent=STATE.appointments.filter(a=>String(a.Date||'').slice(0,10)===today).length;
+  const rev=STATE.invoices.filter(i=>i.Status==='Paid').reduce((s,i)=>s+invTotal(i),0);
+  document.getElementById('statRevenue').textContent=fmtCurrency(rev);
+  const upcoming=STATE.appointments.filter(a=>(a.Date||'')>=today&&a.Status!=='Cancelled').sort((a,b)=>(a.Date||'')>(b.Date||'')?1:-1).slice(0,5);
+  document.getElementById('dashAppts').innerHTML=upcoming.length?upcoming.map(a=>`<div class="flex items-center justify-between py-2 border-b border-gray-50 last:border-0"><div><p class="font-medium text-sm">${esc(a.PatientName||'')}</p><p class="text-xs text-gray-400">${a.Date||''} ${a.Time||''} · ${esc(a.Doctor||'')}</p></div><span class="badge ${statusBadge(a.Status)}">${a.Status||''}</span></div>`).join(''):`<p class="text-gray-400 text-center py-4">No data yet</p>`;
+  const recents=[...STATE.patients].reverse().slice(0,5);
+  document.getElementById('dashPatients').innerHTML=recents.length?recents.map(p=>`<div class="flex items-center gap-3 py-2 border-b border-gray-50 last:border-0"><div class="w-8 h-8 rounded-full bg-dental-light flex items-center justify-center text-dental font-bold text-sm flex-shrink-0">${esc(String(p.Name||'?').charAt(0).toUpperCase())}</div><div><p class="font-medium text-sm">${esc(p.Name||'')}</p><p class="text-xs text-gray-400">${p.Phone||''}</p></div></div>`).join(''):`<p class="text-gray-400 text-center py-4">No data yet</p>`;
 }
 
-function saveSettings() {
-  STATE.settings.clinicName = document.getElementById('settingClinicName').value;
-  STATE.settings.hoursFrom = document.getElementById('settingHoursFrom').value;
-  STATE.settings.hoursTo = document.getElementById('settingHoursTo').value;
-  localStorage.setItem('dental_settings', JSON.stringify(STATE.settings));
-  applySettings();
-  gsPost({ sheet:'Settings', action:'update', id:'clinicName', row:['clinicName', STATE.settings.clinicName] });
-  showToast('Settings saved!','success');
+// ===== PATIENTS =====
+function renderPatients(){
+  const q=(document.getElementById('patientSearch').value||'').toLowerCase();
+  const f=STATE.patients.filter(p=>(p.Name||'').toLowerCase().includes(q)||(p.Phone||'').toLowerCase().includes(q));
+  document.getElementById('patientsTbody').innerHTML=f.length?f.map((p,i)=>`<tr><td><div class="flex items-center gap-2"><div class="w-7 h-7 rounded-full bg-dental-light flex items-center justify-center text-dental font-bold text-xs">${esc(String(p.Name||'?').charAt(0).toUpperCase())}</div><span class="font-medium">${esc(p.Name||'')}</span></div></td><td>${esc(p.Phone||'')}</td><td>${p.Age||'-'}</td><td>${p.Gender||'-'}</td><td class="max-w-xs truncate text-gray-500">${esc(p.Notes||'-')}</td><td><div class="flex gap-1"><button onclick="editPatient(${i})" class="text-xs text-dental hover:underline px-2 py-1 rounded hover:bg-dental-light">Edit</button><button onclick="openDentalChartForPatient('${esc(p.ID||'')}','${esc(p.Name||'')}')" class="text-xs text-purple-600 hover:underline px-2 py-1 rounded hover:bg-purple-50">Chart</button><button onclick="deletePatient(${i})" class="text-xs text-red-500 hover:underline px-2 py-1 rounded hover:bg-red-50">Delete</button></div></td></tr>`).join(''):`<tr><td colspan="6" class="text-center text-gray-400 py-8">No data yet</td></tr>`;
 }
-
-function setLang(lang, persist=true) {
-  STATE.lang = lang;
-  STATE.settings.lang = lang;
-  if (persist) localStorage.setItem('dental_settings', JSON.stringify(STATE.settings));
-  document.documentElement.lang = lang;
-  document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
-  document.getElementById('langBtn').textContent = lang === 'en' ? '🌐 العربية' : '🌐 English';
-  document.getElementById('settingLang').value = lang;
-  translateAll();
-}
-
-function toggleLang() {
-  setLang(STATE.lang === 'en' ? 'ar' : 'en');
-}
-
-function setCurrency(cur, persist=true) {
-  STATE.currency = cur;
-  STATE.settings.currency = cur;
-  if (persist) localStorage.setItem('dental_settings', JSON.stringify(STATE.settings));
-  document.getElementById('currBtn').textContent = cur === 'USD' ? '💱 EGP' : '💱 USD';
-  document.getElementById('settingCurrency').value = cur;
-  renderAll();
-}
-
-function toggleCurrency() {
-  setCurrency(STATE.currency === 'USD' ? 'EGP' : 'USD');
-}
-
-function fmtCurrency(val) {
-  const sym = CURRENCY_SYMBOLS[STATE.currency] || '$';
-  const num = parseFloat(val) || 0;
-  return `${sym}${num.toLocaleString()}`;
-}
-
-function translateAll() {
-  const t = TRANSLATIONS[STATE.lang] || TRANSLATIONS.en;
-  document.querySelectorAll('[data-i18n]').forEach(el => {
-    const key = el.getAttribute('data-i18n');
-    if (t[key]) el.textContent = t[key];
-  });
-  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
-    const key = el.getAttribute('data-i18n-placeholder');
-    if (t[key]) el.placeholder = t[key];
-  });
-}
-
-// ===================================================
-//  DASHBOARD
-// ===================================================
-function renderDashboard() {
-  document.getElementById('statPatients').textContent = STATE.patients.length;
-  document.getElementById('statDoctors').textContent = STATE.doctors.length;
-
-  const today = new Date().toISOString().slice(0,10);
-  const todayAppts = STATE.appointments.filter(a => String(a.Date||'').slice(0,10) === today);
-  document.getElementById('statToday').textContent = todayAppts.length;
-
-  const revenue = STATE.invoices.filter(i => i.Status === 'Paid').reduce((s,i) => s + (parseFloat(i.Amount)||0), 0);
-  document.getElementById('statRevenue').textContent = fmtCurrency(revenue);
-
-  // Upcoming appointments
-  const upcoming = STATE.appointments
-    .filter(a => (a.Date||'') >= today && a.Status !== 'Cancelled')
-    .sort((a,b) => (a.Date||'') > (b.Date||'') ? 1 : -1)
-    .slice(0,5);
-  const dashAppts = document.getElementById('dashAppts');
-  if (upcoming.length === 0) {
-    dashAppts.innerHTML = `<p class="text-gray-400 text-center py-4">${TRANSLATIONS[STATE.lang].noData}</p>`;
-  } else {
-    dashAppts.innerHTML = upcoming.map(a => `
-      <div class="flex items-center justify-between py-2 border-b border-gray-50 last:border-0">
-        <div>
-          <p class="font-medium text-sm">${esc(a.PatientName||a['PatientName']||'')}</p>
-          <p class="text-xs text-gray-400">${a.Date||''} ${a.Time||''} · ${esc(a.Doctor||'')}</p>
-        </div>
-        <span class="badge ${statusBadge(a.Status)}">${a.Status||''}</span>
-      </div>`).join('');
-  }
-
-  // Recent patients
-  const recents = [...STATE.patients].reverse().slice(0,5);
-  const dashPats = document.getElementById('dashPatients');
-  if (recents.length === 0) {
-    dashPats.innerHTML = `<p class="text-gray-400 text-center py-4">${TRANSLATIONS[STATE.lang].noData}</p>`;
-  } else {
-    dashPats.innerHTML = recents.map(p => `
-      <div class="flex items-center gap-3 py-2 border-b border-gray-50 last:border-0">
-        <div class="w-8 h-8 rounded-full bg-dental-light flex items-center justify-center text-dental font-bold text-sm flex-shrink-0">
-          ${esc(String(p.Name||p.name||'?').charAt(0).toUpperCase())}
-        </div>
-        <div>
-          <p class="font-medium text-sm">${esc(p.Name||p.name||'')}</p>
-          <p class="text-xs text-gray-400">${p.Phone||p.phone||''}</p>
-        </div>
-      </div>`).join('');
-  }
-}
-
-// ===================================================
-//  PATIENTS
-// ===================================================
-function renderPatients() {
-  const q = (document.getElementById('patientSearch').value||'').toLowerCase();
-  const filtered = STATE.patients.filter(p =>
-    (p.Name||p.name||'').toLowerCase().includes(q) ||
-    (p.Phone||p.phone||'').toLowerCase().includes(q)
-  );
-  const tbody = document.getElementById('patientsTbody');
-  if (filtered.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="6" class="text-center text-gray-400 py-8">${TRANSLATIONS[STATE.lang].noData}</td></tr>`;
-    return;
-  }
-  tbody.innerHTML = filtered.map((p,i) => `
-    <tr>
-      <td><div class="flex items-center gap-2">
-        <div class="w-7 h-7 rounded-full bg-dental-light flex items-center justify-center text-dental font-bold text-xs flex-shrink-0">${esc(String(p.Name||p.name||'?').charAt(0).toUpperCase())}</div>
-        <span class="font-medium">${esc(p.Name||p.name||'')}</span>
-      </div></td>
-      <td>${esc(p.Phone||p.phone||'')}</td>
-      <td>${p.Age||p.age||'-'}</td>
-      <td>${p.Gender||p.gender||'-'}</td>
-      <td class="max-w-xs truncate text-gray-500">${esc(p.Notes||p.notes||'-')}</td>
-      <td><div class="flex gap-1">
-        <button onclick="editPatient(${i})" class="text-xs text-dental hover:underline px-2 py-1 rounded hover:bg-dental-light">${TRANSLATIONS[STATE.lang].edit}</button>
-        <button onclick="deletePatient(${i})" class="text-xs text-red-500 hover:underline px-2 py-1 rounded hover:bg-red-50">${TRANSLATIONS[STATE.lang].delete}</button>
-      </div></td>
-    </tr>`).join('');
-}
-
-function openPatientModal() {
-  document.getElementById('editPatientId').value = '';
-  document.getElementById('pName').value = '';
-  document.getElementById('pPhone').value = '';
-  document.getElementById('pAge').value = '';
-  document.getElementById('pGender').value = 'Male';
-  document.getElementById('pNotes').value = '';
-  document.getElementById('patientModalTitle').textContent = TRANSLATIONS[STATE.lang].addPatient;
+function openPatientModal(){
+  document.getElementById('editPatientId').value='';
+  ['pName','pPhone','pAge','pNotes'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('pGender').value='Male';
+  document.getElementById('patientModalTitle').textContent='Add Patient';
   openModal('patientModal');
 }
-
-function editPatient(idx) {
-  const p = STATE.patients[idx];
-  document.getElementById('editPatientId').value = idx;
-  document.getElementById('pName').value = p.Name||p.name||'';
-  document.getElementById('pPhone').value = p.Phone||p.phone||'';
-  document.getElementById('pAge').value = p.Age||p.age||'';
-  document.getElementById('pGender').value = p.Gender||p.gender||'Male';
-  document.getElementById('pNotes').value = p.Notes||p.notes||'';
-  document.getElementById('patientModalTitle').textContent = TRANSLATIONS[STATE.lang].edit+' '+TRANSLATIONS[STATE.lang].patient;
+function editPatient(idx){
+  const p=STATE.patients[idx];
+  document.getElementById('editPatientId').value=idx;
+  document.getElementById('pName').value=p.Name||''; document.getElementById('pPhone').value=p.Phone||'';
+  document.getElementById('pAge').value=p.Age||''; document.getElementById('pGender').value=p.Gender||'Male';
+  document.getElementById('pNotes').value=p.Notes||'';
+  document.getElementById('patientModalTitle').textContent='Edit Patient';
   openModal('patientModal');
 }
-
-function savePatient() {
-  const name = document.getElementById('pName').value.trim();
-  const phone = document.getElementById('pPhone').value.trim();
-  if (!name || !phone) { showToast('Name and phone are required','error'); return; }
-  const patient = {
-    ID: Date.now().toString(),
-    Name: name, Phone: phone,
-    Age: document.getElementById('pAge').value,
-    Gender: document.getElementById('pGender').value,
-    Notes: document.getElementById('pNotes').value,
-    CreatedAt: new Date().toISOString()
-  };
-  const editIdx = document.getElementById('editPatientId').value;
-  if (editIdx !== '') {
-    patient.ID = STATE.patients[editIdx].ID || patient.ID;
-    STATE.patients[editIdx] = patient;
-    gsPost({ sheet:'Patients', action:'update', id:patient.ID, row:Object.values(patient) });
-  } else {
-    STATE.patients.push(patient);
-    gsPost({ sheet:'Patients', action:'append', row:Object.values(patient) });
-  }
-  localStorage.setItem('dental_patients', JSON.stringify(STATE.patients));
-  closeModal('patientModal');
-  renderAll();
-  showToast('Patient saved!','success');
+function savePatient(){
+  const name=document.getElementById('pName').value.trim(); const phone=document.getElementById('pPhone').value.trim();
+  if(!name||!phone){showToast('Name and phone required','error');return;}
+  const p={ID:Date.now().toString(),Name:name,Phone:phone,Age:document.getElementById('pAge').value,Gender:document.getElementById('pGender').value,Notes:document.getElementById('pNotes').value,CreatedAt:new Date().toISOString()};
+  const idx=document.getElementById('editPatientId').value;
+  if(idx!==''){p.ID=STATE.patients[idx].ID||p.ID;STATE.patients[idx]=p;gsPost({sheet:'Patients',action:'update',id:p.ID,row:Object.values(p)});}
+  else{STATE.patients.push(p);gsPost({sheet:'Patients',action:'append',row:Object.values(p)});}
+  localStorage.setItem('dental_patients',JSON.stringify(STATE.patients));
+  closeModal('patientModal'); renderAll(); showToast('Patient saved!','success');
+}
+function deletePatient(idx){
+  if(!confirm('Delete this patient?')) return;
+  const p=STATE.patients[idx]; STATE.patients.splice(idx,1);
+  localStorage.setItem('dental_patients',JSON.stringify(STATE.patients));
+  gsPost({sheet:'Patients',action:'delete',id:p.ID}); renderAll(); showToast('Patient deleted','info');
 }
 
-function deletePatient(idx) {
-  if (!confirm('Delete this patient?')) return;
-  const p = STATE.patients[idx];
-  STATE.patients.splice(idx,1);
-  localStorage.setItem('dental_patients', JSON.stringify(STATE.patients));
-  gsPost({ sheet:'Patients', action:'delete', id:p.ID });
-  renderAll();
-  showToast('Patient deleted','info');
+// ===== APPOINTMENTS =====
+function generateTimeSlots(){
+  const from=STATE.settings.hoursFrom||'09:00'; const to=STATE.settings.hoursTo||'17:00';
+  const sel=document.getElementById('aTime'); sel.innerHTML='';
+  let [h,m]=from.split(':').map(Number); const [eh,em]=to.split(':').map(Number);
+  while(h<eh||(h===eh&&m<=em)){ sel.innerHTML+=`<option>${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}</option>`; m+=30; if(m>=60){m=0;h++;} }
 }
-
-// ===================================================
-//  APPOINTMENTS
-// ===================================================
-function generateTimeSlots() {
-  const from = STATE.settings.hoursFrom || '09:00';
-  const to = STATE.settings.hoursTo || '17:00';
-  const sel = document.getElementById('aTime');
-  sel.innerHTML = '';
-  let [h,m] = from.split(':').map(Number);
-  const [endH, endM] = to.split(':').map(Number);
-  while (h < endH || (h === endH && m <= endM)) {
-    const t = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
-    sel.innerHTML += `<option value="${t}">${t}</option>`;
-    m += 30; if (m >= 60) { m = 0; h++; }
-  }
-}
-
-function renderAppointments() {
-  const tbody = document.getElementById('apptsTbody');
-  const sorted = [...STATE.appointments].sort((a,b) => ((b.Date||'') > (a.Date||'') ? 1 : -1));
-  if (sorted.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="7" class="text-center text-gray-400 py-8">${TRANSLATIONS[STATE.lang].noData}</td></tr>`;
-    return;
-  }
-  tbody.innerHTML = sorted.map((a,i) => `
-    <tr>
-      <td>${a.Date||''}</td>
-      <td>${a.Time||''}</td>
-      <td class="font-medium">${esc(a.PatientName||'')}</td>
-      <td>${esc(a.Doctor||'')}</td>
-      <td>${esc(a.Treatment||'')}</td>
-      <td><span class="badge ${statusBadge(a.Status)}">${a.Status||''}</span></td>
-      <td><div class="flex gap-1">
-        <button onclick="editAppt(${STATE.appointments.indexOf(a)})" class="text-xs text-dental hover:underline px-2 py-1 rounded hover:bg-dental-light">${TRANSLATIONS[STATE.lang].edit}</button>
-        <button onclick="deleteAppt(${STATE.appointments.indexOf(a)})" class="text-xs text-red-500 hover:underline px-2 py-1 rounded hover:bg-red-50">${TRANSLATIONS[STATE.lang].delete}</button>
-      </div></td>
-    </tr>`).join('');
+function renderAppointments(){
+  const sorted=[...STATE.appointments].sort((a,b)=>(b.Date||'')>(a.Date||'')?1:-1);
+  document.getElementById('apptsTbody').innerHTML=sorted.length?sorted.map(a=>{const i=STATE.appointments.indexOf(a);return`<tr><td>${a.Date||''}</td><td>${a.Time||''}</td><td class="font-medium">${esc(a.PatientName||'')}</td><td>${esc(a.Doctor||'')}</td><td>${esc(a.Treatment||'')}</td><td><span class="badge ${statusBadge(a.Status)}">${a.Status||''}</span></td><td><div class="flex gap-1"><button onclick="editAppt(${i})" class="text-xs text-dental hover:underline px-2 py-1 rounded hover:bg-dental-light">Edit</button><button onclick="deleteAppt(${i})" class="text-xs text-red-500 hover:underline px-2 py-1 rounded hover:bg-red-50">Del</button></div></td></tr>`;}).join(''):`<tr><td colspan="7" class="text-center text-gray-400 py-8">No data yet</td></tr>`;
   renderCalendar();
 }
-
-function openApptModal(prefillDate) {
-  document.getElementById('editApptId').value = '';
-  document.getElementById('aDate').value = prefillDate || new Date().toISOString().slice(0,10);
-  document.getElementById('aPatientSearch').value = '';
-  document.getElementById('aPatientId').value = '';
-  document.getElementById('aPatientName').value = '';
-  document.getElementById('selectedPatientDisplay').textContent = '';
-  document.getElementById('aStatus').value = 'Scheduled';
-  document.getElementById('aNotes').value = '';
+function openApptModal(prefillDate){
+  document.getElementById('editApptId').value='';
+  document.getElementById('aDate').value=prefillDate||new Date().toISOString().slice(0,10);
+  document.getElementById('aPatientSearch').value=''; document.getElementById('aPatientId').value=''; document.getElementById('aPatientName').value='';
+  document.getElementById('selectedPatientDisplay').textContent=''; document.getElementById('aStatus').value='Scheduled'; document.getElementById('aNotes').value='';
   document.getElementById('patientSuggestions').classList.add('hidden');
-  document.getElementById('apptModalTitle').textContent = TRANSLATIONS[STATE.lang].addAppt;
+  document.getElementById('apptModalTitle').textContent='Add Appointment';
+  populateDoctorSelects(); openModal('apptModal');
+}
+function editAppt(idx){
+  const a=STATE.appointments[idx];
+  document.getElementById('editApptId').value=idx;
+  document.getElementById('aDate').value=a.Date||''; document.getElementById('aPatientSearch').value=a.PatientName||'';
+  document.getElementById('aPatientId').value=a.PatientID||''; document.getElementById('aPatientName').value=a.PatientName||'';
+  document.getElementById('selectedPatientDisplay').textContent=a.PatientName?'✓ '+a.PatientName:'';
+  document.getElementById('aStatus').value=a.Status||'Scheduled'; document.getElementById('aNotes').value=a.Notes||'';
   populateDoctorSelects();
-  openModal('apptModal');
+  setTimeout(()=>{ document.getElementById('aDoctor').value=a.Doctor||''; document.getElementById('aTreatment').value=a.Treatment||''; document.getElementById('aTime').value=a.Time||''; },50);
+  document.getElementById('apptModalTitle').textContent='Edit Appointment'; openModal('apptModal');
 }
-
-function editAppt(idx) {
-  const a = STATE.appointments[idx];
-  document.getElementById('editApptId').value = idx;
-  document.getElementById('aDate').value = a.Date||'';
-  document.getElementById('aPatientSearch').value = a.PatientName||'';
-  document.getElementById('aPatientId').value = a.PatientID||'';
-  document.getElementById('aPatientName').value = a.PatientName||'';
-  document.getElementById('selectedPatientDisplay').textContent = a.PatientName ? '✓ '+a.PatientName : '';
-  document.getElementById('aStatus').value = a.Status||'Scheduled';
-  document.getElementById('aNotes').value = a.Notes||'';
-  populateDoctorSelects();
-  setTimeout(() => {
-    document.getElementById('aDoctor').value = a.Doctor||'';
-    document.getElementById('aTreatment').value = a.Treatment||'';
-    document.getElementById('aTime').value = a.Time||'';
-  }, 50);
-  document.getElementById('apptModalTitle').textContent = TRANSLATIONS[STATE.lang].edit;
-  openModal('apptModal');
+function saveAppt(){
+  const date=document.getElementById('aDate').value;
+  const patName=document.getElementById('aPatientName').value||document.getElementById('aPatientSearch').value;
+  if(!date||!patName){showToast('Date and patient required','error');return;}
+  const a={ID:Date.now().toString(),Date:date,Time:document.getElementById('aTime').value,PatientID:document.getElementById('aPatientId').value,PatientName:patName,Doctor:document.getElementById('aDoctor').value,Treatment:document.getElementById('aTreatment').value,Status:document.getElementById('aStatus').value,Notes:document.getElementById('aNotes').value,CreatedAt:new Date().toISOString()};
+  const idx=document.getElementById('editApptId').value;
+  if(idx!==''){a.ID=STATE.appointments[idx].ID||a.ID;STATE.appointments[idx]=a;gsPost({sheet:'Appointments',action:'update',id:a.ID,row:Object.values(a)});}
+  else{STATE.appointments.push(a);gsPost({sheet:'Appointments',action:'append',row:Object.values(a)});}
+  localStorage.setItem('dental_appointments',JSON.stringify(STATE.appointments));
+  closeModal('apptModal'); renderAll(); showToast('Appointment saved!','success');
 }
-
-function saveAppt() {
-  const date = document.getElementById('aDate').value;
-  const patName = document.getElementById('aPatientName').value || document.getElementById('aPatientSearch').value;
-  if (!date || !patName) { showToast('Date and patient are required','error'); return; }
-  const appt = {
-    ID: Date.now().toString(),
-    Date: date,
-    Time: document.getElementById('aTime').value,
-    PatientID: document.getElementById('aPatientId').value,
-    PatientName: patName,
-    Doctor: document.getElementById('aDoctor').value,
-    Treatment: document.getElementById('aTreatment').value,
-    Status: document.getElementById('aStatus').value,
-    Notes: document.getElementById('aNotes').value,
-    CreatedAt: new Date().toISOString()
-  };
-  const editIdx = document.getElementById('editApptId').value;
-  if (editIdx !== '') {
-    appt.ID = STATE.appointments[editIdx].ID || appt.ID;
-    STATE.appointments[editIdx] = appt;
-    gsPost({ sheet:'Appointments', action:'update', id:appt.ID, row:Object.values(appt) });
-  } else {
-    STATE.appointments.push(appt);
-    gsPost({ sheet:'Appointments', action:'append', row:Object.values(appt) });
-  }
-  localStorage.setItem('dental_appointments', JSON.stringify(STATE.appointments));
-  closeModal('apptModal');
-  renderAll();
-  showToast('Appointment saved!','success');
+function deleteAppt(idx){
+  if(!confirm('Delete?')) return;
+  const a=STATE.appointments[idx]; STATE.appointments.splice(idx,1);
+  localStorage.setItem('dental_appointments',JSON.stringify(STATE.appointments));
+  gsPost({sheet:'Appointments',action:'delete',id:a.ID}); renderAll(); showToast('Deleted','info');
 }
-
-function deleteAppt(idx) {
-  if (!confirm('Delete this appointment?')) return;
-  const a = STATE.appointments[idx];
-  STATE.appointments.splice(idx,1);
-  localStorage.setItem('dental_appointments', JSON.stringify(STATE.appointments));
-  gsPost({ sheet:'Appointments', action:'delete', id:a.ID });
-  renderAll();
-  showToast('Appointment deleted','info');
-}
-
-function searchPatientForAppt() {
-  const q = document.getElementById('aPatientSearch').value.toLowerCase();
-  const sugg = document.getElementById('patientSuggestions');
-  if (!q) { sugg.classList.add('hidden'); return; }
-  const matches = STATE.patients.filter(p => (p.Name||p.name||'').toLowerCase().includes(q)).slice(0,6);
-  if (!matches.length) { sugg.classList.add('hidden'); return; }
-  sugg.innerHTML = matches.map(p => `
-    <div class="px-3 py-2.5 text-sm hover:bg-dental-light cursor-pointer border-b border-gray-100 last:border-0" onclick="selectPatientForAppt('${esc(p.ID||'')}','${esc(p.Name||p.name||'')}')">
-      <span class="font-medium">${esc(p.Name||p.name||'')}</span>
-      <span class="text-gray-400 text-xs ml-2">${p.Phone||p.phone||''}</span>
-    </div>`).join('');
+function searchPatientForAppt(){
+  const q=document.getElementById('aPatientSearch').value.toLowerCase(); const sugg=document.getElementById('patientSuggestions');
+  if(!q){sugg.classList.add('hidden');return;}
+  const m=STATE.patients.filter(p=>(p.Name||'').toLowerCase().includes(q)).slice(0,6);
+  if(!m.length){sugg.classList.add('hidden');return;}
+  sugg.innerHTML=m.map(p=>`<div class="px-3 py-2.5 text-sm hover:bg-dental-light cursor-pointer border-b border-gray-100 last:border-0" onclick="selectPatientForAppt('${esc(p.ID||'')}','${esc(p.Name||'')}')"><span class="font-medium">${esc(p.Name||'')}</span><span class="text-gray-400 text-xs ml-2">${p.Phone||''}</span></div>`).join('');
   sugg.classList.remove('hidden');
 }
+function selectPatientForAppt(id,name){ document.getElementById('aPatientId').value=id; document.getElementById('aPatientName').value=name; document.getElementById('aPatientSearch').value=name; document.getElementById('selectedPatientDisplay').textContent='✓ '+name; document.getElementById('patientSuggestions').classList.add('hidden'); }
 
-function selectPatientForAppt(id, name) {
-  document.getElementById('aPatientId').value = id;
-  document.getElementById('aPatientName').value = name;
-  document.getElementById('aPatientSearch').value = name;
-  document.getElementById('selectedPatientDisplay').textContent = '✓ '+name;
-  document.getElementById('patientSuggestions').classList.add('hidden');
-}
-
-function searchPatientForInvoice() {
-  const q = document.getElementById('iPatientSearch').value.toLowerCase();
-  const sugg = document.getElementById('invPatientSuggestions');
-  if (!q) { sugg.classList.add('hidden'); return; }
-  const matches = STATE.patients.filter(p => (p.Name||p.name||'').toLowerCase().includes(q)).slice(0,6);
-  if (!matches.length) { sugg.classList.add('hidden'); return; }
-  sugg.innerHTML = matches.map(p => `
-    <div class="px-3 py-2.5 text-sm hover:bg-dental-light cursor-pointer border-b border-gray-100 last:border-0" onclick="selectPatientForInvoice('${esc(p.ID||'')}','${esc(p.Name||p.name||'')}')">
-      <span class="font-medium">${esc(p.Name||p.name||'')}</span>
-      <span class="text-gray-400 text-xs ml-2">${p.Phone||p.phone||''}</span>
-    </div>`).join('');
-  sugg.classList.remove('hidden');
-}
-
-function selectPatientForInvoice(id, name) {
-  document.getElementById('iPatientId').value = id;
-  document.getElementById('iPatientName').value = name;
-  document.getElementById('iPatientSearch').value = name;
-  document.getElementById('selectedInvPatientDisplay').textContent = '✓ '+name;
-  document.getElementById('invPatientSuggestions').classList.add('hidden');
-}
-
-// ===================================================
-//  CALENDAR
-// ===================================================
-function renderCalendar() {
-  const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-  const monthsAr = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
-  const y = STATE.calYear; const m = STATE.calMonth;
-  const mNames = STATE.lang === 'ar' ? monthsAr : months;
-  document.getElementById('calTitle').textContent = `${mNames[m]} ${y}`;
-
-  const firstDay = new Date(y,m,1).getDay();
-  const daysInMonth = new Date(y,m+1,0).getDate();
-  const today = new Date();
-  const todayStr = today.toISOString().slice(0,10);
-
-  // Get days with appointments
-  const apptDays = new Set(STATE.appointments
-    .filter(a => { const d = a.Date||''; return d.slice(0,7) === `${y}-${String(m+1).padStart(2,'0')}`; })
-    .map(a => parseInt((a.Date||'').slice(8,10))));
-
-  const grid = document.getElementById('calGrid');
-  grid.innerHTML = '';
-
-  // Empty cells before first day
-  for (let i=0;i<firstDay;i++) {
-    const el = document.createElement('div');
-    el.className = 'cal-day other-month';
-    grid.appendChild(el);
-  }
-  // Days
-  for (let d=1;d<=daysInMonth;d++) {
-    const dateStr = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    const el = document.createElement('div');
-    el.className = 'cal-day' + (dateStr===todayStr?' today':'') + (apptDays.has(d)?' has-appt':'');
-    el.textContent = d;
-    el.onclick = () => { openApptModal(dateStr); };
-    grid.appendChild(el);
+// ===== CALENDAR =====
+function renderCalendar(){
+  const months=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const monthsAr=['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+  const y=STATE.calYear; const m=STATE.calMonth;
+  document.getElementById('calTitle').textContent=`${(STATE.lang==='ar'?monthsAr:months)[m]} ${y}`;
+  const days=STATE.lang==='ar'?['ح','ن','ث','ر','خ','ج','س']:['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  document.getElementById('calHeaders').innerHTML=days.map(d=>`<div class="text-center text-xs text-gray-400 font-medium py-1">${d}</div>`).join('');
+  const firstDay=new Date(y,m,1).getDay();
+  const daysInMonth=new Date(y,m+1,0).getDate();
+  const todayStr=new Date().toISOString().slice(0,10);
+  const apptDays=new Set(STATE.appointments.filter(a=>{const d=a.Date||'';return d.slice(0,7)===`${y}-${String(m+1).padStart(2,'0')}`;}).map(a=>parseInt((a.Date||'').slice(8,10))));
+  const grid=document.getElementById('calGrid'); grid.innerHTML='';
+  for(let i=0;i<firstDay;i++){const el=document.createElement('div');el.className='cal-day other-month';grid.appendChild(el);}
+  for(let d=1;d<=daysInMonth;d++){
+    const ds=`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const el=document.createElement('div');
+    el.className='cal-day'+(ds===todayStr?' today':'')+(apptDays.has(d)?' has-appt':'');
+    el.textContent=d; el.onclick=()=>openApptModal(ds); grid.appendChild(el);
   }
 }
+function prevMonth(){ STATE.calMonth--; if(STATE.calMonth<0){STATE.calMonth=11;STATE.calYear--;} renderCalendar(); }
+function nextMonth(){ STATE.calMonth++; if(STATE.calMonth>11){STATE.calMonth=0;STATE.calYear++;} renderCalendar(); }
 
-function prevMonth() {
-  STATE.calMonth--; if(STATE.calMonth<0){STATE.calMonth=11;STATE.calYear--;}
-  renderCalendar();
+// ===== DAILY VIEW =====
+function renderDailyDoctorFilter(){
+  const sel=document.getElementById('dailyDoctorFilter'); const cur=sel.value;
+  sel.innerHTML='<option value="">All Doctors</option>'+STATE.doctors.map(d=>`<option value="${esc(d.Name||'')}">${esc(d.Name||'')}</option>`).join('');
+  sel.value=cur;
 }
-function nextMonth() {
-  STATE.calMonth++; if(STATE.calMonth>11){STATE.calMonth=0;STATE.calYear++;}
-  renderCalendar();
-}
-
-// ===================================================
-//  INVOICES
-// ===================================================
-function renderInvoices() {
-  const tbody = document.getElementById('invoicesTbody');
-  if (STATE.invoices.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="7" class="text-center text-gray-400 py-8">${TRANSLATIONS[STATE.lang].noData}</td></tr>`;
-    return;
-  }
-  tbody.innerHTML = [...STATE.invoices].reverse().map((inv,i) => {
-    const realIdx = STATE.invoices.length - 1 - i;
-    return `<tr>
-      <td class="text-gray-400 text-xs">#${realIdx+1}</td>
-      <td class="font-medium">${esc(inv.PatientName||'')}</td>
-      <td>${esc(inv.Treatment||'')}</td>
-      <td class="font-semibold text-dental">${fmtCurrency(inv.Amount||0)}</td>
-      <td>${inv.Date||''}</td>
-      <td><span class="badge ${invStatusBadge(inv.Status)}">${inv.Status||''}</span></td>
-      <td><div class="flex gap-1">
-        <button onclick="deleteInvoice(${realIdx})" class="text-xs text-red-500 hover:underline px-2 py-1 rounded hover:bg-red-50">${TRANSLATIONS[STATE.lang].delete}</button>
-      </div></td>
-    </tr>`;
+function prevDay(){ const d=new Date(document.getElementById('dailyDate').value||new Date()); d.setDate(d.getDate()-1); document.getElementById('dailyDate').value=d.toISOString().slice(0,10); renderDaily(); }
+function nextDay(){ const d=new Date(document.getElementById('dailyDate').value||new Date()); d.setDate(d.getDate()+1); document.getElementById('dailyDate').value=d.toISOString().slice(0,10); renderDaily(); }
+function goToday(){ document.getElementById('dailyDate').value=new Date().toISOString().slice(0,10); renderDaily(); }
+function renderDaily(){
+  const date=document.getElementById('dailyDate').value||new Date().toISOString().slice(0,10);
+  const docFilter=document.getElementById('dailyDoctorFilter').value;
+  let dayAppts=STATE.appointments.filter(a=>String(a.Date||'').slice(0,10)===date);
+  if(docFilter) dayAppts=dayAppts.filter(a=>a.Doctor===docFilter);
+  dayAppts.sort((a,b)=>(a.Time||'')>(b.Time||'')?1:-1);
+  document.getElementById('dailySummary').textContent=`${dayAppts.length} appointment${dayAppts.length!==1?'s':''} on this day`;
+  const from=STATE.settings.hoursFrom||'09:00'; const to=STATE.settings.hoursTo||'17:00';
+  let [sh,sm]=from.split(':').map(Number); const [eh,em]=to.split(':').map(Number);
+  const slots=[];
+  while(sh<eh||(sh===eh&&sm<=em)){ slots.push(`${String(sh).padStart(2,'0')}:${String(sm).padStart(2,'0')}`); sm+=30; if(sm>=60){sm=0;sh++;} }
+  const container=document.getElementById('dailyTimeline');
+  if(dayAppts.length===0&&slots.length===0){ container.innerHTML=`<p class="text-gray-400 text-center py-8">No appointments on this day</p>`; return; }
+  const apptMap={};
+  dayAppts.forEach(a=>{ const t=(a.Time||'').slice(0,5); if(!apptMap[t]) apptMap[t]=[]; apptMap[t].push(a); });
+  container.innerHTML=slots.map(slot=>{
+    const slotAppts=apptMap[slot]||[];
+    return `<div class="time-slot"><div class="time-label">${slot}</div><div class="flex-1 flex flex-col gap-1">${
+      slotAppts.length?slotAppts.map(a=>`<div class="appt-chip ${esc(a.Status||'Scheduled')}" onclick="editAppt(${STATE.appointments.indexOf(a)});showTab('appointments',null)">
+        <div class="font-medium">${esc(a.PatientName||'')}</div>
+        <div class="flex gap-2 opacity-75"><span>${esc(a.Treatment||'—')}</span>${a.Doctor?`<span>· ${esc(a.Doctor)}</span>`:''}</div>
+      </div>`).join(''):'<div class="text-gray-200 text-xs py-2 pl-1">—</div>'
+    }</div></div>`;
   }).join('');
 }
 
-function renderPriceGuide() {
-  const list = document.getElementById('priceGuideList');
-  list.innerHTML = STATE.priceGuide.map((item,i) => `
-    <div class="flex gap-2 items-center">
-      <input type="text" value="${esc(item.treatment)}" class="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-sm" onchange="STATE.priceGuide[${i}].treatment=this.value"/>
-      <input type="number" value="${item.price}" class="w-24 border border-gray-200 rounded-xl px-3 py-2 text-sm" onchange="STATE.priceGuide[${i}].price=parseFloat(this.value)||0"/>
-      <button onclick="STATE.priceGuide.splice(${i},1);renderPriceGuide();renderTreatmentSelects();" class="text-red-400 hover:text-red-600 p-1">✕</button>
-    </div>`).join('');
+// ===== INVOICES — MULTI-TREATMENT =====
+
+// Build the treatment options HTML string for a select
+function treatmentOptions(selectedVal){
+  return '<option value="">-- Select --</option>'+STATE.priceGuide.map(t=>`<option value="${esc(t.treatment)}" ${t.treatment===selectedVal?'selected':''}>${esc(t.treatment)}</option>`).join('');
 }
 
-function addPriceRow() {
-  STATE.priceGuide.push({ treatment:'New Treatment', price:0 });
-  renderPriceGuide();
-  renderTreatmentSelects();
+// Render all item rows in the invoice modal
+function renderInvoiceItems(){
+  const sym=CURRENCY_SYMBOLS[STATE.currency]||'$';
+  document.getElementById('invoiceItemsContainer').innerHTML=STATE.invoiceItems.length
+    ? STATE.invoiceItems.map((item,i)=>`
+      <div class="inv-item-row" id="invRow${i}">
+        <select class="border border-gray-200 rounded-xl px-2 py-2 text-sm w-full" onchange="onInvTreatmentChange(${i},this.value)">
+          ${treatmentOptions(item.treatment)}
+        </select>
+        <input type="number" value="${item.price||0}" min="0" step="0.01"
+          class="border border-gray-200 rounded-xl px-2 py-2 text-sm w-24 text-center"
+          onchange="STATE.invoiceItems[${i}].price=parseFloat(this.value)||0;updateInvTotals()"
+          oninput="STATE.invoiceItems[${i}].price=parseFloat(this.value)||0;updateInvTotals()"/>
+        <button onclick="removeInvoiceItem(${i})" class="w-6 h-6 flex items-center justify-center text-red-400 hover:text-red-600 text-lg leading-none flex-shrink-0">✕</button>
+      </div>`).join('')
+    : `<p class="text-gray-400 text-sm py-2 text-center">No treatments added yet. Click "Add Treatment" above.</p>`;
+  updateInvTotals();
 }
 
-function savePriceGuide() {
-  localStorage.setItem('dental_prices', JSON.stringify(STATE.priceGuide));
-  renderTreatmentSelects();
-  showToast('Price guide saved!','success');
+function addInvoiceItem(){
+  STATE.invoiceItems.push({treatment:'',price:0});
+  renderInvoiceItems();
+}
+function removeInvoiceItem(i){
+  STATE.invoiceItems.splice(i,1);
+  renderInvoiceItems();
+}
+function onInvTreatmentChange(i,val){
+  STATE.invoiceItems[i].treatment=val;
+  const item=STATE.priceGuide.find(p=>p.treatment===val);
+  if(item){ STATE.invoiceItems[i].price=item.price; renderInvoiceItems(); }
+  else updateInvTotals();
+}
+function updateInvTotals(){
+  const total=STATE.invoiceItems.reduce((s,i)=>s+(parseFloat(i.price)||0),0);
+  document.getElementById('invSubtotal').textContent=fmtCurrency(total);
+  document.getElementById('invTotal').textContent=fmtCurrency(total);
 }
 
-function renderTreatmentSelects() {
-  ['aTreatment','iTreatment'].forEach(id => {
-    const sel = document.getElementById(id);
-    if (!sel) return;
-    const cur = sel.value;
-    sel.innerHTML = '<option value="">-- Select --</option>' +
-      STATE.priceGuide.map(t => `<option value="${esc(t.treatment)}">${esc(t.treatment)}</option>`).join('');
-    sel.value = cur;
-  });
-}
-
-function updateInvoicePrice() {
-  const t = document.getElementById('iTreatment').value;
-  const item = STATE.priceGuide.find(p => p.treatment === t);
-  if (item) {
-    document.getElementById('iAmount').value = item.price;
-    document.getElementById('invoiceTotal').textContent = fmtCurrency(item.price);
-  }
-}
-
-function openInvoiceModal() {
-  document.getElementById('editInvoiceId').value = '';
-  document.getElementById('iPatientSearch').value = '';
-  document.getElementById('iPatientId').value = '';
-  document.getElementById('iPatientName').value = '';
-  document.getElementById('selectedInvPatientDisplay').textContent = '';
-  document.getElementById('iAmount').value = '';
-  document.getElementById('iDate').value = new Date().toISOString().slice(0,10);
-  document.getElementById('iStatus').value = 'Paid';
-  document.getElementById('invoiceTotal').textContent = fmtCurrency(0);
+function openInvoiceModal(){
+  document.getElementById('editInvoiceId').value='';
+  document.getElementById('iPatientSearch').value=''; document.getElementById('iPatientId').value=''; document.getElementById('iPatientName').value='';
+  document.getElementById('selectedInvPatientDisplay').textContent='';
+  document.getElementById('iDate').value=new Date().toISOString().slice(0,10);
+  document.getElementById('iStatus').value='Paid';
   document.getElementById('invPatientSuggestions').classList.add('hidden');
-  renderTreatmentSelects();
+  STATE.invoiceItems=[{treatment:'',price:0}];
+  renderInvoiceItems();
   openModal('invoiceModal');
 }
 
-function saveInvoice() {
-  const patName = document.getElementById('iPatientName').value || document.getElementById('iPatientSearch').value;
-  const treatment = document.getElementById('iTreatment').value;
-  const amount = document.getElementById('iAmount').value;
-  if (!patName || !treatment) { showToast('Patient and treatment are required','error'); return; }
-  const inv = {
-    ID: Date.now().toString(),
-    PatientID: document.getElementById('iPatientId').value,
-    PatientName: patName,
-    Treatment: treatment,
-    Amount: amount,
-    Date: document.getElementById('iDate').value,
-    Status: document.getElementById('iStatus').value,
-    CreatedAt: new Date().toISOString()
+function saveInvoice(){
+  const patName=document.getElementById('iPatientName').value||document.getElementById('iPatientSearch').value;
+  if(!patName){showToast('Patient required','error');return;}
+  const filledItems=STATE.invoiceItems.filter(i=>i.treatment);
+  if(!filledItems.length){showToast('Add at least one treatment','error');return;}
+  const total=filledItems.reduce((s,i)=>s+(parseFloat(i.price)||0),0);
+  const inv={
+    ID:Date.now().toString(),
+    PatientID:document.getElementById('iPatientId').value,
+    PatientName:patName,
+    // legacy compat fields
+    Treatment:filledItems.map(i=>i.treatment).join(', '),
+    Amount:total,
+    // new multi-item field
+    Items:filledItems,
+    Date:document.getElementById('iDate').value,
+    Status:document.getElementById('iStatus').value,
+    CreatedAt:new Date().toISOString()
   };
   STATE.invoices.push(inv);
-  localStorage.setItem('dental_invoices', JSON.stringify(STATE.invoices));
-  gsPost({ sheet:'Invoices', action:'append', row:Object.values(inv) });
-  closeModal('invoiceModal');
-  renderAll();
-  showToast('Invoice saved!','success');
+  localStorage.setItem('dental_invoices',JSON.stringify(STATE.invoices));
+  gsPost({sheet:'Invoices',action:'append',row:[inv.ID,inv.PatientName,inv.Treatment,inv.Amount,inv.Date,inv.Status]});
+  closeModal('invoiceModal'); renderAll(); showToast('Invoice saved!','success');
 }
 
-function deleteInvoice(idx) {
-  if (!confirm('Delete this invoice?')) return;
-  const inv = STATE.invoices[idx];
-  STATE.invoices.splice(idx,1);
-  localStorage.setItem('dental_invoices', JSON.stringify(STATE.invoices));
-  gsPost({ sheet:'Invoices', action:'delete', id:inv.ID });
-  renderAll();
-  showToast('Invoice deleted','info');
+function renderInvoices(){
+  const sym=CURRENCY_SYMBOLS[STATE.currency]||'$';
+  document.getElementById('invoicesTbody').innerHTML=STATE.invoices.length
+    ? [...STATE.invoices].reverse().map((inv,i)=>{
+        const ri=STATE.invoices.length-1-i;
+        const total=invTotal(inv);
+        const items=inv.Items&&Array.isArray(inv.Items)?inv.Items:[{treatment:inv.Treatment||'',price:inv.Amount||0}];
+        const treatLabel=items.length===1?esc(items[0].treatment||''):
+          `<span title="${items.map(it=>it.treatment).join(', ')}">${esc(items[0].treatment||'')} <span class="text-gray-400">+${items.length-1} more</span></span>`;
+        return `<tr>
+          <td class="text-gray-400 text-xs">#${ri+1}</td>
+          <td class="font-medium">${esc(inv.PatientName||'')}</td>
+          <td class="text-sm max-w-xs">${treatLabel}</td>
+          <td class="font-semibold text-dental">${fmtCurrency(total)}</td>
+          <td>${inv.Date||''}</td>
+          <td><span class="badge ${invStatusBadge(inv.Status)}">${inv.Status||''}</span></td>
+          <td><div class="flex gap-1">
+            <button onclick="printInvoice(${ri})" class="text-xs text-dental hover:underline px-2 py-1 rounded hover:bg-dental-light">Print</button>
+            <button onclick="deleteInvoice(${ri})" class="text-xs text-red-500 hover:underline px-2 py-1 rounded hover:bg-red-50">Del</button>
+          </div></td>
+        </tr>`;
+      }).join('')
+    : `<tr><td colspan="7" class="text-center text-gray-400 py-8">No data yet</td></tr>`;
 }
 
-// ===================================================
-//  DOCTORS
-// ===================================================
-function renderDoctorsList() {
-  const list = document.getElementById('doctorsList');
-  if (STATE.doctors.length === 0) {
-    list.innerHTML = `<p class="text-gray-400 text-sm py-2">${TRANSLATIONS[STATE.lang].noData}</p>`;
-    return;
-  }
-  list.innerHTML = STATE.doctors.map((d,i) => `
-    <div class="flex items-center justify-between py-2 px-3 bg-gray-50 rounded-xl">
-      <div>
-        <p class="font-medium text-sm">${esc(d.Name||d.name||'')}</p>
-        <p class="text-xs text-gray-400">${esc(d.Specialization||d.spec||'')}</p>
+function printInvoice(idx){
+  const inv=STATE.invoices[idx];
+  const clinic=STATE.settings.clinicName||'Finesse Dental Care';
+  const sym=CURRENCY_SYMBOLS[STATE.currency]||'$';
+  const items=inv.Items&&Array.isArray(inv.Items)?inv.Items:[{treatment:inv.Treatment||'',price:inv.Amount||0}];
+  const total=items.reduce((s,i)=>s+(parseFloat(i.price)||0),0);
+  const itemRows=items.map(it=>`<tr>
+    <td style="padding:10px;border-bottom:1px solid #f1f5f9;">${esc(it.treatment||'')}</td>
+    <td style="padding:10px;text-align:right;border-bottom:1px solid #f1f5f9;font-weight:600;color:#007bff;">${sym}${(parseFloat(it.price)||0).toLocaleString()}</td>
+  </tr>`).join('');
+  document.getElementById('printContent').innerHTML=`
+    <div style="font-family:Arial,sans-serif;color:#1a1a1a;">
+      <div style="text-align:center;border-bottom:2px solid #007bff;padding-bottom:16px;margin-bottom:20px;">
+        <h1 style="font-size:22px;color:#007bff;margin:0 0 4px;">${esc(clinic)}</h1>
+        <p style="font-size:13px;color:#666;margin:0;">Dental Care Management</p>
       </div>
-      <button onclick="deleteDoctor(${i})" class="text-red-400 hover:text-red-600 text-xs">✕</button>
-    </div>`).join('');
+      <div style="display:flex;justify-content:space-between;margin-bottom:20px;">
+        <div>
+          <p style="font-size:12px;color:#999;margin:0 0 2px;">INVOICE TO</p>
+          <p style="font-size:16px;font-weight:700;margin:0;">${esc(inv.PatientName||'')}</p>
+        </div>
+        <div style="text-align:right;">
+          <p style="font-size:12px;color:#999;margin:0 0 2px;">INVOICE #${idx+1}</p>
+          <p style="font-size:14px;margin:0;">${inv.Date||''}</p>
+          <span style="background:${inv.Status==='Paid'?'#d1fae5':inv.Status==='Pending'?'#fef3c7':'#fee2e2'};color:${inv.Status==='Paid'?'#065f46':inv.Status==='Pending'?'#92400e':'#991b1b'};padding:2px 10px;border-radius:99px;font-size:12px;font-weight:600;">${inv.Status||''}</span>
+        </div>
+      </div>
+      <table style="width:100%;border-collapse:collapse;margin-bottom:20px;">
+        <thead><tr style="background:#f8fafc;">
+          <th style="padding:10px;text-align:left;font-size:13px;color:#64748b;border-bottom:1px solid #e2e8f0;">Treatment</th>
+          <th style="padding:10px;text-align:right;font-size:13px;color:#64748b;border-bottom:1px solid #e2e8f0;">Amount</th>
+        </tr></thead>
+        <tbody>${itemRows}</tbody>
+      </table>
+      <div style="background:#f8fafc;border-radius:8px;padding:12px;display:flex;justify-content:space-between;">
+        <span style="font-weight:700;font-size:15px;">Total Due</span>
+        <span style="font-weight:700;font-size:18px;color:#007bff;">${sym}${total.toLocaleString()}</span>
+      </div>
+      <p style="text-align:center;color:#94a3b8;font-size:11px;margin-top:24px;">Thank you for choosing ${esc(clinic)}!</p>
+    </div>`;
+  openModal('printModal');
 }
 
-function renderDoctorFilter() {
-  const sel = document.getElementById('doctorFilter');
-  const cur = sel.value;
-  sel.innerHTML = `<option value="">-- All Doctors --</option>` +
-    STATE.doctors.map(d => `<option value="${esc(d.Name||d.name||'')}">${esc(d.Name||d.name||'')}</option>`).join('');
-  sel.value = cur;
-  populateDoctorSelects();
+function deleteInvoice(idx){
+  if(!confirm('Delete this invoice?')) return;
+  const inv=STATE.invoices[idx]; STATE.invoices.splice(idx,1); localStorage.setItem('dental_invoices',JSON.stringify(STATE.invoices));
+  gsPost({sheet:'Invoices',action:'delete',id:inv.ID}); renderAll(); showToast('Invoice deleted','info');
 }
 
-function populateDoctorSelects() {
-  const sel = document.getElementById('aDoctor');
-  sel.innerHTML = '<option value="">-- Select Doctor --</option>' +
-    STATE.doctors.map(d => `<option value="${esc(d.Name||d.name||'')}">${esc(d.Name||d.name||'')} ${d.Specialization ? '· '+d.Specialization : ''}</option>`).join('');
+function renderPriceGuide(){ document.getElementById('priceGuideList').innerHTML=STATE.priceGuide.map((item,i)=>`<div class="flex gap-2 items-center"><input type="text" value="${esc(item.treatment)}" class="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-sm" onchange="STATE.priceGuide[${i}].treatment=this.value"/><input type="number" value="${item.price}" class="w-24 border border-gray-200 rounded-xl px-3 py-2 text-sm" onchange="STATE.priceGuide[${i}].price=parseFloat(this.value)||0"/><button onclick="STATE.priceGuide.splice(${i},1);renderPriceGuide();renderTreatmentSelects();" class="text-red-400 hover:text-red-600 p-1">✕</button></div>`).join(''); }
+function addPriceRow(){ STATE.priceGuide.push({treatment:'New Treatment',price:0}); renderPriceGuide(); renderTreatmentSelects(); }
+function savePriceGuide(){ localStorage.setItem('dental_prices',JSON.stringify(STATE.priceGuide)); renderTreatmentSelects(); showToast('Price guide saved!','success'); }
+function renderTreatmentSelects(){
+  const sel=document.getElementById('aTreatment'); if(!sel) return;
+  const cur=sel.value;
+  sel.innerHTML='<option value="">-- Select --</option>'+STATE.priceGuide.map(t=>`<option value="${esc(t.treatment)}">${esc(t.treatment)}</option>`).join('');
+  sel.value=cur;
 }
 
-function addDoctor() {
-  const name = document.getElementById('newDoctorName').value.trim();
-  const spec = document.getElementById('newDoctorSpec').value.trim();
-  if (!name) { showToast('Doctor name required','error'); return; }
-  const doc = { ID:Date.now().toString(), Name:name, Specialization:spec };
-  STATE.doctors.push(doc);
-  localStorage.setItem('dental_doctors', JSON.stringify(STATE.doctors));
-  gsPost({ sheet:'Doctors', action:'append', row:Object.values(doc) });
-  document.getElementById('newDoctorName').value = '';
-  document.getElementById('newDoctorSpec').value = '';
-  renderAll();
-  showToast('Doctor added!','success');
+// Patient search for invoice
+function searchPatientForInvoice(){
+  const q=document.getElementById('iPatientSearch').value.toLowerCase(); const sugg=document.getElementById('invPatientSuggestions');
+  if(!q){sugg.classList.add('hidden');return;}
+  const m=STATE.patients.filter(p=>(p.Name||'').toLowerCase().includes(q)).slice(0,6);
+  if(!m.length){sugg.classList.add('hidden');return;}
+  sugg.innerHTML=m.map(p=>`<div class="px-3 py-2.5 text-sm hover:bg-dental-light cursor-pointer border-b border-gray-100 last:border-0" onclick="selectPatientForInvoice('${esc(p.ID||'')}','${esc(p.Name||'')}')"><span class="font-medium">${esc(p.Name||'')}</span><span class="text-gray-400 text-xs ml-2">${p.Phone||''}</span></div>`).join('');
+  sugg.classList.remove('hidden');
+}
+function selectPatientForInvoice(id,name){ document.getElementById('iPatientId').value=id; document.getElementById('iPatientName').value=name; document.getElementById('iPatientSearch').value=name; document.getElementById('selectedInvPatientDisplay').textContent='✓ '+name; document.getElementById('invPatientSuggestions').classList.add('hidden'); }
+
+// ===== DENTAL CHART =====
+function getPatientChart(patientId){ if(!STATE.dentalCharts[patientId]) STATE.dentalCharts[patientId]={teeth:{},plan:[]}; return STATE.dentalCharts[patientId]; }
+function saveCharts(){ localStorage.setItem('dental_charts',JSON.stringify(STATE.dentalCharts)); }
+function toothColor(patientId,toothNum){
+  const chart=getPatientChart(patientId); const tooth=chart.teeth[toothNum]; if(!tooth) return {fill:'#ffffff',stroke:'#94a3b8'};
+  const s=TOOTH_STATUSES.find(t=>t.key===tooth.status)||TOOTH_STATUSES[0]; return {fill:s.color,stroke:s.border};
+}
+function renderToothRow(containerId,teeth,patientId){
+  const container=document.getElementById(containerId); container.innerHTML='';
+  teeth.forEach(num=>{
+    const {fill,stroke}=toothColor(patientId||STATE.currentChartPatientId||'__none__',num);
+    const chart=getPatientChart(patientId||STATE.currentChartPatientId||'__none__');
+    const note=chart.teeth[num]?chart.teeth[num].note||'':'';
+    const div=document.createElement('div');
+    div.style.cssText='display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;';
+    div.title=`${TOOTH_NAMES[num]||'Tooth '+num}${note?' - '+note:''}`;
+    div.onclick=()=>openToothModal(num);
+    div.innerHTML=`<span style="font-size:9px;color:#94a3b8;">${num}</span>
+      <svg width="28" height="32" viewBox="0 0 28 32" class="tooth-svg" style="filter:drop-shadow(0 1px 2px rgba(0,0,0,.1))">
+        <path d="M4 4 C4 2 8 1 14 1 C20 1 24 2 24 4 L26 20 C26 26 22 31 18 31 L10 31 C6 31 2 26 2 20 Z" fill="${fill}" stroke="${stroke}" stroke-width="1.5"/>
+        ${note?'<circle cx="14" cy="16" r="4" fill="rgba(0,0,0,0.15)"/>':''}
+      </svg>`;
+    container.appendChild(div);
+  });
+}
+function renderDentalChart(){
+  const pid=STATE.currentChartPatientId||'__none__';
+  renderToothRow('upperTeeth',UPPER_TEETH,pid);
+  renderToothRow('lowerTeeth',LOWER_TEETH,pid);
+  renderTreatmentPlan();
+}
+function openToothModal(num){
+  if(!STATE.currentChartPatientId){showToast('Please select a patient first','error');return;}
+  STATE.currentToothNum=num;
+  document.getElementById('toothModalTitle').textContent=`Tooth ${num} — ${TOOTH_NAMES[num]||''}`;
+  const chart=getPatientChart(STATE.currentChartPatientId);
+  const cur=chart.teeth[num]?chart.teeth[num].status:'healthy';
+  STATE.pendingToothStatus=cur;
+  document.getElementById('toothNote').value=chart.teeth[num]?chart.teeth[num].note||'':'';
+  document.getElementById('toothStatusBtns').innerHTML=TOOTH_STATUSES.map(s=>`
+    <button onclick="STATE.pendingToothStatus='${s.key}';document.querySelectorAll('#toothStatusBtns button').forEach(b=>b.style.opacity='0.5');this.style.opacity='1';" 
+      style="display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:12px;border:2px solid ${s.border};background:${s.color};font-size:13px;font-weight:600;cursor:pointer;opacity:${cur===s.key?'1':'0.5'};color:${s.key==='healthy'?'#374151':'#fff'};">
+      ${s.label}
+    </button>`).join('');
+  openModal('toothModal');
+}
+function saveToothStatus(){
+  if(!STATE.currentChartPatientId||!STATE.currentToothNum) return;
+  const chart=getPatientChart(STATE.currentChartPatientId);
+  chart.teeth[STATE.currentToothNum]={status:STATE.pendingToothStatus,note:document.getElementById('toothNote').value};
+  saveCharts(); closeModal('toothModal'); renderDentalChart(); showToast('Tooth updated!','success');
+}
+function searchPatientForChart(){
+  const q=document.getElementById('chartPatientSearch').value.toLowerCase(); const sugg=document.getElementById('chartPatientSuggestions');
+  if(!q){sugg.classList.add('hidden');return;}
+  const m=STATE.patients.filter(p=>(p.Name||'').toLowerCase().includes(q)).slice(0,6);
+  if(!m.length){sugg.classList.add('hidden');return;}
+  sugg.innerHTML=m.map(p=>`<div class="px-3 py-2.5 text-sm hover:bg-dental-light cursor-pointer border-b border-gray-100 last:border-0" onclick="selectChartPatient('${esc(p.ID||'')}','${esc(p.Name||'')}')"><span class="font-medium">${esc(p.Name||'')}</span><span class="text-gray-400 text-xs ml-2">${p.Phone||''}</span></div>`).join('');
+  sugg.classList.remove('hidden');
+}
+function selectChartPatient(id,name){
+  STATE.currentChartPatientId=id; STATE.currentChartPatientName=name;
+  document.getElementById('chartPatientSearch').value=name;
+  document.getElementById('chartPatientDisplay').textContent='📋 Viewing chart for: '+name;
+  document.getElementById('chartPatientSuggestions').classList.add('hidden');
+  renderDentalChart();
+}
+function clearChartPatient(){
+  STATE.currentChartPatientId=null; STATE.currentChartPatientName='';
+  document.getElementById('chartPatientSearch').value=''; document.getElementById('chartPatientDisplay').textContent='';
+  renderDentalChart();
+}
+function openDentalChartForPatient(id,name){
+  STATE.currentChartPatientId=id; STATE.currentChartPatientName=name;
+  showTab('dental-chart',null);
+  document.getElementById('chartPatientSearch').value=name;
+  document.getElementById('chartPatientDisplay').textContent='📋 Viewing chart for: '+name;
+  document.querySelectorAll('#sideNav .nav-item').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('#bottomNav .nav-item').forEach(b=>b.classList.remove('active'));
+  renderDentalChart();
 }
 
-function deleteDoctor(idx) {
-  if (!confirm('Remove this doctor?')) return;
-  const d = STATE.doctors[idx];
-  STATE.doctors.splice(idx,1);
-  localStorage.setItem('dental_doctors', JSON.stringify(STATE.doctors));
-  gsPost({ sheet:'Doctors', action:'delete', id:d.ID });
-  renderAll();
-  showToast('Doctor removed','info');
+// ===== TREATMENT PLAN =====
+function renderTreatmentPlan(){
+  const plan=STATE.currentChartPatientId?getPatientChart(STATE.currentChartPatientId).plan:[];
+  document.getElementById('treatmentPlanRows').innerHTML=plan.length?plan.map((row,i)=>`
+    <div class="flex gap-2 items-center flex-wrap">
+      <select class="border border-gray-200 rounded-xl px-2 py-2 text-sm flex-1 min-w-32" onchange="updatePlanRow(${i},'tooth',this.value)">
+        <option value="">Tooth</option>
+        ${[...UPPER_TEETH,...LOWER_TEETH].map(n=>`<option value="${n}" ${String(row.tooth)===String(n)?'selected':''}>${n} ${TOOTH_NAMES[n]||''}</option>`).join('')}
+      </select>
+      <select class="border border-gray-200 rounded-xl px-2 py-2 text-sm flex-1 min-w-28" onchange="updatePlanRow(${i},'treatment',this.value)">
+        <option value="">Treatment</option>
+        ${STATE.priceGuide.map(t=>`<option value="${esc(t.treatment)}" ${row.treatment===t.treatment?'selected':''}>${esc(t.treatment)}</option>`).join('')}
+      </select>
+      <select class="border border-gray-200 rounded-xl px-2 py-2 text-sm min-w-24" onchange="updatePlanRow(${i},'status',this.value)">
+        <option value="Planned" ${row.status==='Planned'?'selected':''}>Planned</option>
+        <option value="In Progress" ${row.status==='In Progress'?'selected':''}>In Progress</option>
+        <option value="Done" ${row.status==='Done'?'selected':''}>Done</option>
+      </select>
+      <input type="text" placeholder="Notes" value="${esc(row.notes||'')}" class="border border-gray-200 rounded-xl px-2 py-2 text-sm flex-1 min-w-24" onchange="updatePlanRow(${i},'notes',this.value)"/>
+      <button onclick="deletePlanRow(${i})" class="text-red-400 hover:text-red-600 p-1 flex-shrink-0">✕</button>
+    </div>`).join(''):`<p class="text-gray-400 text-sm py-2">No treatment plan yet. Add rows above.</p>`;
+}
+function addTreatmentPlanRow(){
+  if(!STATE.currentChartPatientId){showToast('Select a patient first','error');return;}
+  const chart=getPatientChart(STATE.currentChartPatientId);
+  chart.plan.push({tooth:'',treatment:'',status:'Planned',notes:''});
+  saveCharts(); renderTreatmentPlan();
+}
+function updatePlanRow(i,field,val){
+  if(!STATE.currentChartPatientId) return;
+  const chart=getPatientChart(STATE.currentChartPatientId);
+  chart.plan[i][field]=val; saveCharts();
+}
+function deletePlanRow(i){
+  if(!STATE.currentChartPatientId) return;
+  const chart=getPatientChart(STATE.currentChartPatientId);
+  chart.plan.splice(i,1); saveCharts(); renderTreatmentPlan();
+}
+function saveTreatmentPlan(){ saveCharts(); showToast('Treatment plan saved!','success'); }
+
+// ===== DOCTORS =====
+function renderDoctorsList(){
+  document.getElementById('doctorsList').innerHTML=STATE.doctors.length?STATE.doctors.map((d,i)=>`<div class="flex items-center justify-between py-2 px-3 bg-gray-50 rounded-xl"><div><p class="font-medium text-sm">${esc(d.Name||'')}</p><p class="text-xs text-gray-400">${esc(d.Specialization||'')}</p></div><button onclick="deleteDoctor(${i})" class="text-red-400 hover:text-red-600 text-xs">✕</button></div>`).join(''):`<p class="text-gray-400 text-sm py-2">No doctors yet</p>`;
+}
+function renderDoctorFilter(){
+  const sel=document.getElementById('doctorFilter'); const cur=sel.value;
+  sel.innerHTML=`<option value="">All Doctors</option>`+STATE.doctors.map(d=>`<option value="${esc(d.Name||'')}">${esc(d.Name||'')}</option>`).join('');
+  sel.value=cur; populateDoctorSelects();
+}
+function populateDoctorSelects(){
+  const sel=document.getElementById('aDoctor');
+  sel.innerHTML='<option value="">-- Select Doctor --</option>'+STATE.doctors.map(d=>`<option value="${esc(d.Name||'')}">${esc(d.Name||'')} ${d.Specialization?'· '+d.Specialization:''}</option>`).join('');
+}
+function addDoctor(){
+  const name=document.getElementById('newDoctorName').value.trim(); const spec=document.getElementById('newDoctorSpec').value.trim();
+  if(!name){showToast('Doctor name required','error');return;}
+  const doc={ID:Date.now().toString(),Name:name,Specialization:spec};
+  STATE.doctors.push(doc); localStorage.setItem('dental_doctors',JSON.stringify(STATE.doctors));
+  gsPost({sheet:'Doctors',action:'append',row:Object.values(doc)});
+  document.getElementById('newDoctorName').value=''; document.getElementById('newDoctorSpec').value='';
+  renderAll(); showToast('Doctor added!','success');
+}
+function deleteDoctor(idx){
+  if(!confirm('Remove this doctor?')) return;
+  const d=STATE.doctors[idx]; STATE.doctors.splice(idx,1); localStorage.setItem('dental_doctors',JSON.stringify(STATE.doctors));
+  gsPost({sheet:'Doctors',action:'delete',id:d.ID}); renderAll(); showToast('Doctor removed','info');
+}
+function syncDoctorSearch(){
+  document.getElementById('doctorSearchInput').value=document.getElementById('doctorFilter').value;
+  renderDoctorView();
+}
+function renderDoctorView(){
+  const searchQ=(document.getElementById('doctorSearchInput').value||'').toLowerCase().trim();
+  const dropVal=document.getElementById('doctorFilter').value;
+  const filter=searchQ||dropVal;
+  const period=document.getElementById('doctorPeriod').value;
+  const today=new Date().toISOString().slice(0,10);
+  const weekEnd=new Date(Date.now()+7*24*60*60*1000).toISOString().slice(0,10);
+  let appts=STATE.appointments;
+  if(filter) appts=appts.filter(a=>(a.Doctor||'').toLowerCase().includes(filter.toLowerCase()));
+  if(period==='today') appts=appts.filter(a=>(a.Date||'').slice(0,10)===today);
+  else if(period==='week') appts=appts.filter(a=>(a.Date||'')>=today&&(a.Date||'')<=weekEnd);
+  const sorted=appts.sort((a,b)=>((a.Date||'')+(a.Time||''))>((b.Date||'')+(b.Time||''))?1:-1);
+  document.getElementById('doctorViewTbody').innerHTML=sorted.length?sorted.map(a=>`<tr><td>${a.Date||''}</td><td>${a.Time||''}</td><td class="font-medium">${esc(a.PatientName||'')}</td><td>${esc(a.Treatment||'')}</td><td><span class="badge ${statusBadge(a.Status)}">${a.Status||''}</span></td></tr>`).join(''):`<tr><td colspan="5" class="text-center text-gray-400 py-8">No appointments found</td></tr>`;
+  const docName=filter?filter.charAt(0).toUpperCase()+filter.slice(1):'All Doctors';
+  document.getElementById('doctorStatsBox').textContent=`${sorted.length} appt${sorted.length!==1?'s':''} · ${docName}`;
 }
 
-function renderDoctorView() {
-  const filter = document.getElementById('doctorFilter').value;
-  const period = document.getElementById('doctorPeriod').value;
-  const today = new Date().toISOString().slice(0,10);
-  const weekEnd = new Date(Date.now() + 7*24*60*60*1000).toISOString().slice(0,10);
-
-  let appts = STATE.appointments;
-  if (filter) appts = appts.filter(a => a.Doctor === filter);
-  if (period === 'today') appts = appts.filter(a => (a.Date||'').slice(0,10) === today);
-  else if (period === 'week') appts = appts.filter(a => (a.Date||'') >= today && (a.Date||'') <= weekEnd);
-
-  const tbody = document.getElementById('doctorViewTbody');
-  if (appts.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="5" class="text-center text-gray-400 py-8">${TRANSLATIONS[STATE.lang].noData}</td></tr>`;
-    return;
-  }
-  tbody.innerHTML = appts.sort((a,b) => ((a.Date||'')+(a.Time||'')) > ((b.Date||'')+(b.Time||'')) ? 1 : -1)
-    .map(a => `<tr>
-      <td>${a.Date||''}</td>
-      <td>${a.Time||''}</td>
-      <td class="font-medium">${esc(a.PatientName||'')}</td>
-      <td>${esc(a.Treatment||'')}</td>
-      <td><span class="badge ${statusBadge(a.Status)}">${a.Status||''}</span></td>
-    </tr>`).join('');
-}
-
-// ===================================================
-//  NAVIGATION
-// ===================================================
-function showTab(name, btn) {
-  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+// ===== NAVIGATION =====
+function showTab(name,btn){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
   document.getElementById('tab-'+name).classList.add('active');
-
-  // Sidebar nav
-  document.querySelectorAll('#sideNav .nav-item').forEach(b => b.classList.remove('active'));
-  // Bottom nav
-  document.querySelectorAll('#bottomNav .nav-item').forEach(b => b.classList.remove('active'));
-  if (btn) btn.classList.add('active');
-
-  const titles = {dashboard:'Dashboard',patients:'Patients',appointments:'Appointments',invoices:'Invoices',doctors:'Doctors',settings:'Settings'};
-  document.getElementById('pageTitle').textContent = TRANSLATIONS[STATE.lang][name] || titles[name] || name;
+  document.querySelectorAll('#sideNav .nav-item').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('#bottomNav .nav-item').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  const titles={dashboard:'Dashboard',patients:'Patients',appointments:'Appointments',daily:'Daily View',invoices:'Invoices','dental-chart':'Dental Chart',doctors:'Doctors',settings:'Settings'};
+  document.getElementById('pageTitle').textContent=titles[name]||name;
   closeSidebar();
-
-  if (name === 'appointments') renderCalendar();
-  if (name === 'invoices') { renderPriceGuide(); renderTreatmentSelects(); }
-  if (name === 'settings') { renderDoctorsList(); applySettings(); }
-  if (name === 'doctors') renderDoctorView();
+  if(name==='appointments') renderCalendar();
+  if(name==='invoices'){renderPriceGuide();renderTreatmentSelects();}
+  if(name==='settings'){renderDoctorsList();applySettings();}
+  if(name==='doctors') renderDoctorView();
+  if(name==='daily'){renderDailyDoctorFilter();renderDaily();}
+  if(name==='dental-chart') renderDentalChart();
 }
-
-function openFabModal() {
-  const active = document.querySelector('.section.active');
-  if (!active) return;
-  const id = active.id;
-  if (id === 'tab-patients') openPatientModal();
-  else if (id === 'tab-appointments') openApptModal(null);
-  else if (id === 'tab-invoices') openInvoiceModal();
-  else if (id === 'tab-settings') document.getElementById('newDoctorName').focus();
+function openFabModal(){
+  const id=(document.querySelector('.section.active')||{}).id||'';
+  if(id==='tab-patients') openPatientModal();
+  else if(id==='tab-appointments') openApptModal(null);
+  else if(id==='tab-invoices') openInvoiceModal();
   else openPatientModal();
 }
+function openSidebar(){ document.getElementById('sidebar').classList.add('open'); document.getElementById('sidebarOverlay').classList.add('show'); }
+function closeSidebar(){ document.getElementById('sidebar').classList.remove('open'); document.getElementById('sidebarOverlay').classList.remove('show'); }
+function openModal(id){ document.getElementById(id).classList.remove('hidden'); document.body.style.overflow='hidden'; }
+function closeModal(id){ document.getElementById(id).classList.add('hidden'); document.body.style.overflow=''; }
+function closeModalOnOverlay(e,id){ if(e.target===e.currentTarget) closeModal(id); }
+function showToast(msg,type='info'){
+  const c=document.getElementById('toastContainer'); const t=document.createElement('div');
+  t.className=`toast ${type}`; t.textContent=msg; c.appendChild(t);
+  setTimeout(()=>{t.style.opacity='0';t.style.transition='opacity .3s';setTimeout(()=>t.remove(),300);},3000);
+}
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function statusBadge(s){ return({Scheduled:'bg-blue-100 text-blue-700',Confirmed:'bg-green-100 text-green-700',Completed:'bg-gray-100 text-gray-600',Cancelled:'bg-red-100 text-red-600'})[s]||'bg-gray-100 text-gray-600'; }
+function invStatusBadge(s){ return({Paid:'bg-green-100 text-green-700',Pending:'bg-yellow-100 text-yellow-700',Cancelled:'bg-red-100 text-red-600'})[s]||'bg-gray-100 text-gray-600'; }
 
-function openSidebar() {
-  document.getElementById('sidebar').classList.add('open');
-  document.getElementById('sidebarOverlay').classList.add('show');
-}
-function closeSidebar() {
-  document.getElementById('sidebar').classList.remove('open');
-  document.getElementById('sidebarOverlay').classList.remove('show');
-}
-
-// ===================================================
-//  MODALS
-// ===================================================
-function openModal(id) {
-  document.getElementById(id).classList.remove('hidden');
-  document.body.style.overflow = 'hidden';
-}
-function closeModal(id) {
-  document.getElementById(id).classList.add('hidden');
-  document.body.style.overflow = '';
-}
-function closeModalOnOverlay(e, id) {
-  if (e.target === e.currentTarget) closeModal(id);
-}
-
-// ===================================================
-//  TOAST
-// ===================================================
-function showToast(msg, type='info') {
-  const c = document.getElementById('toastContainer');
-  const t = document.createElement('div');
-  t.className = `toast ${type}`;
-  t.textContent = msg;
-  c.appendChild(t);
-  setTimeout(() => { t.style.opacity='0'; t.style.transition='opacity .3s'; setTimeout(()=>t.remove(),300); }, 3000);
-}
-
-// ===================================================
-//  HELPERS
-// ===================================================
-function esc(str) {
-  return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
-function statusBadge(s) {
-  const map = { Scheduled:'bg-blue-100 text-blue-700', Confirmed:'bg-green-100 text-green-700',
-    Completed:'bg-gray-100 text-gray-600', Cancelled:'bg-red-100 text-red-600' };
-  return map[s] || 'bg-gray-100 text-gray-600';
-}
-
-function invStatusBadge(s) {
-  const map = { Paid:'bg-green-100 text-green-700', Pending:'bg-yellow-100 text-yellow-700', Cancelled:'bg-red-100 text-red-600' };
-  return map[s] || 'bg-gray-100 text-gray-600';
-}
-
-// ===================================================
-//  STARTUP
-// ===================================================
-window.addEventListener('DOMContentLoaded', () => {
-  if (sessionStorage.getItem('dental_auth') === '1') {
-    document.getElementById('lockScreen').style.display = 'none';
-    init();
-  }
-  // Today's date default
-  const today = new Date().toISOString().slice(0,10);
-  document.getElementById('aDate').value = today;
-  document.getElementById('iDate').value = today;
-
-  // iAmount live update
-  document.getElementById('iAmount').addEventListener('input', function() {
-    document.getElementById('invoiceTotal').textContent = fmtCurrency(this.value||0);
-  });
+window.addEventListener('DOMContentLoaded',()=>{
+  if(sessionStorage.getItem('dental_auth')==='1'){ document.getElementById('lockScreen').style.display='none'; init(); }
+  const today=new Date().toISOString().slice(0,10);
+  document.getElementById('aDate').value=today; document.getElementById('iDate').value=today; document.getElementById('dailyDate').value=today;
 });
 </script>
 </body>
