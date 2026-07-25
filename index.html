@@ -782,7 +782,7 @@ function calcAge(dobStr){
 }
 function formatDOB(dobStr){
   if(!dobStr) return '—';
-  try{ const d=new Date(dobStr+'T12:00:00'); return d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}); }catch{return dobStr;}
+  try{ const dateOnly=(dobStr||'').split('T')[0]; const d=new Date(dateOnly+'T12:00:00'); return d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}); }catch{return dobStr;}
 }
 function isBirthdayToday(dobStr){
   if(!dobStr) return false;
