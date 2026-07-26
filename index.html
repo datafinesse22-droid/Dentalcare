@@ -949,7 +949,7 @@ function renderBirthdays(){
 // ===== PATIENTS =====
 function renderPatients(){
   const q=(document.getElementById('patientSearch').value||'').toLowerCase();
-  const f=STATE.patients.filter(p=>(p.Name||'').toLowerCase().includes(q)||(p.Phone||'').toLowerCase().includes(q));
+const f=STATE.patients.filter(p=>(p.Name||'').normalize('NFC').toLowerCase().includes(q.normalize('NFC'))||(p.Phone||'').toLowerCase().includes(q));
   document.getElementById('patientsTbody').innerHTML=f.length?f.map((p,i)=>`<tr>
     <td><div class="flex items-center gap-2"><div class="w-7 h-7 rounded-full bg-dental-light flex items-center justify-center text-dental font-bold text-xs">${esc(String(p.Name||'?').charAt(0).toUpperCase())}</div><span class="font-medium">${esc(p.Name||'')}</span>${isBirthdayToday(p.DOB||p.dob)?'<span title="Birthday today!">🎂</span>':''}</div></td>
     <td>${esc(p.Phone||'')}</td>
