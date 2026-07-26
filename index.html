@@ -998,3 +998,587 @@ function openPatientProfile(patientId){
       <div class="w-16 h-16 rounded-2xl bg-dental flex items-center justify-center text-white font-bold text-2xl flex-shrink-0">${esc(String(p.Name||'?').charAt(0).toUpperCase())}</div>
       <div class="flex-1">
         <h2 class="text-xl font-bold text-gray-800">${esc(p.Name||'')}</h2>
+        <p class="text-gray-500 text-sm">${p.FileNo||''} · ${p.Phone||''}</p>
+        <div class="flex flex-wrap gap-2 mt-2">
+          ${p.Insurance?`<span class="badge bg-blue-100 text-blue-700">🛡 ${esc(p.InsuranceCompany||'Insured')}</span>`:''}
+          ${p.DOB||p.dob?`<span class="badge bg-gray-100 text-gray-600">Age ${calcAge(p.DOB||p.dob)}</span>`:''}
+          ${p.Gender?`<span class="badge bg-gray-100 text-gray-600">${p.Gender}</span>`:''}
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-3 text-center">
+        <div class="bg-white rounded-xl p-3"><p class="text-xs text-gray-400">Total Visits</p><p class="text-xl font-bold text-dental">${allAppts.length}</p></div>
+        <div class="bg-white rounded-xl p-3"><p class="text-xs text-gray-400">Total Spent</p><p class="text-lg font-bold text-green-600">${fmtCurrency(totalSpent)}</p></div>
+        <div class="bg-white rounded-xl p-3"><p class="text-xs text-gray-400">Balance Due</p><p class="text-lg font-bold ${bal>0?'text-red-500':'text-green-600'}">${bal>0?fmtCurrency(bal):'Clear'}</p></div>
+        <div class="bg-white rounded-xl p-3"><p class="text-xs text-gray-400">Last Visit</p><p class="text-sm font-bold text-gray-700">${lastVisit?lastVisit.Date:'Never'}</p></div>
+      </div>
+    </div>
+    ${p.Notes?`<div class="mt-3 bg-yellow-50 border border-yellow-200 rounded-xl p-3 text-sm text-yellow-800"><strong>Notes:</strong> ${esc(p.Notes)}</div>`:''}`;
+
+  // Overview tab
+  document.getElementById('ptOverview').innerHTML=`
+    <div class="grid grid-cols-2 gap-3">
+      ${allAppts.slice(0,4).map(a=>`<div class="border border-gray-100 rounded-xl p-3"><p class="font-medium text-sm">${esc(a.Treatment||'—')}</p><p class="text-xs text-gray-400">${a.Date||''} · ${esc(a.Doctor||'')}</p><span class="badge ${statusBadge(a.Status)} text-xs">${a.Status||''}</span></div>`).join('') || '<p class="col-span-2 text-gray-400 text-sm py-4 text-center">No appointments yet</p>'}
+    </div>`;
+
+  // Appointments tab
+  const sortedAppts=[...allAppts].sort((a,b)=>(b.Date||'')>(a.Date||'')?1:-1);
+  document.getElementById('ptAppointments').innerHTML=sortedAppts.length?`<div class="overflow-x-auto"><table class="data-table"><thead><tr><th>Date</th><th>Time</th><th>Doctor</th><th>Treatment</th><th>Status</th></tr></thead><tbody>${sortedAppts.map(a=>`<tr><td>${a.Date||''}</td><td>${a.Time||''}</td><td>${esc(a.Doctor||'')}</td><td>${esc(a.Treatment||'')}</td><td><span class="badge ${statusBadge(a.Status)}">${a.Status||''}</span></td></tr>`).join('')}</tbody></table></div>`:`<p class="text-gray-400 text-center py-8">No appointments found</p>`;
+
+  // Invoices tab
+  const sortedInvs=[...allInvs].sort((a,b)=>(b.Date||'')>(a.Date||'')?1:-1);
+  document.getElementById('ptInvoices').innerHTML=sortedInvs.length?`<div class="overflow-x-auto"><table class="data-table"><thead><tr><th>#</th><th>Treatments</th><th>Total</th><th>Method</th><th>Date</th><th>Status</th><th></th></tr></thead><tbody>${sortedInvs.map((inv,i)=>`<tr><td class="text-xs text-gray-400">${esc(inv.InvoiceNo||'—')}</td><td class="text-sm">${esc(inv.Treatment||'')}</td><td class="font-semibold text-dental">${fmtCurrency(invTotal(inv))}</td><td class="text-xs">${esc(inv.PaymentMethod||'—')}</td><td>${inv.Date||''}</td><td><span class="badge ${invStatusBadge(inv.Status)}">${inv.Status||''}</span></td><td><button onclick="printInvoice(${STATE.invoices.indexOf(inv)})" class="text-xs text-dental hover:underline">Print</button></td></tr>`).join('')}</tbody></table></div><div class="mt-3 bg-gray-50 rounded-xl p-3 flex justify-between"><span class="font-semibold text-sm">Total Paid</span><span class="font-bold text-green-600">${fmtCurrency(sortedInvs.filter(i=>i.Status==='Paid').reduce((s,i)=>s+invTotal(i),0))}</span></div>${bal>0?`<div class="mt-2 bg-red-50 rounded-xl p-3 flex justify-between"><span class="font-semibold text-sm text-red-700">Outstanding Balance</span><span class="font-bold text-red-600">${fmtCurrency(bal)}</span></div>`:''}`:`<p class="text-gray-400 text-center py-8">No invoices found</p>`;
+
+  // Reset tabs
+  document.querySelectorAll('.profile-tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('ptbOverview').classList.add('active');
+  document.querySelectorAll('.ptab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('ptOverview').classList.add('active');
+  openModal('profileModal');
+}
+function switchProfileTab(tab){
+  document.querySelectorAll('.profile-tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('ptb'+tab.charAt(0).toUpperCase()+tab.slice(1)).classList.add('active');
+  document.querySelectorAll('.ptab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('pt'+tab.charAt(0).toUpperCase()+tab.slice(1)).classList.add('active');
+}
+
+// ===== APPOINTMENTS =====
+function generateTimeSlots(){
+  const from=STATE.settings.hoursFrom||'09:00',to=STATE.settings.hoursTo||'17:00';
+  const sel=document.getElementById('aTime'); sel.innerHTML='';
+  let [h,m]=from.split(':').map(Number);const[eh,em]=to.split(':').map(Number);
+  while(h<eh||(h===eh&&m<=em)){sel.innerHTML+=`<option>${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}</option>`;m+=30;if(m>=60){m=0;h++;}}
+}
+function toggleRecurringOpts(){ document.getElementById('recurringOpts').style.display=document.getElementById('aRecurring').checked?'block':'none'; }
+function renderAppointments(){
+  const sorted=[...STATE.appointments].map((a,i)=>({a,i})).sort((x,y)=>(y.a.Date||'')>(x.a.Date||'')?1:-1);
+  document.getElementById('apptsTbody').innerHTML=sorted.length?sorted.map(({a,i})=>`<tr><td>${a.Date||''}</td><td>${a.Time||''}</td><td class="font-medium">${esc(a.PatientName||'')}</td><td>${esc(a.Doctor||'')}</td><td>${esc(a.Treatment||'')}</td><td>${a.Recurring?`<span class="badge bg-blue-100 text-blue-700">Every ${a.RecurringMonths}m</span>`:'—'}</td><td><span class="badge ${statusBadge(a.Status)}">${a.Status||''}</span></td><td><div class="flex gap-1"><button onclick="editAppt(${i})" class="text-xs text-dental hover:underline px-2 py-1 rounded hover:bg-dental-light">Edit</button><button onclick="deleteAppt(${i})" class="text-xs text-red-500 hover:underline px-2 py-1 rounded hover:bg-red-50">Del</button></div></td></tr>`).join(''):`<tr><td colspan="8" class="text-center text-gray-400 py-8">No appointments yet</td></tr>`;
+  renderCalendar();
+}
+function openApptModal(prefillDate){
+  document.getElementById('editApptId').value='';
+  document.getElementById('aDate').value=prefillDate||new Date().toISOString().slice(0,10);
+  document.getElementById('aPatientSearch').value=''; document.getElementById('aPatientId').value=''; document.getElementById('aPatientName').value='';
+  document.getElementById('selectedPatientDisplay').textContent=''; document.getElementById('aStatus').value='Scheduled'; document.getElementById('aNotes').value='';
+  document.getElementById('aRecurring').checked=false; document.getElementById('recurringOpts').style.display='none';
+  document.getElementById('patientSuggestions').classList.add('hidden');
+  document.getElementById('apptModalTitle').textContent='Add Appointment';
+  populateDoctorSelects(); openModal('apptModal');
+}
+function editAppt(idx){
+  const a=STATE.appointments[idx];
+  document.getElementById('editApptId').value=idx;
+  document.getElementById('aDate').value=a.Date||''; document.getElementById('aPatientSearch').value=a.PatientName||'';
+  document.getElementById('aPatientId').value=a.PatientID||''; document.getElementById('aPatientName').value=a.PatientName||'';
+  document.getElementById('selectedPatientDisplay').textContent=a.PatientName?'✓ '+a.PatientName:'';
+  document.getElementById('aStatus').value=a.Status||'Scheduled'; document.getElementById('aNotes').value=a.Notes||'';
+  document.getElementById('aRecurring').checked=!!(a.Recurring); document.getElementById('recurringOpts').style.display=a.Recurring?'block':'none';
+  populateDoctorSelects();
+  setTimeout(()=>{document.getElementById('aDoctor').value=a.Doctor||'';document.getElementById('aTreatment').value=a.Treatment||'';document.getElementById('aTime').value=a.Time||'';if(a.RecurringMonths)document.getElementById('aRecurringMonths').value=a.RecurringMonths;},50);
+  document.getElementById('apptModalTitle').textContent='Edit Appointment'; openModal('apptModal');
+}
+function saveAppt(){
+  const date=document.getElementById('aDate').value;
+  const patName=document.getElementById('aPatientName').value||document.getElementById('aPatientSearch').value;
+  if(!date||!patName){showToast('Date and patient required','error');return;}
+  const recurring=document.getElementById('aRecurring').checked;
+  const recurringMonths=recurring?parseInt(document.getElementById('aRecurringMonths').value||'6'):null;
+  const a={ID:Date.now().toString(),Date:date,Time:document.getElementById('aTime').value,PatientID:document.getElementById('aPatientId').value,PatientName:patName,Doctor:document.getElementById('aDoctor').value,Treatment:document.getElementById('aTreatment').value,Status:document.getElementById('aStatus').value,Notes:document.getElementById('aNotes').value,Recurring:recurring,RecurringMonths:recurringMonths,CreatedAt:new Date().toISOString()};
+  const idx=document.getElementById('editApptId').value;
+  if(idx!==''){a.ID=STATE.appointments[parseInt(idx)].ID||a.ID;STATE.appointments[parseInt(idx)]=a;gsPost({sheet:'Appointments',action:'update',id:a.ID,row:Object.values(a)});}
+  else{STATE.appointments.push(a);gsPost({sheet:'Appointments',action:'append',row:Object.values(a)});}
+  // Create recurring follow-up
+  if(recurring&&recurringMonths&&idx===''){
+    const nextDate=addMonths(date,recurringMonths);
+    const next={...a,ID:(Date.now()+1).toString(),Date:nextDate,Status:'Scheduled',CreatedAt:new Date().toISOString()};
+    STATE.appointments.push(next);
+    gsPost({sheet:'Appointments',action:'append',row:Object.values(next)});
+    showToast(`Recurring appointment created for ${nextDate}!`,'info');
+  }
+  localStorage.setItem('dental_appointments',JSON.stringify(STATE.appointments));
+  closeModal('apptModal'); renderAll(); showToast('Appointment saved!','success');
+}
+function deleteAppt(idx){
+  if(!confirm('Delete?'))return;
+  const a=STATE.appointments[idx];STATE.appointments.splice(idx,1);localStorage.setItem('dental_appointments',JSON.stringify(STATE.appointments));
+  gsPost({sheet:'Appointments',action:'delete',id:a.ID});renderAll();showToast('Deleted','info');
+}
+function searchPatientForAppt(){
+  const q=document.getElementById('aPatientSearch').value.toLowerCase();const sugg=document.getElementById('patientSuggestions');
+  if(!q){sugg.classList.add('hidden');return;}
+  const m=STATE.patients.filter(p=>(p.Name||'').toLowerCase().includes(q)||(p.FileNo||'').toLowerCase().includes(q)).slice(0,6);
+  if(!m.length){sugg.classList.add('hidden');return;}
+  sugg.innerHTML=m.map(p=>`<div class="px-3 py-2.5 text-sm hover:bg-dental-light cursor-pointer border-b border-gray-100 last:border-0" onclick="selectPatientForAppt('${esc(p.ID||'')}','${esc(p.Name||'')}')"><span class="font-medium">${esc(p.Name||'')}</span><span class="text-gray-400 text-xs ml-2">${p.FileNo||''} · ${p.Phone||''}</span></div>`).join('');
+  sugg.classList.remove('hidden');
+}
+function selectPatientForAppt(id,name){document.getElementById('aPatientId').value=id;document.getElementById('aPatientName').value=name;document.getElementById('aPatientSearch').value=name;document.getElementById('selectedPatientDisplay').textContent='✓ '+name;document.getElementById('patientSuggestions').classList.add('hidden');}
+
+// ===== CALENDAR =====
+function renderCalendar(){
+  const months=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const y=STATE.calYear,m=STATE.calMonth;
+  document.getElementById('calTitle').textContent=`${months[m]} ${y}`;
+  const days=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  document.getElementById('calHeaders').innerHTML=days.map(d=>`<div class="text-center text-xs text-gray-400 font-medium py-1">${d}</div>`).join('');
+  const firstDay=new Date(y,m,1).getDay(),daysInMonth=new Date(y,m+1,0).getDate();
+  const todayStr=new Date().toISOString().slice(0,10);
+  const apptDays=new Set(STATE.appointments.filter(a=>{const d=a.Date||'';return d.slice(0,7)===`${y}-${String(m+1).padStart(2,'0')}`;}).map(a=>parseInt((a.Date||'').slice(8,10))));
+  const grid=document.getElementById('calGrid');grid.innerHTML='';
+  for(let i=0;i<firstDay;i++){const el=document.createElement('div');el.className='cal-day other-month';grid.appendChild(el);}
+  for(let d=1;d<=daysInMonth;d++){
+    const ds=`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const el=document.createElement('div');
+    el.className='cal-day'+(ds===todayStr?' today':'')+(apptDays.has(d)?' has-appt':'');
+    el.textContent=d;el.onclick=()=>openApptModal(ds);grid.appendChild(el);
+  }
+}
+function prevMonth(){STATE.calMonth--;if(STATE.calMonth<0){STATE.calMonth=11;STATE.calYear--;}renderCalendar();}
+function nextMonth(){STATE.calMonth++;if(STATE.calMonth>11){STATE.calMonth=0;STATE.calYear++;}renderCalendar();}
+
+// ===== DAILY =====
+function renderDailyDoctorFilter(){
+  const sel=document.getElementById('dailyDoctorFilter');const cur=sel.value;
+  sel.innerHTML=`<option value="">All Doctors</option>`+STATE.doctors.map(d=>`<option value="${esc(d.Name||'')}">${esc(d.Name||'')}</option>`).join('');
+  sel.value=cur;
+}
+function prevDay(){const d=new Date(document.getElementById('dailyDate').value||new Date());d.setDate(d.getDate()-1);document.getElementById('dailyDate').value=d.toISOString().slice(0,10);renderDaily();}
+function nextDay(){const d=new Date(document.getElementById('dailyDate').value||new Date());d.setDate(d.getDate()+1);document.getElementById('dailyDate').value=d.toISOString().slice(0,10);renderDaily();}
+function goToday(){document.getElementById('dailyDate').value=new Date().toISOString().slice(0,10);renderDaily();}
+function renderDaily(){
+  const date=document.getElementById('dailyDate').value||new Date().toISOString().slice(0,10);
+  const docFilter=document.getElementById('dailyDoctorFilter').value;
+  const dayApptsWithIdx=STATE.appointments.map((a,i)=>({a,i})).filter(({a})=>String(a.Date||'').slice(0,10)===date&&(!docFilter||a.Doctor===docFilter));
+  dayApptsWithIdx.sort((x,y)=>(x.a.Time||'')>(y.a.Time||'')?1:-1);
+  const from=STATE.settings.hoursFrom||'09:00',to=STATE.settings.hoursTo||'17:00';
+  let [sh,sm]=from.split(':').map(Number);const[eh,em]=to.split(':').map(Number);
+  const slots=[];
+  while(sh<eh||(sh===eh&&sm<=em)){slots.push(`${String(sh).padStart(2,'0')}:${String(sm).padStart(2,'0')}`);sm+=30;if(sm>=60){sm=0;sh++;}}
+  const apptMap={};dayApptsWithIdx.forEach(({a,i})=>{const t2=(a.Time||'').slice(0,5);if(!apptMap[t2])apptMap[t2]=[];apptMap[t2].push({a,i});});
+  document.getElementById('dailyTimeline').innerHTML=slots.length?slots.map(slot=>{
+    const slotAppts=apptMap[slot]||[];
+    return`<div class="time-slot"><div class="time-label">${slot}</div><div class="flex-1 flex flex-col gap-1">${slotAppts.length?slotAppts.map(({a,i})=>`<div class="appt-chip ${esc(a.Status||'Scheduled')}" onclick="editAppt(${i});showTab('appointments',null)"><div class="font-medium">${esc(a.PatientName||'')}</div><div class="flex gap-2 opacity-75"><span>${esc(a.Treatment||'—')}</span>${a.Doctor?`<span>· ${esc(a.Doctor)}</span>`:''}</div></div>`).join(''):'<div class="text-gray-200 text-xs py-2 pl-1">—</div>'}</div></div>`;
+  }).join(''):`<p class="text-gray-400 text-center py-8">No appointments this day</p>`;
+}
+
+// ===== INVOICES =====
+function renderInvoiceItems(){
+  document.getElementById('invoiceItemsContainer').innerHTML=STATE.invoiceItems.length?STATE.invoiceItems.map((item,i)=>`
+    <div class="inv-item-row">
+      <input type="text" value="${esc(item.treatment||'')}" list="tl${i}" class="border border-gray-200 rounded-xl px-2 py-2 text-sm w-full" oninput="onInvTreatmentChange(${i},this.value)" placeholder="Type treatment..."/>
+      <datalist id="tl${i}">${STATE.priceGuide.map(tr=>`<option value="${esc(tr.treatment)}">`).join('')}</datalist>
+      <input type="number" value="${item.price||0}" min="0" step="0.01" class="border border-gray-200 rounded-xl px-2 py-2 text-sm w-24 text-center" oninput="STATE.invoiceItems[${i}].price=parseFloat(this.value)||0;updateInvTotals()"/>
+      <button onclick="removeInvoiceItem(${i})" class="w-6 h-6 flex items-center justify-center text-red-400 hover:text-red-600 text-lg flex-shrink-0">✕</button>
+    </div>`).join(''):`<p class="text-gray-400 text-sm py-2 text-center">No items added</p>`;
+  updateInvTotals();
+}
+function addInvoiceItem(){STATE.invoiceItems.push({treatment:'',price:0});renderInvoiceItems();}
+function removeInvoiceItem(i){STATE.invoiceItems.splice(i,1);renderInvoiceItems();}
+function onInvTreatmentChange(i,val){
+  STATE.invoiceItems[i].treatment=val;
+  const item=STATE.priceGuide.find(p=>p.treatment===val);
+  if(item){STATE.invoiceItems[i].price=item.price;renderInvoiceItems();}else updateInvTotals();
+}
+function updateInvTotals(){
+  const sub=STATE.invoiceItems.reduce((s,i)=>s+(parseFloat(i.price)||0),0);
+  const disc=parseFloat(document.getElementById('iDiscount').value)||0;
+  const dtype=document.getElementById('iDiscountType').value;
+  const discAmt=dtype==='pct'?sub*disc/100:disc;
+  const total=Math.max(0,sub-discAmt);
+  document.getElementById('invSubtotal').textContent=fmtCurrency(sub);
+  document.getElementById('invDiscountDisplay').textContent=`-${fmtCurrency(discAmt)}`;
+  document.getElementById('invDiscountRow').style.display=discAmt>0?'flex':'none';
+  document.getElementById('invTotal').textContent=fmtCurrency(total);
+}
+function openInvoiceModal(){
+  document.getElementById('editInvoiceId').value='';
+  document.getElementById('iPatientSearch').value='';document.getElementById('iPatientId').value='';document.getElementById('iPatientName').value='';
+  document.getElementById('selectedInvPatientDisplay').textContent='';
+  document.getElementById('iDate').value=new Date().toISOString().slice(0,10);
+  document.getElementById('iStatus').value='Paid';document.getElementById('iPaymentMethod').value='Cash';
+  document.getElementById('iDiscount').value='0';document.getElementById('iDiscountType').value='flat';
+  document.getElementById('invPatientSuggestions').classList.add('hidden');
+  STATE.invoiceItems=[{treatment:'',price:0}];
+  renderInvoiceItems(); openModal('invoiceModal');
+}
+function saveInvoice(){
+  const patName=document.getElementById('iPatientName').value||document.getElementById('iPatientSearch').value;
+  if(!patName){showToast('Patient required','error');return;}
+  const filledItems=STATE.invoiceItems.filter(i=>i.treatment);
+  if(!filledItems.length){showToast('Add at least one treatment','error');return;}
+  const sub=filledItems.reduce((s,i)=>s+(parseFloat(i.price)||0),0);
+  const disc=parseFloat(document.getElementById('iDiscount').value)||0;
+  const dtype=document.getElementById('iDiscountType').value;
+  const discAmt=dtype==='pct'?sub*disc/100:disc;
+  const total=Math.max(0,sub-discAmt);
+  const invNo=getNextInvoiceNo();
+  const inv={ID:Date.now().toString(),InvoiceNo:invNo,PatientID:document.getElementById('iPatientId').value,PatientName:patName,Treatment:filledItems.map(i=>i.treatment).join(', '),Amount:sub,Discount:disc,DiscountType:dtype,DiscountAmount:discAmt,Total:total,Items:filledItems,PaymentMethod:document.getElementById('iPaymentMethod').value,Date:document.getElementById('iDate').value,Status:document.getElementById('iStatus').value,CreatedAt:new Date().toISOString()};
+  STATE.invoices.push(inv);
+  localStorage.setItem('dental_invoices',JSON.stringify(STATE.invoices));
+  gsPost({sheet:'Invoices',action:'append',row:[inv.ID,inv.InvoiceNo,inv.PatientName,inv.Treatment,inv.Total,inv.Discount,inv.PaymentMethod,inv.Date,inv.Status]});
+  closeModal('invoiceModal'); renderAll(); showToast('Invoice saved!','success');
+  if(confirm(`Invoice ${invNo} saved! Would you like to print it now?`)){
+    printInvoice(STATE.invoices.length-1);
+  }
+}
+function renderInvoices(){
+  const q=(document.getElementById('invoiceSearch')?document.getElementById('invoiceSearch').value||'':'').toLowerCase();
+  let list=[...STATE.invoices].map((inv,i)=>({inv,i})).reverse();
+  if(q) list=list.filter(({inv})=>(inv.PatientName||'').toLowerCase().includes(q)||(inv.Treatment||'').toLowerCase().includes(q));
+  document.getElementById('invoicesTbody').innerHTML=list.length?list.map(({inv,i:ri})=>{
+    const total=invTotal(inv);
+    const items=inv.Items&&Array.isArray(inv.Items)?inv.Items:[{treatment:inv.Treatment||'',price:inv.Amount||0}];
+    const treatLabel=items.length===1?esc(items[0].treatment||''):`<span title="${items.map(it=>it.treatment).join(', ')}">${esc(items[0].treatment||'')} <span class="text-gray-400">+${items.length-1}</span></span>`;
+    return`<tr>
+      <td class="text-xs font-mono font-semibold text-dental">${esc(inv.InvoiceNo||`#${ri+1}`)}</td>
+      <td class="font-medium">${esc(inv.PatientName||'')}</td>
+      <td class="text-sm max-w-xs">${treatLabel}</td>
+      <td class="font-semibold text-dental">${fmtCurrency(total)}</td>
+      <td class="text-xs">${parseFloat(inv.Discount||0)>0?`${inv.Discount}${inv.DiscountType==='pct'?'%':' flat'}`:'—'}</td>
+      <td><span class="badge bg-gray-100 text-gray-600 text-xs">${esc(inv.PaymentMethod||'—')}</span></td>
+      <td>${inv.Date||''}</td>
+      <td><span class="badge ${invStatusBadge(inv.Status)}">${inv.Status||''}</span></td>
+      <td><div class="flex gap-1"><button onclick="printInvoice(${ri})" class="text-xs text-dental hover:underline px-2 py-1 rounded hover:bg-dental-light">Print</button><button onclick="deleteInvoice(${ri})" class="text-xs text-red-500 hover:underline px-2 py-1 rounded hover:bg-red-50">Del</button></div></td>
+    </tr>`;
+  }).join(''):`<tr><td colspan="9" class="text-center text-gray-400 py-8">No invoices yet</td></tr>`;
+}
+function printInvoice(idx){
+  const inv=STATE.invoices[idx];
+  const clinic=STATE.settings.clinicName||'Finesse Dental Care';
+  const sym=CURRENCY_SYMBOLS[STATE.currency]||'$';
+  const items=inv.Items&&Array.isArray(inv.Items)?inv.Items:[{treatment:inv.Treatment||'',price:inv.Amount||0}];
+  const sub=items.reduce((s,i)=>s+(parseFloat(i.price)||0),0);
+  const discAmt=parseFloat(inv.DiscountAmount||0);
+  const total=invTotal(inv);
+  const invNo=inv.InvoiceNo||`#${idx+1}`;
+  document.getElementById('printContent').innerHTML=`
+    <div style="font-family:Arial,sans-serif;color:#1a1a1a;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid #007bff;padding-bottom:16px;margin-bottom:20px;">
+        <div><h1 style="font-size:22px;color:#007bff;margin:0 0 4px;">${esc(clinic)}</h1><p style="font-size:12px;color:#666;margin:0;">Dental Care Management</p></div>
+        <div style="text-align:right;"><p style="font-size:20px;font-weight:900;color:#007bff;margin:0;">${esc(invNo)}</p><p style="font-size:12px;color:#999;margin:2px 0 0;">INVOICE</p></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:20px;">
+        <div><p style="font-size:11px;color:#999;margin:0 0 2px;text-transform:uppercase;">Bill To</p><p style="font-size:17px;font-weight:700;margin:0;">${esc(inv.PatientName||'')}</p></div>
+        <div style="text-align:right;"><p style="font-size:11px;color:#999;margin:0 0 2px;">Date: ${inv.Date||''}</p><p style="font-size:11px;color:#999;margin:0 0 4px;">Payment: ${esc(inv.PaymentMethod||'—')}</p><span style="background:${inv.Status==='Paid'?'#d1fae5':inv.Status==='Pending'?'#fef3c7':'#fee2e2'};color:${inv.Status==='Paid'?'#065f46':inv.Status==='Pending'?'#92400e':'#991b1b'};padding:3px 12px;border-radius:99px;font-size:12px;font-weight:700;">${inv.Status||''}</span></div>
+      </div>
+      <table style="width:100%;border-collapse:collapse;margin-bottom:16px;">
+        <thead><tr style="background:#f8fafc;"><th style="padding:10px;text-align:left;font-size:12px;color:#64748b;border-bottom:1px solid #e2e8f0;">Treatment</th><th style="padding:10px;text-align:right;font-size:12px;color:#64748b;border-bottom:1px solid #e2e8f0;">Amount</th></tr></thead>
+        <tbody>${items.map(it=>`<tr><td style="padding:10px;border-bottom:1px solid #f1f5f9;">${esc(it.treatment||'')}</td><td style="padding:10px;text-align:right;border-bottom:1px solid #f1f5f9;font-weight:600;">${sym}${(parseFloat(it.price)||0).toLocaleString()}</td></tr>`).join('')}</tbody>
+      </table>
+      <div style="background:#f8fafc;border-radius:8px;padding:12px;">
+        <div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:13px;color:#64748b;"><span>Subtotal</span><span>${sym}${sub.toLocaleString()}</span></div>
+        ${discAmt>0?`<div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:13px;color:#ef4444;"><span>Discount (${inv.Discount}${inv.DiscountType==='pct'?'%':''})</span><span>-${sym}${discAmt.toLocaleString()}</span></div>`:''}
+        <div style="display:flex;justify-content:space-between;border-top:1px solid #e2e8f0;padding-top:8px;margin-top:4px;"><span style="font-weight:700;font-size:15px;">Total Due</span><span style="font-weight:700;font-size:18px;color:#007bff;">${sym}${total.toLocaleString()}</span></div>
+      </div>
+      <p style="text-align:center;color:#94a3b8;font-size:11px;margin-top:24px;">Thank you for choosing ${esc(clinic)}! 🦷</p>
+    </div>`;
+  openModal('printModal');
+}
+function printInvoiceWindow(){
+  const content=document.getElementById('printContent').innerHTML;
+  const w=window.open('','_blank','width=700,height=900');
+  w.document.write('<html><head><title>Invoice</title><style>body{font-family:Arial,sans-serif;padding:24px;margin:0;}@media print{body{padding:16px;}}</style></head><body>'+content+'</body></html>');
+  w.document.close();
+  w.focus();
+  setTimeout(()=>{ w.print(); },400);
+}
+function deleteInvoice(idx){
+  if(!confirm('Delete this invoice?'))return;
+  const inv=STATE.invoices[idx];STATE.invoices.splice(idx,1);localStorage.setItem('dental_invoices',JSON.stringify(STATE.invoices));
+  gsPost({sheet:'Invoices',action:'delete',id:inv.ID});renderAll();showToast('Deleted','info');
+}
+function renderPriceGuide(){
+  document.getElementById('priceGuideList').innerHTML=STATE.priceGuide.map((item,i)=>`
+    <div class="flex gap-2 items-center">
+      <input type="text" value="${esc(item.treatment)}" class="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-sm" oninput="STATE.priceGuide[${i}].treatment=this.value"/>
+      <input type="number" value="${item.price}" class="w-24 border border-gray-200 rounded-xl px-3 py-2 text-sm" oninput="STATE.priceGuide[${i}].price=parseFloat(this.value)||0"/>
+      <button onclick="STATE.priceGuide.splice(${i},1);renderPriceGuide();renderTreatmentSelects();" class="text-red-400 hover:text-red-600 p-1">✕</button>
+    </div>`).join('');
+}
+function addPriceRow(){STATE.priceGuide.push({treatment:'New Treatment',price:0});renderPriceGuide();renderTreatmentSelects();}
+function savePriceGuide(){localStorage.setItem('dental_prices',JSON.stringify(STATE.priceGuide));renderTreatmentSelects();if(STATE.scriptUrl)gsPost({sheet:'PriceGuide',action:'replaceAll',rows:STATE.priceGuide.map(item=>[item.treatment,item.price])});showToast('Saved!','success');}
+function renderTreatmentSelects(){
+  const sel=document.getElementById('aTreatment');if(!sel)return;
+  const cur=sel.value;
+  sel.innerHTML=`<option value="">-- Treatment --</option>`+STATE.priceGuide.map(tr=>`<option value="${esc(tr.treatment)}">${esc(tr.treatment)}</option>`).join('');
+  sel.value=cur;
+}
+function searchPatientForInvoice(){
+  const q=document.getElementById('iPatientSearch').value.toLowerCase();const sugg=document.getElementById('invPatientSuggestions');
+  if(!q){sugg.classList.add('hidden');return;}
+  const m=STATE.patients.filter(p=>(p.Name||'').toLowerCase().includes(q)||(p.FileNo||'').toLowerCase().includes(q)).slice(0,6);
+  if(!m.length){sugg.classList.add('hidden');return;}
+  sugg.innerHTML=m.map(p=>`<div class="px-3 py-2.5 text-sm hover:bg-dental-light cursor-pointer border-b border-gray-100 last:border-0" onclick="selectPatientForInvoice('${esc(p.ID||'')}','${esc(p.Name||'')}')"><span class="font-medium">${esc(p.Name||'')}</span><span class="text-gray-400 text-xs ml-2">${p.FileNo||''} · ${p.Phone||''}</span></div>`).join('');
+  sugg.classList.remove('hidden');
+}
+function selectPatientForInvoice(id,name){document.getElementById('iPatientId').value=id;document.getElementById('iPatientName').value=name;document.getElementById('iPatientSearch').value=name;document.getElementById('selectedInvPatientDisplay').textContent='✓ '+name;document.getElementById('invPatientSuggestions').classList.add('hidden');}
+
+// ===== BALANCE TRACKER =====
+function renderBalance(){
+  const balances={};
+  STATE.invoices.filter(inv=>inv.Status==='Pending').forEach(inv=>{
+    const key=inv.PatientID||inv.PatientName;
+    if(!balances[key]) balances[key]={name:inv.PatientName,id:inv.PatientID,phone:'',total:0,count:0,lastDate:''};
+    balances[key].total+=invTotal(inv);
+    balances[key].count++;
+    if((inv.Date||'')>(balances[key].lastDate||'')) balances[key].lastDate=inv.Date||'';
+  });
+  // Enrich with patient phone
+  Object.values(balances).forEach(b=>{
+    const pt=STATE.patients.find(p=>(p.ID||p.Name||'')===(b.id||b.name||''));
+    if(pt) b.phone=pt.Phone||'';
+  });
+  const rows=Object.values(balances).sort((a,b)=>b.total-a.total);
+  const totalOut=rows.reduce((s,r)=>s+r.total,0);
+  const totalPaid=STATE.invoices.filter(i=>i.Status==='Paid').reduce((s,i)=>s+invTotal(i),0);
+  document.getElementById('balTotalOutstanding').textContent=fmtCurrency(totalOut);
+  document.getElementById('balPatientsCount').textContent=rows.length;
+  document.getElementById('balTotalPaid').textContent=fmtCurrency(totalPaid);
+  document.getElementById('balanceTbody').innerHTML=rows.length?rows.map(r=>{
+    const pt=STATE.patients.find(p=>(p.ID||p.Name||'')===(r.id||r.name||''));
+    const fileNo=pt?pt.FileNo||'—':'—';
+    const clean=(r.phone||'').replace(/\D/g,'');
+    return`<tr>
+      <td class="text-xs font-mono text-dental font-semibold">${esc(fileNo)}</td>
+      <td class="font-medium">${esc(r.name||'')}</td>
+      <td>${esc(r.phone||'')}</td>
+      <td class="text-center">${r.count}</td>
+      <td class="font-bold text-red-600">${fmtCurrency(r.total)}</td>
+      <td class="text-sm text-gray-500">${r.lastDate||'—'}</td>
+      <td><div class="flex gap-1">
+        ${pt?`<button onclick="openPatientProfile('${esc(r.id||r.name||'')}')" class="text-xs text-purple-600 hover:underline px-2 py-1 rounded hover:bg-purple-50">Profile</button>`:''}
+        ${clean?`<button onclick="quickWhatsApp('${esc(r.name||'')}','${esc(r.phone||'')}')" class="text-xs text-green-600 hover:underline px-2 py-1 rounded hover:bg-green-50">WhatsApp</button>`:''}
+      </div></td>
+    </tr>`;
+  }).join(''):`<tr><td colspan="7" class="text-center text-gray-400 py-8">No outstanding balances 🎉</td></tr>`;
+}
+
+// ===== WHATSAPP MESSAGES =====
+function searchPatientForMsg(){
+  const q=document.getElementById('msgPatientSearch').value.toLowerCase();const sugg=document.getElementById('msgPatientSuggestions');
+  if(!q){sugg.classList.add('hidden');return;}
+  const m=STATE.patients.filter(p=>(p.Name||'').toLowerCase().includes(q)||(p.FileNo||'').toLowerCase().includes(q)).slice(0,6);
+  if(!m.length){sugg.classList.add('hidden');return;}
+  sugg.innerHTML=m.map(p=>`<div class="px-3 py-2.5 text-sm hover:bg-dental-light cursor-pointer border-b border-gray-100 last:border-0" onclick="selectMsgPatient('${esc(p.ID||'')}','${esc(p.Name||'')}','${esc(p.Phone||'')}')"><span class="font-medium">${esc(p.Name||'')}</span><span class="text-gray-400 text-xs ml-2">${p.FileNo||''} · ${p.Phone||''}</span></div>`).join('');
+  sugg.classList.remove('hidden');
+}
+function selectMsgPatient(id,name,phone){
+  STATE.msgPatientId=id; STATE.msgPatientName=name; STATE.msgPatientPhone=phone;
+  document.getElementById('msgPatientSearch').value=name;
+  document.getElementById('msgPatientDisplay').textContent=`✓ ${name} · ${phone}`;
+  document.getElementById('msgPatientSuggestions').classList.add('hidden');
+  // Populate appointment selector for reminder template
+  const appts=STATE.appointments.filter(a=>a.PatientID===id||a.PatientName===name).filter(a=>a.Status==='Scheduled'||a.Status==='Confirmed').sort((a,b)=>(a.Date||'')>(b.Date||'')?1:-1);
+  const sel=document.getElementById('msgApptSelect');
+  sel.innerHTML='<option value="">-- Pick appointment --</option>'+appts.map((a,i)=>`<option value="${i}">${a.Date||''} ${a.Time||''} · ${esc(a.Treatment||a.Doctor||'')}</option>`).join('');
+  updateMsgPreview();
+}
+function selectMsgTemplate(type,btn){
+  STATE.msgTemplate=type;
+  document.querySelectorAll('.msg-tpl-btn').forEach(b=>b.classList.remove('sel'));
+  btn.classList.add('sel');
+  document.getElementById('msgApptSelector').style.display=type==='appointment'?'block':'none';
+  updateMsgPreview();
+}
+function setMsgLang(lang){
+  STATE.msgLang=lang;
+  document.getElementById('msgLangEN').className=`flex-1 py-2 rounded-xl text-sm font-medium transition ${lang==='en'?'bg-dental text-white':'border border-gray-200 text-gray-600 hover:bg-gray-50'}`;
+  document.getElementById('msgLangAR').className=`flex-1 py-2 rounded-xl text-sm font-medium transition ${lang==='ar'?'bg-dental text-white':'border border-gray-200 text-gray-600 hover:bg-gray-50'}`;
+  updateMsgPreview();
+}
+function updateMsgPreview(){
+  const name=STATE.msgPatientName||'[Patient Name]';
+  const clinic=STATE.settings.clinicName||'Finesse Dental Care';
+  const lang=STATE.msgLang;
+  let msg='';
+  if(STATE.msgTemplate==='appointment'){
+    const sel=document.getElementById('msgApptSelect');
+    const selIdx=sel.value;
+    const patAppts=STATE.msgPatientId?STATE.appointments.filter(a=>a.PatientID===STATE.msgPatientId||a.PatientName===STATE.msgPatientName).filter(a=>a.Status==='Scheduled'||a.Status==='Confirmed'):[];
+    const appt=selIdx!==''&&patAppts[parseInt(selIdx)]?patAppts[parseInt(selIdx)]:null;
+    const date=appt?(appt.Date||'[Date]'):'[Date]';
+    const time=appt?(appt.Time||'[Time]'):'[Time]';
+    msg=WA_TEMPLATES.appointment[lang](name,date,time,clinic);
+  } else if(STATE.msgTemplate==='birthday'){
+    msg=WA_TEMPLATES.birthday[lang](name,clinic);
+  } else if(STATE.msgTemplate==='followup'){
+    msg=WA_TEMPLATES.followup[lang](name,clinic);
+  } else if(STATE.msgTemplate==='checkup'){
+    msg=WA_TEMPLATES.checkup[lang](name,clinic);
+  }
+  document.getElementById('msgPreview').value=msg;
+  document.getElementById('msgPreview').dir=lang==='ar'?'rtl':'ltr';
+}
+function copyMsg(){
+  const txt=document.getElementById('msgPreview').value;
+  if(!txt){showToast('Nothing to copy','error');return;}
+  navigator.clipboard.writeText(txt).then(()=>showToast('Copied to clipboard!','success')).catch(()=>{document.getElementById('msgPreview').select();document.execCommand('copy');showToast('Copied!','success');});
+}
+function openWhatsApp(){
+  const msg=document.getElementById('msgPreview').value;
+  if(!msg){showToast('Generate a message first','error');return;}
+  const phone=(STATE.msgPatientPhone||'').replace(/\D/g,'');
+  if(phone) window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`,'_blank');
+  else window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`,'_blank');
+}
+
+// ===== DENTAL CHART =====
+function getPatientChart(pid){if(!STATE.dentalCharts[pid])STATE.dentalCharts[pid]={teeth:{},plan:[]};return STATE.dentalCharts[pid];}
+function saveCharts(){localStorage.setItem('dental_charts',JSON.stringify(STATE.dentalCharts));}
+function toothColor(pid,num){const chart=getPatientChart(pid),tooth=chart.teeth[num];if(!tooth)return{fill:'#ffffff',stroke:'#94a3b8'};const s=TOOTH_STATUSES.find(ts=>ts.key===tooth.status)||TOOTH_STATUSES[0];return{fill:s.color,stroke:s.border};}
+function renderToothRow(containerId,teeth,pid){
+  const container=document.getElementById(containerId);container.innerHTML='';
+  teeth.forEach(num=>{
+    const{fill,stroke}=toothColor(pid||STATE.currentChartPatientId||'__none__',num);
+    const chart=getPatientChart(pid||STATE.currentChartPatientId||'__none__');
+    const note=chart.teeth[num]?chart.teeth[num].note||'':'';
+    const div=document.createElement('div');
+    div.style.cssText='display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;';
+    div.title=`${TOOTH_NAMES[num]||'Tooth '+num}${note?' - '+note:''}`;
+    div.onclick=()=>openToothModal(num);
+    div.innerHTML=`<span style="font-size:9px;color:#94a3b8;">${num}</span><svg width="28" height="32" viewBox="0 0 28 32" style="filter:drop-shadow(0 1px 2px rgba(0,0,0,.1));cursor:pointer;"><path d="M4 4 C4 2 8 1 14 1 C20 1 24 2 24 4 L26 20 C26 26 22 31 18 31 L10 31 C6 31 2 26 2 20 Z" fill="${fill}" stroke="${stroke}" stroke-width="1.5"/>${note?'<circle cx="14" cy="16" r="4" fill="rgba(0,0,0,0.15)"/>':''}</svg>`;
+    container.appendChild(div);
+  });
+}
+function renderDentalChart(){const pid=STATE.currentChartPatientId||'__none__';renderToothRow('upperTeeth',UPPER_TEETH,pid);renderToothRow('lowerTeeth',LOWER_TEETH,pid);renderTreatmentPlan();}
+function openToothModal(num){
+  if(!STATE.currentChartPatientId){showToast('Please select a patient first','error');return;}
+  STATE.currentToothNum=num;
+  document.getElementById('toothModalTitle').textContent=`Tooth ${num} — ${TOOTH_NAMES[num]||''}`;
+  const chart=getPatientChart(STATE.currentChartPatientId);
+  const cur=chart.teeth[num]?chart.teeth[num].status:'healthy';
+  STATE.pendingToothStatus=cur;
+  document.getElementById('toothNote').value=chart.teeth[num]?chart.teeth[num].note||'':'';
+  document.getElementById('toothStatusBtns').innerHTML=TOOTH_STATUSES.map(s=>`<button onclick="STATE.pendingToothStatus='${s.key}';document.querySelectorAll('#toothStatusBtns button').forEach(b=>b.style.opacity='0.5');this.style.opacity='1';" style="display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:12px;border:2px solid ${s.border};background:${s.color};font-size:13px;font-weight:600;cursor:pointer;opacity:${cur===s.key?'1':'0.5'};color:${s.key==='healthy'?'#374151':'#fff'};">${STATE.lang==='ar'?s.labelAr:s.label}</button>`).join('');
+  openModal('toothModal');
+}
+function saveToothStatus(){
+  if(!STATE.currentChartPatientId||!STATE.currentToothNum)return;
+  const chart=getPatientChart(STATE.currentChartPatientId);
+  chart.teeth[STATE.currentToothNum]={status:STATE.pendingToothStatus,note:document.getElementById('toothNote').value};
+  saveCharts();closeModal('toothModal');renderDentalChart();showToast('Saved!','success');
+}
+function searchPatientForChart(){
+  const q=document.getElementById('chartPatientSearch').value.toLowerCase();const sugg=document.getElementById('chartPatientSuggestions');
+  if(!q){sugg.classList.add('hidden');return;}
+  const m=STATE.patients.filter(p=>(p.Name||'').toLowerCase().includes(q)).slice(0,6);
+  if(!m.length){sugg.classList.add('hidden');return;}
+  sugg.innerHTML=m.map(p=>`<div class="px-3 py-2.5 text-sm hover:bg-dental-light cursor-pointer border-b border-gray-100 last:border-0" onclick="selectChartPatient('${esc(p.ID||'')}','${esc(p.Name||'')}')"><span class="font-medium">${esc(p.Name||'')}</span><span class="text-gray-400 text-xs ml-2">${p.Phone||''}</span></div>`).join('');
+  sugg.classList.remove('hidden');
+}
+function selectChartPatient(id,name){STATE.currentChartPatientId=id;document.getElementById('chartPatientSearch').value=name;document.getElementById('chartPatientDisplay').textContent='📋 Viewing: '+name;document.getElementById('chartPatientSuggestions').classList.add('hidden');renderDentalChart();}
+function clearChartPatient(){STATE.currentChartPatientId=null;document.getElementById('chartPatientSearch').value='';document.getElementById('chartPatientDisplay').textContent='';renderDentalChart();}
+function openDentalChartForPatient(id,name){STATE.currentChartPatientId=id;showTab('dental-chart',null);document.getElementById('chartPatientSearch').value=name;document.getElementById('chartPatientDisplay').textContent='📋 Viewing: '+name;renderDentalChart();}
+
+// ===== TREATMENT PLAN =====
+function renderTreatmentPlan(){
+  const plan=STATE.currentChartPatientId?getPatientChart(STATE.currentChartPatientId).plan:[];
+  document.getElementById('treatmentPlanRows').innerHTML=plan.length?plan.map((row,i)=>`
+    <div class="flex gap-2 items-center flex-wrap">
+      <select class="border border-gray-200 rounded-xl px-2 py-2 text-sm flex-1 min-w-32" onchange="updatePlanRow(${i},'tooth',this.value)">
+        <option value="">Tooth</option>
+        ${[...UPPER_TEETH,...LOWER_TEETH].map(n=>`<option value="${n}" ${String(row.tooth)===String(n)?'selected':''}>${n} ${TOOTH_NAMES[n]||''}</option>`).join('')}
+      </select>
+      <select class="border border-gray-200 rounded-xl px-2 py-2 text-sm flex-1 min-w-28" onchange="updatePlanRow(${i},'treatment',this.value)">
+        <option value="">Treatment</option>
+        ${STATE.priceGuide.map(tr=>`<option value="${esc(tr.treatment)}" ${row.treatment===tr.treatment?'selected':''}>${esc(tr.treatment)}</option>`).join('')}
+      </select>
+      <select class="border border-gray-200 rounded-xl px-2 py-2 text-sm min-w-24" onchange="updatePlanRow(${i},'status',this.value)">
+        <option value="Planned" ${row.status==='Planned'?'selected':''}>Planned</option>
+        <option value="In Progress" ${row.status==='In Progress'?'selected':''}>In Progress</option>
+        <option value="Done" ${row.status==='Done'?'selected':''}>Done</option>
+      </select>
+      <input type="text" placeholder="Notes" value="${esc(row.notes||'')}" class="border border-gray-200 rounded-xl px-2 py-2 text-sm flex-1 min-w-24" oninput="updatePlanRow(${i},'notes',this.value)"/>
+      <button onclick="deletePlanRow(${i})" class="text-red-400 hover:text-red-600 p-1 flex-shrink-0">✕</button>
+    </div>`).join(''):`<p class="text-gray-400 text-sm py-2">No treatment plan yet</p>`;
+}
+function addTreatmentPlanRow(){if(!STATE.currentChartPatientId){showToast('Select a patient first','error');return;}const chart=getPatientChart(STATE.currentChartPatientId);chart.plan.push({tooth:'',treatment:'',status:'Planned',notes:''});saveCharts();renderTreatmentPlan();}
+function updatePlanRow(i,field,val){if(!STATE.currentChartPatientId)return;const chart=getPatientChart(STATE.currentChartPatientId);chart.plan[i][field]=val;saveCharts();}
+function deletePlanRow(i){if(!STATE.currentChartPatientId)return;const chart=getPatientChart(STATE.currentChartPatientId);chart.plan.splice(i,1);saveCharts();renderTreatmentPlan();}
+function saveTreatmentPlan(){saveCharts();showToast('Plan saved!','success');}
+
+// ===== DOCTORS =====
+function renderDoctorsList(){document.getElementById('doctorsList').innerHTML=STATE.doctors.length?STATE.doctors.map((d,i)=>`<div class="flex items-center justify-between py-2 px-3 bg-gray-50 rounded-xl"><div><p class="font-medium text-sm">${esc(d.Name||'')}</p><p class="text-xs text-gray-400">${esc(d.Specialization||'')}</p></div><button onclick="deleteDoctor(${i})" class="text-red-400 hover:text-red-600 text-xs">✕</button></div>`).join(''):`<p class="text-gray-400 text-sm py-2">No doctors yet</p>`;}
+function renderDoctorFilter(){
+  const sel=document.getElementById('doctorFilter');const cur=sel.value;
+  sel.innerHTML=`<option value="">All Doctors</option>`+STATE.doctors.map(d=>`<option value="${esc(d.Name||'')}">${esc(d.Name||'')}</option>`).join('');
+  sel.value=cur;populateDoctorSelects();
+}
+function populateDoctorSelects(){
+  const sel=document.getElementById('aDoctor');if(!sel)return;
+  sel.innerHTML=`<option value="">-- Doctor --</option>`+STATE.doctors.map(d=>`<option value="${esc(d.Name||'')}">${esc(d.Name||'')} ${d.Specialization?'· '+d.Specialization:''}</option>`).join('');
+}
+function addDoctor(){
+  const name=document.getElementById('newDoctorName').value.trim(),spec=document.getElementById('newDoctorSpec').value.trim();
+  if(!name){showToast('Doctor name required','error');return;}
+  const doc={ID:Date.now().toString(),Name:name,Specialization:spec};
+  STATE.doctors.push(doc);localStorage.setItem('dental_doctors',JSON.stringify(STATE.doctors));
+  gsPost({sheet:'Doctors',action:'append',row:Object.values(doc)});
+  document.getElementById('newDoctorName').value='';document.getElementById('newDoctorSpec').value='';
+  renderAll();showToast('Doctor added!','success');
+}
+function deleteDoctor(idx){if(!confirm('Remove this doctor?'))return;const d=STATE.doctors[idx];STATE.doctors.splice(idx,1);localStorage.setItem('dental_doctors',JSON.stringify(STATE.doctors));gsPost({sheet:'Doctors',action:'delete',id:d.ID});renderAll();showToast('Deleted','info');}
+function syncDoctorSearch(){document.getElementById('doctorSearchInput').value=document.getElementById('doctorFilter').value;renderDoctorView();}
+function renderDoctorView(){
+  const searchQ=(document.getElementById('doctorSearchInput').value||'').toLowerCase();
+  const dropVal=document.getElementById('doctorFilter').value;
+  const filter=searchQ||dropVal;
+  const period=document.getElementById('doctorPeriod').value;
+  const today=new Date().toISOString().slice(0,10);
+  const weekEnd=new Date(Date.now()+7*24*60*60*1000).toISOString().slice(0,10);
+  let appts=STATE.appointments;
+  if(filter) appts=appts.filter(a=>(a.Doctor||'').toLowerCase().includes(filter.toLowerCase()));
+  if(period==='today') appts=appts.filter(a=>(a.Date||'').slice(0,10)===today);
+  else if(period==='week') appts=appts.filter(a=>(a.Date||'')>=today&&(a.Date||'')<=weekEnd);
+  const sorted=appts.sort((a,b)=>((a.Date||'')+(a.Time||''))>((b.Date||'')+(b.Time||''))?1:-1);
+  document.getElementById('doctorViewTbody').innerHTML=sorted.length?sorted.map(a=>`<tr><td>${a.Date||''}</td><td>${a.Time||''}</td><td class="font-medium">${esc(a.PatientName||'')}</td><td>${esc(a.Treatment||'')}</td><td><span class="badge ${statusBadge(a.Status)}">${a.Status||''}</span></td></tr>`).join(''):`<tr><td colspan="5" class="text-center text-gray-400 py-8">No data</td></tr>`;
+  document.getElementById('doctorStatsBox').textContent=`${sorted.length} appointment${sorted.length!==1?'s':''} · ${filter||'All Doctors'}`;
+}
+
+// ===== NAVIGATION =====
+function showTab(name,btn){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  document.querySelectorAll('#sideNav .nav-item').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('#bottomNav .nav-item').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  const titles={dashboard:'Dashboard',patients:'Patients',appointments:'Appointments',daily:'Daily View',invoices:'Invoices',balance:'Balance Tracker',messages:'WhatsApp Messages','dental-chart':'Dental Chart',doctors:'Doctors',settings:'Settings',birthdays:'Birthdays'};
+  document.getElementById('pageTitle').textContent=titles[name]||name;
+  closeSidebar();
+  if(name==='appointments') renderCalendar();
+  if(name==='invoices'){renderPriceGuide();renderTreatmentSelects();}
+  if(name==='settings'){renderDoctorsList();applySettings();}
+  if(name==='doctors') renderDoctorView();
+  if(name==='daily'){renderDailyDoctorFilter();renderDaily();}
+  if(name==='dental-chart') renderDentalChart();
+  if(name==='birthdays') renderBirthdays();
+  if(name==='balance') renderBalance();
+  if(name==='messages') updateMsgPreview();
+}
+function openFabModal(){
+  const id=(document.querySelector('.section.active')||{}).id||'';
+  if(id==='tab-patients') openPatientModal();
+  else if(id==='tab-appointments') openApptModal(null);
+  else if(id==='tab-invoices') openInvoiceModal();
+  else openPatientModal();
+}
+function openSidebar(){document.getElementById('sidebar').classList.add('open');document.getElementById('sidebarOverlay').classList.add('show');}
+function closeSidebar(){document.getElementById('sidebar').classList.remove('open');document.getElementById('sidebarOverlay').classList.remove('show');}
+function openModal(id){document.getElementById(id).classList.remove('hidden');document.body.style.overflow='hidden';}
+function closeModal(id){document.getElementById(id).classList.add('hidden');document.body.style.overflow='';}
+function closeModalOnOverlay(e,id){if(e.target===e.currentTarget)closeModal(id);}
+function showToast(msg,type='info'){
+  const c=document.getElementById('toastContainer'),ts=document.createElement('div');
+  ts.className=`toast ${type}`;ts.textContent=msg;c.appendChild(ts);
+  setTimeout(()=>{ts.style.opacity='0';ts.style.transition='opacity .3s';setTimeout(()=>ts.remove(),300);},3000);
+}
+
+window.addEventListener('DOMContentLoaded',()=>{
+  if(sessionStorage.getItem('dental_auth')==='1'){document.getElementById('lockScreen').style.display='none';init();}
+  const today=new Date().toISOString().slice(0,10);
+  document.getElementById('aDate').value=today;
+  document.getElementById('iDate').value=today;
+  document.getElementById('dailyDate').value=today;
+});
+</script>
+</body>
+</html>
