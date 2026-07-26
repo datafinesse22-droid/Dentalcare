@@ -196,7 +196,6 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:#007bff!import
         <div class="stat-card" style="--from:#8b5cf6;--to:#6d28d9"><p class="text-purple-100 text-xs mb-1" data-i18n="revenue">Revenue</p><p class="text-2xl font-bold" id="statRevenue">0</p></div>
         <div class="stat-card" style="--from:#f59e0b;--to:#d97706"><p class="text-yellow-100 text-xs mb-1" data-i18n="doctors">Doctors</p><p class="text-3xl font-bold" id="statDoctors">0</p></div>
       </div>
-      <!-- Birthdays Today Banner -->
       <div id="dashBirthdays" class="mb-4"></div>
       <div class="grid md:grid-cols-2 gap-4">
         <div class="card"><h3 class="font-semibold mb-3 text-sm text-gray-500 uppercase tracking-wide" data-i18n="upcomingAppts">Upcoming Appointments</h3><div id="dashAppts"><p class="text-gray-400 text-center py-4" data-i18n="noData">No data yet</p></div></div>
@@ -212,7 +211,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:#007bff!import
         </button>
       </div>
       <div class="card mb-4 flex gap-2">
-        <input id="patientSearch" type="text" class="flex-1 border border-gray-200 rounded-xl px-4 py-2.5 text-sm" oninput="renderPatients()" id="patientSearch" placeholder="Search by name or phone..."/>
+        <input id="patientSearch" type="text" class="flex-1 border border-gray-200 rounded-xl px-4 py-2.5 text-sm" oninput="renderPatients()" placeholder="Search by name, phone or file #..."/>
         <button onclick="loadData()" class="p-2.5 border border-gray-200 rounded-xl hover:bg-gray-50" title="Refresh">
           <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
         </button>
@@ -220,6 +219,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:#007bff!import
       <div class="card overflow-x-auto">
         <table class="data-table">
           <thead><tr>
+            <th>File #</th>
             <th data-i18n="name">Name</th>
             <th data-i18n="phone">Phone</th>
             <th data-i18n="dob">Date of Birth</th>
@@ -228,7 +228,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:#007bff!import
             <th data-i18n="notes">Notes</th>
             <th data-i18n="actions">Actions</th>
           </tr></thead>
-          <tbody id="patientsTbody"><tr><td colspan="7" class="text-center text-gray-400 py-8" data-i18n="noData">No data yet</td></tr></tbody>
+          <tbody id="patientsTbody"><tr><td colspan="8" class="text-center text-gray-400 py-8" data-i18n="noData">No data yet</td></tr></tbody>
         </table>
       </div>
     </div>
@@ -310,6 +310,10 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:#007bff!import
         <button onclick="addPriceRow()" class="mt-3 text-dental text-xs font-medium flex items-center gap-1 hover:underline">
           <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> <span data-i18n="addTreatment">Add Treatment</span>
         </button>
+      </div>
+      <!-- Invoice Search -->
+      <div class="card mb-4 flex gap-2">
+        <input id="invoiceSearch" type="text" class="flex-1 border border-gray-200 rounded-xl px-4 py-2.5 text-sm" oninput="renderInvoices()" placeholder="Search by patient name or treatment..."/>
       </div>
       <div class="card overflow-x-auto">
         <table class="data-table">
@@ -626,14 +630,6 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:#007bff!import
     </div>
   </div>
 </div>
-<style>
-@media print {
-  body > *:not(#printModal) { display:none!important; }
-  #printModal { position:static!important; background:none!important; z-index:0; }
-  #printModal .modal-box { box-shadow:none!important; border:none!important; max-height:none!important; padding:0!important; }
-  #printModal > div:first-child { display:none; }
-}
-</style>
 <script>
 // ===== TRANSLATIONS =====
 const TRANSLATIONS = {
@@ -704,10 +700,7 @@ const TRANSLATIONS = {
     connectBtn:'حفظ والاتصال', setupBarLabel:'رابط جوجل شيتس:',
   }
 };
-
 function t(key){ return (TRANSLATIONS[STATE.lang]||{})[key] || TRANSLATIONS.en[key] || key; }
-
-// Apply translations to all data-i18n elements
 function applyTranslations(){
   document.querySelectorAll('[data-i18n]').forEach(el=>{
     const key=el.getAttribute('data-i18n');
@@ -715,12 +708,10 @@ function applyTranslations(){
     if(el.tagName==='INPUT'&&el.hasAttribute('placeholder')) el.placeholder=val;
     else el.textContent=val;
   });
-  // update page title
   const titles={dashboard:'dashboard',patients:'patients',appointments:'appointments',daily:'dailyView',invoices:'invoices','dental-chart':'dentalChart',doctors:'doctors',settings:'settings',birthdays:'birthdays'};
   const active=document.querySelector('.section.active');
   if(active){const id=active.id.replace('tab-','');document.getElementById('pageTitle').textContent=t(titles[id]||id);}
-  // update placeholders manually for inputs with oninput handlers
-  const ps=document.getElementById('patientSearch'); if(ps) ps.placeholder=STATE.lang==='ar'?'بحث بالاسم أو الهاتف...':'Search by name or phone...';
+  const ps=document.getElementById('patientSearch'); if(ps) ps.placeholder=STATE.lang==='ar'?'بحث بالاسم أو الهاتف أو رقم الملف...':'Search by name, phone or file #...';
   const cs=document.getElementById('chartPatientSearch'); if(cs) cs.placeholder=STATE.lang==='ar'?'بحث باسم المريض...':'Search patient name...';
   const ds=document.getElementById('doctorSearchInput'); if(ds) ds.placeholder=STATE.lang==='ar'?'اكتب اسم الطبيب...':'Type doctor name to filter...';
   const nd=document.getElementById('newDoctorName'); if(nd) nd.placeholder=STATE.lang==='ar'?'اسم الطبيب...':'Doctor name...';
@@ -728,11 +719,10 @@ function applyTranslations(){
   const aps=document.getElementById('aPatientSearch'); if(aps) aps.placeholder=STATE.lang==='ar'?'بحث عن مريض...':'Search patient...';
   const ips=document.getElementById('iPatientSearch'); if(ips) ips.placeholder=STATE.lang==='ar'?'بحث عن مريض...':'Search patient...';
   const tn=document.getElementById('toothNote'); if(tn) tn.placeholder=STATE.lang==='ar'?'مثل: ألم عند المضغ':'e.g. pain on chewing';
-  // update lang/currency buttons
+  const invs=document.getElementById('invoiceSearch'); if(invs) invs.placeholder=STATE.lang==='ar'?'بحث بالاسم أو العلاج...':'Search by patient name or treatment...';
   document.getElementById('langBtn').textContent=STATE.lang==='en'?'🌐 العربية':'🌐 English';
   document.getElementById('currBtn').textContent=STATE.currency==='USD'?'💱 EGP':'💱 USD';
 }
-
 // ===== STATE =====
 const STATE = {
   patients:[], appointments:[], invoices:[], doctors:[],
@@ -770,7 +760,6 @@ const UPPER_TEETH = [18,17,16,15,14,13,12,11,21,22,23,24,25,26,27,28];
 const LOWER_TEETH = [48,47,46,45,44,43,42,41,31,32,33,34,35,36,37,38];
 const CORRECT_PW = 'MOSTAFA_saad44';
 const CURRENCY_SYMBOLS = {USD:'$',EGP:'ج.م'};
-
 // ===== HELPERS =====
 function calcAge(dobStr){
   if(!dobStr) return '—';
@@ -797,16 +786,10 @@ function daysUntilBirthday(dobStr){
   if(next<today) next=new Date(today.getFullYear()+1,parseInt(parts[1])-1,parseInt(parts[2]));
   return Math.round((next-today)/(1000*60*60*24));
 }
-
 function invTotal(inv){
   if(inv.Items&&Array.isArray(inv.Items)) return inv.Items.reduce((s,i)=>s+(parseFloat(i.price)||0),0);
   return parseFloat(inv.Amount||0);
 }
-function invTreatmentsLabel(inv){
-  if(inv.Items&&Array.isArray(inv.Items)) return inv.Items.map(i=>esc(i.treatment||'')).join(', ');
-  return esc(inv.Treatment||'');
-}
-
 // ===== AUTH =====
 function doLogin(){
   if(document.getElementById('pwInput').value===CORRECT_PW){
@@ -820,7 +803,6 @@ function doLogin(){
 }
 function doLogout(){ sessionStorage.removeItem('dental_auth'); location.reload(); }
 function togglePw(){ const i=document.getElementById('pwInput'); i.type=i.type==='password'?'text':'password'; }
-
 // ===== INIT =====
 function init(){
   STATE.scriptUrl=localStorage.getItem('dental_script_url')||'';
@@ -840,11 +822,10 @@ function init(){
   document.getElementById('dailyDate').value=today;
   if(STATE.scriptUrl) loadData();
 }
-
 // ===== GOOGLE SHEETS =====
 function saveScriptUrl(){ const u=document.getElementById('scriptUrl').value.trim(); if(!u){showToast('Please enter a URL','error');return;} STATE.scriptUrl=u; localStorage.setItem('dental_script_url',u); document.getElementById('connectionStatus').textContent='Connecting...'; loadData(); }
 async function gsGet(sheet){ if(!STATE.scriptUrl) return null; try{ const r=await fetch(`${STATE.scriptUrl}?sheet=${sheet}`); const d=await r.json(); return d.data||[]; }catch{return null;} }
-async function gsPost(payload){ if(!STATE.scriptUrl) return false; try{ await fetch(STATE.scriptUrl,{method:'POST',body:JSON.stringify(payload),headers:{'Content-Type':'application/json'},mode:'no-cors'}); return true; }catch{return false;} }
+async function gsPost(payload){ if(!STATE.scriptUrl) return false; try{ await fetch(STATE.scriptUrl,{method:'POST',body:JSON.stringify(payload),mode:'no-cors'}); return true; }catch{return false;} }
 async function loadData(){
   showToast('Syncing data...','info');
   try{
@@ -860,7 +841,6 @@ async function loadData(){
     showToast('Data synced!','success');
   }catch(e){ document.getElementById('connectionStatus').textContent='❌ Error'; document.getElementById('connectionStatus').className='text-xs font-medium text-red-500'; showToast('Sync failed. Using local data.','error'); }
 }
-
 // ===== RENDER ALL =====
 function renderAll(){
   applySettings(); renderDashboard(); renderPatients(); renderAppointments();
@@ -869,7 +849,6 @@ function renderAll(){
   renderDailyDoctorFilter(); renderBirthdays();
   applyTranslations();
 }
-
 // ===== SETTINGS =====
 function applySettings(){
   document.getElementById('clinicNameDisplay').textContent=STATE.settings.clinicName||'Finesse Dental';
@@ -905,7 +884,6 @@ function setCurrency(cur,persist=true){
 }
 function toggleCurrency(){ setCurrency(STATE.currency==='USD'?'EGP':'USD'); }
 function fmtCurrency(val){ return `${CURRENCY_SYMBOLS[STATE.currency]||'$'}${(parseFloat(val)||0).toLocaleString()}`; }
-
 // ===== DASHBOARD =====
 function renderDashboard(){
   document.getElementById('statPatients').textContent=STATE.patients.length;
@@ -914,7 +892,6 @@ function renderDashboard(){
   document.getElementById('statToday').textContent=STATE.appointments.filter(a=>String(a.Date||'').slice(0,10)===today).length;
   const rev=STATE.invoices.filter(i=>i.Status==='Paid').reduce((s,i)=>s+invTotal(i),0);
   document.getElementById('statRevenue').textContent=fmtCurrency(rev);
-  // birthdays today banner
   const bdays=STATE.patients.filter(p=>isBirthdayToday(p.DOB||p.dob));
   const bdEl=document.getElementById('dashBirthdays');
   if(bdays.length){
@@ -925,32 +902,32 @@ function renderDashboard(){
   const recents=[...STATE.patients].reverse().slice(0,5);
   document.getElementById('dashPatients').innerHTML=recents.length?recents.map(p=>`<div class="flex items-center gap-3 py-2 border-b border-gray-50 last:border-0"><div class="w-8 h-8 rounded-full bg-dental-light flex items-center justify-center text-dental font-bold text-sm flex-shrink-0">${esc(String(p.Name||'?').charAt(0).toUpperCase())}</div><div><p class="font-medium text-sm">${esc(p.Name||'')}</p><p class="text-xs text-gray-400">${p.Phone||''}</p></div></div>`).join(''):`<p class="text-gray-400 text-center py-4">${t('noData')}</p>`;
 }
-
 // ===== BIRTHDAYS TAB =====
 function renderBirthdays(){
   const today=new Date();
   const todayBdays=STATE.patients.filter(p=>isBirthdayToday(p.DOB||p.dob));
-  // today list
   document.getElementById('birthdayTodayList').innerHTML=todayBdays.length
     ? todayBdays.map(p=>`<div class="flex items-center gap-2 py-1 border-b border-pink-300 border-opacity-30 last:border-0"><div class="w-8 h-8 rounded-full bg-white bg-opacity-20 flex items-center justify-center font-bold text-sm">${esc(String(p.Name||'?').charAt(0))}</div><div><p class="font-medium">${esc(p.Name||'')}</p><p class="text-pink-200 text-xs">${t('turnsAge')} ${calcAge(p.DOB||p.dob)} ${t('years')} · ${p.Phone||''}</p></div></div>`).join('')
     : `<p class="text-pink-200 text-sm py-2">${t('noBirthdaysToday')}</p>`;
-  // upcoming 30 days (excluding today)
   const upcoming=STATE.patients.filter(p=>{const d=p.DOB||p.dob; if(!d) return false; const days=daysUntilBirthday(d); return days>0&&days<=30;}).sort((a,b)=>daysUntilBirthday(a.DOB||a.dob)-daysUntilBirthday(b.DOB||b.dob));
   document.getElementById('birthdayUpcomingList').innerHTML=upcoming.length
     ? upcoming.map(p=>{const days=daysUntilBirthday(p.DOB||p.dob); return `<div class="flex items-center justify-between py-2 border-b border-gray-50 last:border-0"><div class="flex items-center gap-2"><div class="w-8 h-8 rounded-full bg-dental-light flex items-center justify-center text-dental font-bold text-sm">${esc(String(p.Name||'?').charAt(0))}</div><div><p class="font-medium text-sm">${esc(p.Name||'')}</p><p class="text-xs text-gray-400">${formatDOB(p.DOB||p.dob)}</p></div></div><span class="text-xs bg-dental-light text-dental font-semibold px-2 py-1 rounded-full">${days}d</span></div>`;}).join('')
     : `<p class="text-gray-400 text-sm py-4 text-center">—</p>`;
-  // all patients with DOB
   const withDOB=STATE.patients.filter(p=>p.DOB||p.dob).sort((a,b)=>{const am=parseInt((a.DOB||a.dob||'').slice(5,7)); const bm=parseInt((b.DOB||b.dob||'').slice(5,7)); const ad=parseInt((a.DOB||a.dob||'').slice(8,10)); const bd2=parseInt((b.DOB||b.dob||'').slice(8,10)); return am!==bm?am-bm:ad-bd2;});
   document.getElementById('allBirthdaysTbody').innerHTML=withDOB.length
     ? withDOB.map(p=>`<tr><td class="font-medium">${esc(p.Name||'')}</td><td>${formatDOB(p.DOB||p.dob)}</td><td>${calcAge(p.DOB||p.dob)}</td><td>${esc(p.Phone||'')}</td></tr>`).join('')
     : `<tr><td colspan="4" class="text-center text-gray-400 py-4">${t('noData')}</td></tr>`;
 }
-
 // ===== PATIENTS =====
 function renderPatients(){
   const q=(document.getElementById('patientSearch').value||'').toLowerCase();
-const f=STATE.patients.filter(p=>(p.Name||'').normalize('NFC').toLowerCase().includes(q.normalize('NFC'))||(p.Phone||'').toLowerCase().includes(q));
+  const f=STATE.patients.filter(p=>
+    (p.Name||'').normalize('NFC').toLowerCase().includes(q.normalize('NFC'))||
+    (p.Phone||'').toLowerCase().includes(q)||
+    (p.FileNo||'').toLowerCase().includes(q)
+  );
   document.getElementById('patientsTbody').innerHTML=f.length?f.map((p,i)=>`<tr>
+    <td class="text-xs font-mono text-dental font-semibold">${esc(p.FileNo||'—')}</td>
     <td><div class="flex items-center gap-2"><div class="w-7 h-7 rounded-full bg-dental-light flex items-center justify-center text-dental font-bold text-xs">${esc(String(p.Name||'?').charAt(0).toUpperCase())}</div><span class="font-medium">${esc(p.Name||'')}</span>${isBirthdayToday(p.DOB||p.dob)?'<span title="Birthday today!">🎂</span>':''}</div></td>
     <td>${esc(p.Phone||'')}</td>
     <td>${formatDOB(p.DOB||p.dob)}</td>
@@ -958,12 +935,11 @@ const f=STATE.patients.filter(p=>(p.Name||'').normalize('NFC').toLowerCase().inc
     <td>${p.Gender||'-'}</td>
     <td class="max-w-xs truncate text-gray-500">${esc(p.Notes||'-')}</td>
     <td><div class="flex gap-1">
-      <button onclick="editPatient(${i})" class="text-xs text-dental hover:underline px-2 py-1 rounded hover:bg-dental-light">${t('save').replace('Save','Edit')}</button>
-      <button onclick="editPatient(${i})" class="text-xs text-dental hover:underline px-2 py-1 rounded hover:bg-dental-light">Edit</button>
+      <button onclick="editPatient(${STATE.patients.indexOf(p)})" class="text-xs text-dental hover:underline px-2 py-1 rounded hover:bg-dental-light">Edit</button>
       <button onclick="openDentalChartForPatient('${esc(p.ID||'')}','${esc(p.Name||'')}')" class="text-xs text-purple-600 hover:underline px-2 py-1 rounded hover:bg-purple-50">Chart</button>
-      <button onclick="deletePatient(${i})" class="text-xs text-red-500 hover:underline px-2 py-1 rounded hover:bg-red-50">${t('delete')}</button>
+      <button onclick="deletePatient(${STATE.patients.indexOf(p)})" class="text-xs text-red-500 hover:underline px-2 py-1 rounded hover:bg-red-50">${t('delete')}</button>
     </div></td>
-  </tr>`).join(''):`<tr><td colspan="7" class="text-center text-gray-400 py-8">${t('noData')}</td></tr>`;
+  </tr>`).join(''):`<tr><td colspan="8" class="text-center text-gray-400 py-8">${t('noData')}</td></tr>`;
 }
 function openPatientModal(){
   document.getElementById('editPatientId').value='';
@@ -988,10 +964,11 @@ function editPatient(idx){
 function savePatient(){
   const name=document.getElementById('pName').value.trim(); const phone=document.getElementById('pPhone').value.trim();
   if(!name||!phone){showToast('Name and phone required','error');return;}
-  const p={ID:Date.now().toString(),Name:name,Phone:phone,DOB:document.getElementById('pDOB').value,Gender:document.getElementById('pGender').value,Notes:document.getElementById('pNotes').value,CreatedAt:new Date().toISOString()};
   const idx=document.getElementById('editPatientId').value;
-  if(idx!==''){p.ID=STATE.patients[idx].ID||p.ID;STATE.patients[idx]=p;gsPost({sheet:'Patients',action:'update',id:p.ID,row:[p.ID,p.Name,p.Phone,p.DOB,p.Gender,p.Notes,p.CreatedAt]});}
-  else{STATE.patients.push(p);gsPost({sheet:'Patients',action:'append',row:[p.ID,p.Name,p.Phone,p.DOB,p.Gender,p.Notes,p.CreatedAt]});}
+  const fileNum=idx!==''?(STATE.patients[idx].FileNo||'P-'+String(parseInt(idx)+1).padStart(3,'0')):'P-'+String(STATE.patients.length+1).padStart(3,'0');
+  const p={ID:idx!==''?(STATE.patients[idx].ID||Date.now().toString()):Date.now().toString(),FileNo:fileNum,Name:name,Phone:phone,DOB:document.getElementById('pDOB').value,Gender:document.getElementById('pGender').value,Notes:document.getElementById('pNotes').value,CreatedAt:new Date().toISOString()};
+  if(idx!==''){STATE.patients[idx]=p;gsPost({sheet:'Patients',action:'update',id:p.ID,row:[p.ID,p.FileNo,p.Name,p.Phone,p.DOB,p.Gender,p.Notes,p.CreatedAt]});}
+  else{STATE.patients.push(p);gsPost({sheet:'Patients',action:'append',row:[p.ID,p.FileNo,p.Name,p.Phone,p.DOB,p.Gender,p.Notes,p.CreatedAt]});}
   localStorage.setItem('dental_patients',JSON.stringify(STATE.patients));
   closeModal('patientModal'); renderAll(); showToast(t('save'),'success');
 }
@@ -1001,7 +978,6 @@ function deletePatient(idx){
   localStorage.setItem('dental_patients',JSON.stringify(STATE.patients));
   gsPost({sheet:'Patients',action:'delete',id:p.ID}); renderAll(); showToast(t('delete'),'info');
 }
-
 // ===== APPOINTMENTS =====
 function generateTimeSlots(){
   const from=STATE.settings.hoursFrom||'09:00'; const to=STATE.settings.hoursTo||'17:00';
@@ -1054,13 +1030,12 @@ function deleteAppt(idx){
 function searchPatientForAppt(){
   const q=document.getElementById('aPatientSearch').value.toLowerCase(); const sugg=document.getElementById('patientSuggestions');
   if(!q){sugg.classList.add('hidden');return;}
-  const m=STATE.patients.filter(p=>(p.Name||'').toLowerCase().includes(q)).slice(0,6);
+  const m=STATE.patients.filter(p=>(p.Name||'').toLowerCase().includes(q)||(p.FileNo||'').toLowerCase().includes(q)).slice(0,6);
   if(!m.length){sugg.classList.add('hidden');return;}
-  sugg.innerHTML=m.map(p=>`<div class="px-3 py-2.5 text-sm hover:bg-dental-light cursor-pointer border-b border-gray-100 last:border-0" onclick="selectPatientForAppt('${esc(p.ID||'')}','${esc(p.Name||'')}')"><span class="font-medium">${esc(p.Name||'')}</span><span class="text-gray-400 text-xs ml-2">${p.Phone||''}</span></div>`).join('');
+  sugg.innerHTML=m.map(p=>`<div class="px-3 py-2.5 text-sm hover:bg-dental-light cursor-pointer border-b border-gray-100 last:border-0" onclick="selectPatientForAppt('${esc(p.ID||'')}','${esc(p.Name||'')}')"><span class="font-medium">${esc(p.Name||'')}</span><span class="text-gray-400 text-xs ml-2">${p.FileNo||''} · ${p.Phone||''}</span></div>`).join('');
   sugg.classList.remove('hidden');
 }
 function selectPatientForAppt(id,name){ document.getElementById('aPatientId').value=id; document.getElementById('aPatientName').value=name; document.getElementById('aPatientSearch').value=name; document.getElementById('selectedPatientDisplay').textContent='✓ '+name; document.getElementById('patientSuggestions').classList.add('hidden'); }
-
 // ===== CALENDAR =====
 function renderCalendar(){
   const months=['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -1084,7 +1059,6 @@ function renderCalendar(){
 }
 function prevMonth(){ STATE.calMonth--; if(STATE.calMonth<0){STATE.calMonth=11;STATE.calYear--;} renderCalendar(); }
 function nextMonth(){ STATE.calMonth++; if(STATE.calMonth>11){STATE.calMonth=0;STATE.calYear++;} renderCalendar(); }
-
 // ===== DAILY VIEW =====
 function renderDailyDoctorFilter(){
   const sel=document.getElementById('dailyDoctorFilter'); const cur=sel.value;
@@ -1119,21 +1093,16 @@ function renderDaily(){
     }</div></div>`;
   }).join('');
 }
-
-// ===== INVOICES — MULTI-TREATMENT =====
-function treatmentOptions(selectedVal){
-  return `<option value="">-- ${t('treatment')} --</option>`+STATE.priceGuide.map(tr=>`<option value="${esc(tr.treatment)}" ${tr.treatment===selectedVal?'selected':''}>${esc(tr.treatment)}</option>`).join('');
-}
+// ===== INVOICES =====
 function renderInvoiceItems(){
   document.getElementById('invoiceItemsContainer').innerHTML=STATE.invoiceItems.length
     ? STATE.invoiceItems.map((item,i)=>`
       <div class="inv-item-row" id="invRow${i}">
-                <input type="text" value="${esc(item.treatment||'')}" list="treatmentList${i}" 
+        <input type="text" value="${esc(item.treatment||'')}" list="treatmentList${i}"
           class="border border-gray-200 rounded-xl px-2 py-2 text-sm w-full"
           oninput="onInvTreatmentChange(${i},this.value)"
           placeholder="Type or pick treatment..."/>
         <datalist id="treatmentList${i}">${STATE.priceGuide.map(tr=>`<option value="${esc(tr.treatment)}">`).join('')}</datalist>
-
         <input type="number" value="${item.price||0}" min="0" step="0.01"
           class="border border-gray-200 rounded-xl px-2 py-2 text-sm w-24 text-center"
           oninput="STATE.invoiceItems[${i}].price=parseFloat(this.value)||0;updateInvTotals()"/>
@@ -1186,12 +1155,21 @@ function saveInvoice(){
   STATE.invoices.push(inv);
   localStorage.setItem('dental_invoices',JSON.stringify(STATE.invoices));
   gsPost({sheet:'Invoices',action:'append',row:[inv.ID,inv.PatientName,inv.Treatment,inv.Amount,inv.Date,inv.Status]});
-  closeModal('invoiceModal'); renderAll(); showToast(t('save'),'success');
+  closeModal('invoiceModal');
+  renderAll();
+  showToast(t('save'),'success');
+  // Ask user if they want to print immediately
+  if(confirm('Invoice saved! Would you like to print it now?')){
+    printInvoice(STATE.invoices.length-1);
+  }
 }
 function renderInvoices(){
-  document.getElementById('invoicesTbody').innerHTML=STATE.invoices.length
-    ? [...STATE.invoices].reverse().map((inv,i)=>{
-        const ri=STATE.invoices.length-1-i;
+  const q=(document.getElementById('invoiceSearch')?document.getElementById('invoiceSearch').value||'':'').toLowerCase();
+  let list=[...STATE.invoices].reverse();
+  if(q) list=list.filter(inv=>(inv.PatientName||'').toLowerCase().includes(q)||(inv.Treatment||'').toLowerCase().includes(q));
+  document.getElementById('invoicesTbody').innerHTML=list.length
+    ? list.map((inv)=>{
+        const ri=STATE.invoices.indexOf(inv);
         const total=invTotal(inv);
         const items=inv.Items&&Array.isArray(inv.Items)?inv.Items:[{treatment:inv.Treatment||'',price:inv.Amount||0}];
         const treatLabel=items.length===1?esc(items[0].treatment||''):
@@ -1253,12 +1231,20 @@ function printInvoice(idx){
     </div>`;
   openModal('printModal');
 }
+function printInvoiceWindow(){
+  const content=document.getElementById('printContent').innerHTML;
+  const w=window.open('','_blank','width=700,height=900');
+  w.document.write('<html><head><title>Invoice</title></head><body style="font-family:Arial,sans-serif;padding:24px;">'+content+'</body></html>');
+  w.document.close();
+  w.focus();
+  w.print();
+  w.close();
+}
 function deleteInvoice(idx){
   if(!confirm('Delete this invoice?')) return;
   const inv=STATE.invoices[idx]; STATE.invoices.splice(idx,1); localStorage.setItem('dental_invoices',JSON.stringify(STATE.invoices));
   gsPost({sheet:'Invoices',action:'delete',id:inv.ID}); renderAll(); showToast(t('delete'),'info');
 }
-// Price guide — use oninput so values update immediately before Save is clicked
 function renderPriceGuide(){
   document.getElementById('priceGuideList').innerHTML=STATE.priceGuide.map((item,i)=>`
     <div class="flex gap-2 items-center">
@@ -1280,13 +1266,12 @@ function renderTreatmentSelects(){
 function searchPatientForInvoice(){
   const q=document.getElementById('iPatientSearch').value.toLowerCase(); const sugg=document.getElementById('invPatientSuggestions');
   if(!q){sugg.classList.add('hidden');return;}
-  const m=STATE.patients.filter(p=>(p.Name||'').toLowerCase().includes(q)).slice(0,6);
+  const m=STATE.patients.filter(p=>(p.Name||'').toLowerCase().includes(q)||(p.FileNo||'').toLowerCase().includes(q)).slice(0,6);
   if(!m.length){sugg.classList.add('hidden');return;}
-  sugg.innerHTML=m.map(p=>`<div class="px-3 py-2.5 text-sm hover:bg-dental-light cursor-pointer border-b border-gray-100 last:border-0" onclick="selectPatientForInvoice('${esc(p.ID||'')}','${esc(p.Name||'')}')"><span class="font-medium">${esc(p.Name||'')}</span><span class="text-gray-400 text-xs ml-2">${p.Phone||''}</span></div>`).join('');
+  sugg.innerHTML=m.map(p=>`<div class="px-3 py-2.5 text-sm hover:bg-dental-light cursor-pointer border-b border-gray-100 last:border-0" onclick="selectPatientForInvoice('${esc(p.ID||'')}','${esc(p.Name||'')}')"><span class="font-medium">${esc(p.Name||'')}</span><span class="text-gray-400 text-xs ml-2">${p.FileNo||''} · ${p.Phone||''}</span></div>`).join('');
   sugg.classList.remove('hidden');
 }
 function selectPatientForInvoice(id,name){ document.getElementById('iPatientId').value=id; document.getElementById('iPatientName').value=name; document.getElementById('iPatientSearch').value=name; document.getElementById('selectedInvPatientDisplay').textContent='✓ '+name; document.getElementById('invPatientSuggestions').classList.add('hidden'); }
-
 // ===== DENTAL CHART =====
 function getPatientChart(patientId){ if(!STATE.dentalCharts[patientId]) STATE.dentalCharts[patientId]={teeth:{},plan:[]}; return STATE.dentalCharts[patientId]; }
 function saveCharts(){ localStorage.setItem('dental_charts',JSON.stringify(STATE.dentalCharts)); }
@@ -1350,7 +1335,7 @@ function searchPatientForChart(){
 function selectChartPatient(id,name){
   STATE.currentChartPatientId=id; STATE.currentChartPatientName=name;
   document.getElementById('chartPatientSearch').value=name;
-  document.getElementById('chartPatientDisplay').textContent='📋 '+t('selectPatientChart').replace('Select Patient to view/edit chart','Viewing chart for')+': '+name;
+  document.getElementById('chartPatientDisplay').textContent='📋 Viewing chart for: '+name;
   document.getElementById('chartPatientSuggestions').classList.add('hidden');
   renderDentalChart();
 }
@@ -1368,7 +1353,6 @@ function openDentalChartForPatient(id,name){
   document.querySelectorAll('#bottomNav .nav-item').forEach(b=>b.classList.remove('active'));
   renderDentalChart();
 }
-
 // ===== TREATMENT PLAN =====
 function renderTreatmentPlan(){
   const plan=STATE.currentChartPatientId?getPatientChart(STATE.currentChartPatientId).plan:[];
@@ -1408,7 +1392,6 @@ function deletePlanRow(i){
   chart.plan.splice(i,1); saveCharts(); renderTreatmentPlan();
 }
 function saveTreatmentPlan(){ saveCharts(); showToast(t('savePlan'),'success'); }
-
 // ===== DOCTORS =====
 function renderDoctorsList(){
   document.getElementById('doctorsList').innerHTML=STATE.doctors.length?STATE.doctors.map((d,i)=>`<div class="flex items-center justify-between py-2 px-3 bg-gray-50 rounded-xl"><div><p class="font-medium text-sm">${esc(d.Name||'')}</p><p class="text-xs text-gray-400">${esc(d.Specialization||'')}</p></div><button onclick="deleteDoctor(${i})" class="text-red-400 hover:text-red-600 text-xs">✕</button></div>`).join(''):`<p class="text-gray-400 text-sm py-2">${t('noData')}</p>`;
@@ -1456,7 +1439,6 @@ function renderDoctorView(){
   const docName=filter?filter.charAt(0).toUpperCase()+filter.slice(1):t('allDoctors');
   document.getElementById('doctorStatsBox').textContent=`${sorted.length} appt${sorted.length!==1?'s':''} · ${docName}`;
 }
-
 // ===== NAVIGATION =====
 function showTab(name,btn){
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
@@ -1496,16 +1478,6 @@ function showToast(msg,type='info'){
 function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function statusBadge(s){ return({Scheduled:'bg-blue-100 text-blue-700',Confirmed:'bg-green-100 text-green-700',Completed:'bg-gray-100 text-gray-600',Cancelled:'bg-red-100 text-red-600'})[s]||'bg-gray-100 text-gray-600'; }
 function invStatusBadge(s){ return({Paid:'bg-green-100 text-green-700',Pending:'bg-yellow-100 text-yellow-700',Cancelled:'bg-red-100 text-red-600'})[s]||'bg-gray-100 text-gray-600'; }
-function printInvoiceWindow() {
-  const content = document.getElementById('printContent').innerHTML;
-  const w = window.open('', '_blank', 'width=700,height=900');
-  w.document.write('<html><head><title>Invoice</title></head><body style="font-family:Arial,sans-serif;padding:24px;">' + content + '</body></html>');
-  w.document.close();
-  w.focus();
-  w.print();
-  w.close();
-}
-
 window.addEventListener('DOMContentLoaded',()=>{
   if(sessionStorage.getItem('dental_auth')==='1'){ document.getElementById('lockScreen').style.display='none'; init(); }
   const today=new Date().toISOString().slice(0,10);
