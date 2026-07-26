@@ -1128,9 +1128,12 @@ function renderInvoiceItems(){
   document.getElementById('invoiceItemsContainer').innerHTML=STATE.invoiceItems.length
     ? STATE.invoiceItems.map((item,i)=>`
       <div class="inv-item-row" id="invRow${i}">
-        <select class="border border-gray-200 rounded-xl px-2 py-2 text-sm w-full" onchange="onInvTreatmentChange(${i},this.value)">
-          ${treatmentOptions(item.treatment)}
-        </select>
+                <input type="text" value="${esc(item.treatment||'')}" list="treatmentList${i}" 
+          class="border border-gray-200 rounded-xl px-2 py-2 text-sm w-full"
+          oninput="onInvTreatmentChange(${i},this.value)"
+          placeholder="Type or pick treatment..."/>
+        <datalist id="treatmentList${i}">${STATE.priceGuide.map(tr=>`<option value="${esc(tr.treatment)}">`).join('')}</datalist>
+
         <input type="number" value="${item.price||0}" min="0" step="0.01"
           class="border border-gray-200 rounded-xl px-2 py-2 text-sm w-24 text-center"
           oninput="STATE.invoiceItems[${i}].price=parseFloat(this.value)||0;updateInvTotals()"/>
