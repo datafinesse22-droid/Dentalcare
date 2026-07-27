@@ -478,9 +478,9 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:#007bff!import
             <div><label class="text-xs text-gray-500 mb-1 block">Clinic Name</label><input id="settingClinicName" type="text" class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm" placeholder="Finesse Dental Care"/></div>
             <div><label class="text-xs text-gray-500 mb-1 block">Working Hours</label>
               <div class="flex gap-2">
-                <input id="settingHoursFrom" type="time" class="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-sm" value="09:00"/>
+                <input id="settingHoursFrom" type="time" class="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-sm" value="17:00"/>
                 <span class="self-center text-gray-400">-</span>
-                <input id="settingHoursTo" type="time" class="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-sm" value="17:00"/>
+                <input id="settingHoursTo" type="time" class="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-sm" value="21:30"/>
               </div>
             </div>
             <div><label class="text-xs text-gray-500 mb-1 block">Currency</label>
@@ -872,7 +872,7 @@ function applySettings(){
   document.getElementById('settingCurrency').value=STATE.settings.currency||'USD';
   document.getElementById('settingLang').value=STATE.settings.lang||'en';
 }
-function saveSettings(){ const gk=document.getElementById('settingGeminiKey').value.trim();if(gk) localStorage.setItem('dental_gemini_key',gk); STATE.settings.clinicName=document.getElementById('settingClinicName').value; STATE.settings.hoursFrom=document.getElementById('settingHoursFrom').value; STATE.settings.hoursTo=document.getElementById('settingHoursTo').value; localStorage.setItem('dental_settings',JSON.stringify(STATE.settings)); applySettings(); showToast('Settings saved!','success'); }
+function saveSettings(){ const gk=document.getElementById('settingGeminiKey').value.trim();if(gk) localStorage.setItem('dental_gemini_key',gk); STATE.settings.clinicName=document.getElementById('settingClinicName').value; STATE.settings.hoursFrom=document.getElementById('settingHoursFrom').value; STATE.settings.hoursTo=document.getElementById('settingHoursTo').value; localStorage.setItem('dental_settings',JSON.stringify(STATE.settings)); applySettings(); generateTimeSlots(); renderDaily(); renderDailyDoctorFilter(); showToast('Settings saved!','success'); }
 function setLang(lang,persist=true){ STATE.lang=lang; STATE.settings.lang=lang; if(persist) localStorage.setItem('dental_settings',JSON.stringify(STATE.settings)); document.documentElement.lang=lang; document.documentElement.dir=lang==='ar'?'rtl':'ltr'; document.getElementById('langBtn').textContent=lang==='en'?'🌐 العربية':'🌐 English'; document.getElementById('settingLang').value=lang; translateUI(); }
 function toggleLang(){ setLang(STATE.lang==='en'?'ar':'en'); renderAll(); }
 function setCurrency(cur,persist=true){ STATE.currency=cur; STATE.settings.currency=cur; if(persist) localStorage.setItem('dental_settings',JSON.stringify(STATE.settings)); document.getElementById('currBtn').textContent=cur==='USD'?'💱 EGP':'💱 USD'; document.getElementById('settingCurrency').value=cur; renderInvoices(); renderDashboard(); renderBalance(); }
