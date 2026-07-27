@@ -852,7 +852,7 @@ function applySettings(){
   document.getElementById('settingLang').value=STATE.settings.lang||'en';
 }
 function saveSettings(){ STATE.settings.clinicName=document.getElementById('settingClinicName').value; STATE.settings.hoursFrom=document.getElementById('settingHoursFrom').value; STATE.settings.hoursTo=document.getElementById('settingHoursTo').value; localStorage.setItem('dental_settings',JSON.stringify(STATE.settings)); applySettings(); showToast('Settings saved!','success'); }
-function setLang(lang,persist=true){ STATE.lang=lang; STATE.settings.lang=lang; if(persist) localStorage.setItem('dental_settings',JSON.stringify(STATE.settings)); document.documentElement.lang=lang; document.documentElement.dir=lang==='ar'?'rtl':'ltr'; document.getElementById('langBtn').textContent=lang==='en'?'🌐 العربية':'🌐 English'; document.getElementById('settingLang').value=lang; }
+function setLang(lang,persist=true){ STATE.lang=lang; STATE.settings.lang=lang; if(persist) localStorage.setItem('dental_settings',JSON.stringify(STATE.settings)); document.documentElement.lang=lang; document.documentElement.dir=lang==='ar'?'rtl':'ltr'; document.getElementById('langBtn').textContent=lang==='en'?'🌐 العربية':'🌐 English'; document.getElementById('settingLang').value=lang; translateUI(); }
 function toggleLang(){ setLang(STATE.lang==='en'?'ar':'en'); renderAll(); }
 function setCurrency(cur,persist=true){ STATE.currency=cur; STATE.settings.currency=cur; if(persist) localStorage.setItem('dental_settings',JSON.stringify(STATE.settings)); document.getElementById('currBtn').textContent=cur==='USD'?'💱 EGP':'💱 USD'; document.getElementById('settingCurrency').value=cur; renderInvoices(); renderDashboard(); renderBalance(); }
 function toggleCurrency(){ setCurrency(STATE.currency==='USD'?'EGP':'USD'); }
@@ -1570,6 +1570,124 @@ function showToast(msg,type='info'){
   const c=document.getElementById('toastContainer'),ts=document.createElement('div');
   ts.className=`toast ${type}`;ts.textContent=msg;c.appendChild(ts);
   setTimeout(()=>{ts.style.opacity='0';ts.style.transition='opacity .3s';setTimeout(()=>ts.remove(),300);},3000);
+}
+// ===== BILINGUAL TRANSLATION SYSTEM =====
+const UI_STRINGS = {
+  en: {
+    navDashboard:'Dashboard', navPatients:'Patients', navAppointments:'Appointments',
+    navDaily:'Daily View', navInvoices:'Invoices', navBalance:'Balance Tracker',
+    navMessages:'WhatsApp Messages', navChart:'Dental Chart', navDoctors:'Doctors',
+    navBirthdays:'Birthdays', navSettings:'Settings', navLogout:'Logout',
+    btnAddPatient:'Add Patient', btnAddAppt:'Add Appointment', btnNewInvoice:'New Invoice',
+    btnSave:'Save', btnCancel:'Cancel', btnDelete:'Del', btnEdit:'Edit',
+    btnProfile:'Profile', btnChart:'Chart', btnPrint:'Print',
+    secDashboard:'Dashboard', secPatients:'Patients', secAppointments:'Appointments',
+    secDaily:'Daily Calendar', secInvoices:'Invoices', secBalance:'Outstanding Balance Tracker',
+    secMessages:'WhatsApp Message Templates', secChart:'Dental Chart',
+    secDoctors:'Doctors View', secBirthdays:'Birthdays', secSettings:'Settings',
+    today:'Today', allDoctors:'All Doctors', searchPatient:'Search by name, phone, file # or insurance...',
+    unlock:'Unlock', enterPassword:'Enter your password to continue',
+    settingsClinic:'Clinic Info', settingsDoctors:'Manage Doctors',
+    clinicName:'Clinic Name', workingHours:'Working Hours', currency:'Currency', language:'Language',
+    saveSettings:'Save Settings', doctorName:'Doctor name...', specialization:'Specialization...',
+    totalPatients:"Total Patients", todayAppts:"Today's Appts", revenue:"Revenue", outstanding:"Outstanding",
+    upcoming:'Upcoming Appointments', recentPatients:'Recent Patients',
+    fileNo:'File #', name:'Name', phone:'Phone', dob:'DOB', age:'Age', gender:'Gender',
+    insurance:'Insurance', balance:'Balance', actions:'Actions',
+    date:'Date', time:'Time', patient:'Patient', doctor:'Doctor', treatment:'Treatment',
+    recurring:'Recurring', status:'Status',
+  },
+  ar: {
+    navDashboard:'لوحة التحكم', navPatients:'المرضى', navAppointments:'المواعيد',
+    navDaily:'العرض اليومي', navInvoices:'الفواتير', navBalance:'متابعة الرصيد',
+    navMessages:'رسائل واتساب', navChart:'خريطة الأسنان', navDoctors:'الأطباء',
+    navBirthdays:'أعياد الميلاد', navSettings:'الإعدادات', navLogout:'تسجيل الخروج',
+    btnAddPatient:'إضافة مريض', btnAddAppt:'إضافة موعد', btnNewInvoice:'فاتورة جديدة',
+    btnSave:'حفظ', btnCancel:'إلغاء', btnDelete:'حذف', btnEdit:'تعديل',
+    btnProfile:'الملف', btnChart:'الخريطة', btnPrint:'طباعة',
+    secDashboard:'لوحة التحكم', secPatients:'المرضى', secAppointments:'المواعيد',
+    secDaily:'التقويم اليومي', secInvoices:'الفواتير', secBalance:'متابعة الأرصدة المستحقة',
+    secMessages:'قوالب رسائل واتساب', secChart:'خريطة الأسنان',
+    secDoctors:'عرض الأطباء', secBirthdays:'أعياد الميلاد', secSettings:'الإعدادات',
+    today:'اليوم', allDoctors:'جميع الأطباء', searchPatient:'بحث بالاسم أو الهاتف أو الملف...',
+    unlock:'دخول', enterPassword:'أدخل كلمة المرور للمتابعة',
+    settingsClinic:'معلومات العيادة', settingsDoctors:'إدارة الأطباء',
+    clinicName:'اسم العيادة', workingHours:'ساعات العمل', currency:'العملة', language:'اللغة',
+    saveSettings:'حفظ الإعدادات', doctorName:'اسم الطبيب...', specialization:'التخصص...',
+    totalPatients:'إجمالي المرضى', todayAppts:'مواعيد اليوم', revenue:'الإيرادات', outstanding:'المستحقات',
+    upcoming:'المواعيد القادمة', recentPatients:'أحدث المرضى',
+    fileNo:'رقم الملف', name:'الاسم', phone:'الهاتف', dob:'تاريخ الميلاد', age:'العمر', gender:'الجنس',
+    insurance:'التأمين', balance:'الرصيد', actions:'إجراءات',
+    date:'التاريخ', time:'الوقت', patient:'المريض', doctor:'الطبيب', treatment:'العلاج',
+    recurring:'متكرر', status:'الحالة',
+  }
+};
+
+function t(key){ return (UI_STRINGS[STATE.lang]||UI_STRINGS.en)[key]||key; }
+
+function translateUI(){
+  const L = STATE.lang;
+  // Sidebar nav
+  const navMap = [
+    ['dashboard','navDashboard'],['patients','navPatients'],['appointments','navAppointments'],
+    ['daily','navDaily'],['invoices','navInvoices'],['balance','navBalance'],
+    ['messages','navMessages'],['dental-chart','navChart'],['doctors','navDoctors'],
+    ['birthdays','navBirthdays'],['settings','navSettings']
+  ];
+  document.querySelectorAll('#sideNav .nav-item span').forEach((el,i)=>{
+    if(navMap[i]) el.textContent=t(navMap[i][1]);
+  });
+  // Bottom nav labels
+  const bnLabels=document.querySelectorAll('#bottomNav .nav-item span');
+  const bnKeys=['navDashboard','navPatients','navDaily','navInvoices','navMessages'];
+  bnLabels.forEach((el,i)=>{ if(bnKeys[i]) el.textContent=t(bnKeys[i]); });
+  // Logout button
+  const logoutBtn=document.querySelector('#sidebar button.text-red-500');
+  if(logoutBtn){ const span=logoutBtn.querySelector('svg'); if(span) logoutBtn.lastChild.textContent=' '+t('navLogout'); }
+  // Lock screen
+  const pwBtn=document.querySelector('#lockScreen button[onclick="doLogin()"]');
+  if(pwBtn) pwBtn.textContent=t('unlock');
+  const pwSubtitle=document.querySelector('#lockScreen p.text-gray-500');
+  if(pwSubtitle) pwSubtitle.textContent=t('enterPassword');
+  // Section headings (h2 titles)
+  const headings={
+    'tab-dashboard':t('secDashboard'),'tab-patients':t('secPatients'),
+    'tab-appointments':t('secAppointments'),'tab-daily':t('secDaily'),
+    'tab-invoices':t('secInvoices'),'tab-balance':t('secBalance'),
+    'tab-messages':t('secMessages'),'tab-dental-chart':t('secChart'),
+    'tab-doctors':t('secDoctors'),'tab-birthdays':t('secBirthdays'),'tab-settings':t('secSettings')
+  };
+  Object.entries(headings).forEach(([id,text])=>{
+    const h=document.querySelector(`#${id} h2`);if(h) h.textContent=text;
+  });
+  // Page title in top bar
+  const activeSection=document.querySelector('.section.active');
+  if(activeSection) document.getElementById('pageTitle').textContent=headings[activeSection.id]||'';
+  // Stat card labels
+  const statLabels=document.querySelectorAll('.stat-card p.text-xs');
+  const statKeys=['totalPatients','todayAppts','revenue','outstanding'];
+  statLabels.forEach((el,i)=>{ if(statKeys[i]) el.textContent=t(statKeys[i]); });
+  // Settings section headings
+  const settSec=document.querySelectorAll('#tab-settings .card h3');
+  if(settSec[0]) settSec[0].textContent=t('settingsClinic');
+  if(settSec[1]) settSec[1].textContent=t('settingsDoctors');
+  // Save settings button
+  const saveBtn=document.querySelector('#tab-settings button[onclick="saveSettings()"]');
+  if(saveBtn) saveBtn.textContent=t('saveSettings');
+  // Doctor inputs placeholders
+  const docName=document.getElementById('newDoctorName');
+  const docSpec=document.getElementById('newDoctorSpec');
+  if(docName) docName.placeholder=t('doctorName');
+  if(docSpec) docSpec.placeholder=t('specialization');
+  // Patient search placeholder
+  const ps=document.getElementById('patientSearch');
+  if(ps) ps.placeholder=t('searchPatient');
+  // Dashboard section titles
+  const dashCards=document.querySelectorAll('#tab-dashboard .card h3');
+  if(dashCards[0]) dashCards[0].textContent=t('upcoming');
+  if(dashCards[1]) dashCards[1].textContent=t('recentPatients');
+  // Re-render tables to pick up translated headers
+  renderPatients(); renderAppointments(); renderInvoices();
 }
 
 window.addEventListener('DOMContentLoaded',()=>{
