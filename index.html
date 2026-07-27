@@ -478,7 +478,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:#007bff!import
             <div><label class="text-xs text-gray-500 mb-1 block">Clinic Name</label><input id="settingClinicName" type="text" class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm" placeholder="Finesse Dental Care"/></div>
             <div><label class="text-xs text-gray-500 mb-1 block">Working Hours</label>
               <div class="flex gap-2">
-                <input id="settingHoursFrom" type="time" class="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-sm" value="17:00"/>
+                <input id="settingHoursTo" type="time" class="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-sm" value="21:30"/>
                 <span class="self-center text-gray-400">-</span>
                 <input id="settingHoursTo" type="time" class="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-sm" value="21:30"/>
               </div>
@@ -747,7 +747,7 @@ const CURRENCY_SYMBOLS = {USD:'$', EGP:'ج.م'};
 
 const STATE = {
   patients:[], appointments:[], invoices:[], doctors:[],
-  settings:{ clinicName:'Finesse Dental Care', hoursFrom:'09:00', hoursTo:'17:00', currency:'USD', lang:'en' },
+  settings:{ clinicName:'Finesse Dental Care', hoursFrom:'17:00', hoursTo:'22:00', currency:'USD', lang:'en' },
   priceGuide:[
     {treatment:'Cleaning',price:50},{treatment:'Filling',price:80},{treatment:'Root Canal',price:300},
     {treatment:'Crown',price:500},{treatment:'Extraction',price:100},{treatment:'Whitening',price:150},{treatment:'Braces Consult',price:200},
