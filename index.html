@@ -1756,7 +1756,8 @@ async function sendAIMessage(){
       ]})
     });
     const data = await res.json();
-    const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text || 'Sorry, I could not get a response. Please try again.';
+if(data?.error){ updateAIMessage(thinkingId, 'API Error: '+data.error.message); return; }
+const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text || 'Sorry, I could not get a response. Please try again.';
     updateAIMessage(thinkingId, reply);
     AI_HISTORY.push({role:'user',content:text},{role:'assistant',content:reply});
   } catch(e){
