@@ -1689,6 +1689,79 @@ function translateUI(){
   // Re-render tables to pick up translated headers
   renderPatients(); renderAppointments(); renderInvoices();
 }
+// ===== AI ASSISTANT =====
+const GEMINI_KEY = () => localStorage.getItem('dental_gemini_key')||'';
+const AI_HISTORY = [];
+
+function toggleAIChat(){
+  const box = document.getElementById('aiChatBox');
+  const isVisible = box.style.display === 'flex';
+  box.style.display = isVisible ? 'none' : 'flex';
+  box.style.flexDirection = 'column';
+  if(!isVisible && AI_HISTORY.length === 0){
+    appendAIMessage('assistant', STATE.lang === 'ar'
+      ? 'مرحباً! أنا مساعدك في ' + (STATE.settings.clinicName||'فينيس دينتال') + '. الصق رسالة المريض وسأقترح ردًا احترافيًا!'
+      : 'Hello! I\'m your assistant at ' + (STATE.settings.clinicName||'Finesse Dental') + '. Paste any patient WhatsApp message and I\'ll suggest a professional reply!'
+    );
+  }
+}
+
+function buildAIContext(){
+  return `You are a helpful, professional dental clinic receptionist assistant for "${STATE.settings.clinicName||'Finesse Dental Care'}". 
+Your job is to help clinic staff draft polite, professional replies to patient WhatsApp messages.
+You do NOT have access to any patient records or clinic data.
+Respond in the same language the user writes in (Arabic or English).
+Keep replies warm, concise, and professional — suitable for a dental clinic.
+If asked about specific patient data (appointments, balances, etc.), politely say that staff should check the clinic system directly.`;
+}
+
+async function sendAIMessage(){
+  const input = document.getElementById('aiInput');
+  const text = (input.value||'').trim();
+  if(!text) return;
+  appendAIMessage('user', text);
+  input.value = '';
+  const thinkingId = appendAIMessage('assistant', '...');
+  try {
+    const key = GEMINI_KEY();
+    if(!key){ updateAIMessage(thinkingId, 'Please add your Gemini API key in Settings first.'); return; }
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({contents:[
+        {role:'user',parts:[{text: buildAIContext()}]},
+        {role:'model',parts:[{text:'Understood, I am ready to help draft replies to patient messages.'}]},
+        {role:'user',parts:[{text}]}
+      ]})
+    });
+    const data = await res.json();
+    const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text || 'Sorry, I could not get a response. Please try again.';
+    updateAIMessage(thinkingId, reply);
+    AI_HISTORY.push({role:'user',content:text},{role:'assistant',content:reply});
+  } catch(e){
+    updateAIMessage(thinkingId, 'Error connecting to AI. Please check your internet connection.');
+  }
+}
+
+let aiMsgCounter = 0;
+function appendAIMessage(role, text){
+  const id = 'aimsg-'+(++aiMsgCounter);
+  const box = document.getElementById('aiMessages');
+  const isUser = role === 'user';
+  const div = document.createElement('div');
+  div.id = id;
+  div.style.cssText = `display:flex;justify-content:${isUser?'flex-end':'flex-start'};`;
+  div.innerHTML = `<div style="max-width:85%;padding:8px 12px;border-radius:${isUser?'12px 12px 2px 12px':'12px 12px 12px 2px'};background:${isUser?'#007bff':'#fff'};color:${isUser?'#fff':'#1a1a1a'};font-size:13px;line-height:1.5;border:${isUser?'none':'1px solid #e2e8f0'};white-space:pre-wrap;">${esc(text)}</div>`;
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+  return id;
+}
+
+function updateAIMessage(id, text){
+  const el = document.getElementById(id);
+  if(el) el.querySelector('div').textContent = text;
+  document.getElementById('aiMessages').scrollTop = 9999;
+}
 
 window.addEventListener('DOMContentLoaded',()=>{
   if(sessionStorage.getItem('dental_auth')==='1'){document.getElementById('lockScreen').style.display='none';init();}
