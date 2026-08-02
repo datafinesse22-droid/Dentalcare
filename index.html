@@ -938,7 +938,7 @@ function renderPatients(){
       <td>${p.Insurance?`<span class="badge bg-blue-100 text-blue-700">✓ ${esc(p.InsuranceCompany||'Insured')}</span>`:'<span class="text-gray-400 text-xs">—</span>'}</td>
       <td>${bal>0?`<span class="badge bg-red-100 text-red-600">${fmtCurrency(bal)}</span>`:'<span class="text-green-600 text-xs font-semibold">✓ Clear</span>'}</td>
       <td><div class="flex gap-1 flex-wrap">
-        <button onclick="openPatientProfile('${esc(p.ID||p.Name||'')}')" class="text-xs text-purple-600 hover:underline px-2 py-1 rounded hover:bg-purple-50">Profile</button>
+        <button onclick="openPatientProfile('${esc(String(p.ID||p.Name||''))}')" class="text-xs text-purple-600 hover:underline px-2 py-1 rounded hover:bg-purple-50">Profile</button>
         <button onclick="editPatient(${realIdx})" class="text-xs text-dental hover:underline px-2 py-1 rounded hover:bg-dental-light">Edit</button>
         <button onclick="openDentalChartForPatient('${esc(p.ID||'')}','${esc(p.Name||'')}')" class="text-xs text-gray-500 hover:underline px-2 py-1 rounded hover:bg-gray-100">Chart</button>
         <button onclick="quickWhatsApp('${esc(p.Name||'')}','${esc(p.Phone||'')}')" class="text-xs text-green-600 hover:underline px-2 py-1 rounded hover:bg-green-50">WA</button>
@@ -1005,7 +1005,7 @@ function quickWhatsApp(name,phone){
 
 // ===== PATIENT PROFILE =====
 function openPatientProfile(patientId){
-  const p=STATE.patients.find(pt=>(pt.ID||pt.Name||'')===(patientId||''));
+  const p=STATE.patients.find(pt=>String(pt.ID||pt.Name||'')===String(patientId||''));
   if(!p){showToast('Patient not found','error');return;}
   STATE.currentProfilePatientId=patientId;
   document.getElementById('profileModalTitle').textContent=p.Name||'Profile';
