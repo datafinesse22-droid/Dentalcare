@@ -1078,7 +1078,7 @@ function generateTimeSlots(){
   const from=STATE.settings.hoursFrom||'09:00',to=STATE.settings.hoursTo||'17:00';
   const sel=document.getElementById('aTime'); sel.innerHTML='';
   let [h,m]=from.split(':').map(Number);const[eh,em]=to.split(':').map(Number);
-  while(h<eh||(h===eh&&m<=em)){sel.innerHTML+=`<option>${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}</option>`;m+=30;if(m>=60){m=0;h++;}}
+  while(h<eh||(h===eh&&m<=em)){const val=`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`; sel.innerHTML+=`<option value="${val}">${fmt12(val)}</option>`;m+=30;if(m>=60){m=0;h++;}}
 }
 function toggleRecurringOpts(){ document.getElementById('recurringOpts').style.display=document.getElementById('aRecurring').checked?'block':'none'; }
 function renderAppointments(){
