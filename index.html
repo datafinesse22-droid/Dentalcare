@@ -819,6 +819,7 @@ function invSubtotal(inv){ if(inv.Items&&Array.isArray(inv.Items)) return inv.It
 function invTotal(inv){ const sub=invSubtotal(inv); const disc=parseFloat(inv.Discount||0); const dtype=inv.DiscountType||'flat'; const discAmt=dtype==='pct'?sub*disc/100:disc; return Math.max(0,sub-discAmt); }
 function getNextInvoiceNo(){ STATE.invoiceCounter=(parseInt(localStorage.getItem('dental_invoice_counter')||'0'))+1; localStorage.setItem('dental_invoice_counter',STATE.invoiceCounter); return 'INV-'+String(STATE.invoiceCounter).padStart(4,'0'); }
 function getPatientBalance(patientId){   if(!patientId) return 0;   return STATE.invoices     .filter(inv=>(inv.Status==='Pending'||inv.Status==='Partial')&&(inv.PatientID===patientId||inv.PatientName===patientId))     .reduce((s,inv)=>{       if(inv.Status==='Partial'){         const remaining = Math.max(0, invTotal(inv) - (parseFloat(inv.AmountPaid)||0));         return s + remaining;       }       return s + invTotal(inv);     }, 0); }
+function normalizePhone(phone){ let c=(phone||'').replace(/\D/g,''); if(c.startsWith('00')) c=c.slice(2); if(c.startsWith('0')&&c.length===11) c='2'+c.slice(1); return c; }
 function addMonths(dateStr,months){ const d=new Date(dateStr); d.setMonth(d.getMonth()+parseInt(months)); return d.toISOString().slice(0,10); }
 
 // ===== AUTH =====
@@ -1005,7 +1006,7 @@ function deletePatient(idx){
 }
 function quickWhatsApp(name,phone){
   if(!phone){showToast('No phone number for this patient','error');return;}
-  const clean=phone.replace(/\D/g,'');
+  const clean=normalizePhone(phone);
   const msg=WA_TEMPLATES.followup[STATE.lang](name,STATE.settings.clinicName||'Finesse Dental Care');
   window.open(`https://wa.me/${clean}?text=${encodeURIComponent(msg)}`,'_blank');
 }
@@ -1496,7 +1497,7 @@ function copyMsg(){
 function openWhatsApp(){
   const msg=document.getElementById('msgPreview').value;
   if(!msg){showToast('Generate a message first','error');return;}
-  const phone=(STATE.msgPatientPhone||'').replace(/\D/g,'');
+  const phone=normalizePhone(STATE.msgPatientPhone||'');
   if(phone) window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`,'_blank');
   else window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`,'_blank');
 }
