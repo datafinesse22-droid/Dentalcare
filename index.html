@@ -1009,7 +1009,7 @@ function quickWhatsApp(name,phone){
   if(!phone){showToast('No phone number for this patient','error');return;}
   const clean=normalizePhone(phone);
   const msg=WA_TEMPLATES.followup[STATE.lang](name,STATE.settings.clinicName||'Finesse Dental Care');
-  window.open(`https://wa.me/${clean}?text=${encodeURIComponent(msg)}`,'_blank');
+  window.open(`https://api.whatsapp.com/send?phone=${clean}&text=${encodeURIComponent(msg)}`,'_blank');
 }
 
 // ===== PATIENT PROFILE =====
@@ -1501,7 +1501,7 @@ function openWhatsApp(){
   const msg=document.getElementById('msgPreview').value;
   if(!msg){showToast('Generate a message first','error');return;}
   const phone=normalizePhone(STATE.msgPatientPhone||'');
-  if(phone) window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`,'_blank');
+  if(phone) window.open(`https://api.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(msg)}`,'_blank');
   else window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`,'_blank');
 }
 
