@@ -1238,6 +1238,26 @@ function togglePartialField(){
 }
 
 
+function editInvoice(idx){
+  const inv=STATE.invoices[idx];
+  document.getElementById('editInvoiceId').value=idx;
+  document.getElementById('iPatientSearch').value=inv.PatientName||'';
+  document.getElementById('iPatientId').value=inv.PatientID||'';
+  document.getElementById('iPatientName').value=inv.PatientName||'';
+  document.getElementById('selectedInvPatientDisplay').textContent=inv.PatientName?'✓ '+inv.PatientName:'';
+  document.getElementById('iDate').value=inv.Date||'';
+  document.getElementById('iStatus').value=inv.Status||'Paid';
+  document.getElementById('iAmountPaid').value=inv.AmountPaid||0;
+  document.getElementById('iPaymentMethod').value=inv.PaymentMethod||'Cash';
+  document.getElementById('iDiscount').value=inv.Discount||0;
+  document.getElementById('iDiscountType').value=inv.DiscountType||'flat';
+  document.getElementById('partialPayRow').style.display=inv.Status==='Partial'?'block':'none';
+  document.getElementById('invPatientSuggestions').classList.add('hidden');
+  const items=inv.Items&&Array.isArray(inv.Items)?inv.Items:[{treatment:inv.Treatment||'',price:parseFloat(inv.Amount||inv.Total)||0}];
+  STATE.invoiceItems=items.map(i=>({treatment:i.treatment||'',price:parseFloat(i.price)||0}));
+  renderInvoiceItems();
+  openModal('invoiceModal');
+}
 function openInvoiceModal(){
   document.getElementById('editInvoiceId').value='';
   document.getElementById('iPatientSearch').value='';document.getElementById('iPatientId').value='';document.getElementById('iPatientName').value='';
@@ -1261,13 +1281,20 @@ function saveInvoice(){
   const total=Math.max(0,sub-discAmt);
   const invNo=getNextInvoiceNo();
   const inv={ID:Date.now().toString(),InvoiceNo:invNo,PatientID:document.getElementById('iPatientId').value,PatientName:patName,Treatment:filledItems.map(i=>i.treatment).join(', '),Amount:sub,Discount:disc,DiscountType:dtype,DiscountAmount:discAmt,Total:total, AmountPaid: document.getElementById('iStatus').value==='Partial' ? (parseFloat(document.getElementById('iAmountPaid').value)||0) : (document.getElementById('iStatus').value==='Paid' ? total : 0), Items:filledItems,PaymentMethod:document.getElementById('iPaymentMethod').value,Date:document.getElementById('iDate').value,Status:document.getElementById('iStatus').value,CreatedAt:new Date().toISOString()};
-  STATE.invoices.push(inv);
-  localStorage.setItem('dental_invoices',JSON.stringify(STATE.invoices));
-  gsPost({sheet:'Invoices',action:'append',row:[inv.ID,inv.InvoiceNo,inv.PatientName,inv.Treatment,inv.Total,inv.Discount,inv.PaymentMethod,inv.Date,inv.Status,inv.AmountPaid||0]});
-  closeModal('invoiceModal'); renderAll(); showToast('Invoice saved!','success');
-  if(confirm(`Invoice ${invNo} saved! Would you like to print it now?`)){
-    printInvoice(STATE.invoices.length-1);
+ const editIdx=document.getElementById('editInvoiceId').value;
+  if(editIdx!==''){
+    inv.ID=STATE.invoices[parseInt(editIdx)].ID||inv.ID;
+    inv.InvoiceNo=STATE.invoices[parseInt(editIdx)].InvoiceNo||inv.InvoiceNo;
+    STATE.invoices[parseInt(editIdx)]=inv;
+    gsPost({sheet:'Invoices',action:'update',id:inv.ID,row:[inv.ID,inv.InvoiceNo,inv.PatientName,inv.Treatment,inv.Total,inv.Discount,inv.PaymentMethod,inv.Date,inv.Status,inv.AmountPaid||0]});
+  } else {
+    STATE.invoices.push(inv);
+    gsPost({sheet:'Invoices',action:'append',row:[inv.ID,inv.InvoiceNo,inv.PatientName,inv.Treatment,inv.Total,inv.Discount,inv.PaymentMethod,inv.Date,inv.Status,inv.AmountPaid||0]});
+    if(confirm(`Invoice ${invNo} saved! Would you like to print it now?`)){printInvoice(STATE.invoices.length-1);}
   }
+  localStorage.setItem('dental_invoices',JSON.stringify(STATE.invoices));
+  closeModal('invoiceModal'); renderAll(); showToast('Invoice saved!','success');
+
 }
 function renderInvoices(){
   const q=(document.getElementById('invoiceSearch')?document.getElementById('invoiceSearch').value||'':'').toLowerCase();
@@ -1286,7 +1313,7 @@ function renderInvoices(){
       <td><span class="badge bg-gray-100 text-gray-600 text-xs">${esc(inv.PaymentMethod||'—')}</span></td>
       <td>${inv.Date||''}</td>
       <td><span class="badge ${invStatusBadge(inv.Status)}">${inv.Status||''}</span></td>
-      <td><div class="flex gap-1"><button onclick="printInvoice(${ri})" class="text-xs text-dental hover:underline px-2 py-1 rounded hover:bg-dental-light">Print</button><button onclick="deleteInvoice(${ri})" class="text-xs text-red-500 hover:underline px-2 py-1 rounded hover:bg-red-50">Del</button></div></td>
+      <td><div class="flex gap-1"><button onclick="editInvoice(${ri})" class="text-xs text-green-600 hover:underline px-2 py-1 rounded hover:bg-green-50">Edit</button><button onclick="printInvoice(${ri})" class="text-xs text-dental hover:underline px-2 py-1 rounded hover:bg-dental-light">Print</button><button onclick="deleteInvoice(${ri})" class="text-xs text-red-500 hover:underline px-2 py-1 rounded hover:bg-red-50">Del</button></div></td>
     </tr>`;
   }).join(''):`<tr><td colspan="9" class="text-center text-gray-400 py-8">No invoices yet</td></tr>`;
 }
