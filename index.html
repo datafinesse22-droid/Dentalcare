@@ -1263,7 +1263,7 @@ function saveInvoice(){
   const inv={ID:Date.now().toString(),InvoiceNo:invNo,PatientID:document.getElementById('iPatientId').value,PatientName:patName,Treatment:filledItems.map(i=>i.treatment).join(', '),Amount:sub,Discount:disc,DiscountType:dtype,DiscountAmount:discAmt,Total:total, AmountPaid: document.getElementById('iStatus').value==='Partial' ? (parseFloat(document.getElementById('iAmountPaid').value)||0) : (document.getElementById('iStatus').value==='Paid' ? total : 0), Items:filledItems,PaymentMethod:document.getElementById('iPaymentMethod').value,Date:document.getElementById('iDate').value,Status:document.getElementById('iStatus').value,CreatedAt:new Date().toISOString()};
   STATE.invoices.push(inv);
   localStorage.setItem('dental_invoices',JSON.stringify(STATE.invoices));
-  gsPost({sheet:'Invoices',action:'append',row:[inv.ID,inv.InvoiceNo,inv.PatientName,inv.Treatment,inv.Total,inv.Discount,inv.PaymentMethod,inv.Date,inv.Status]});
+  gsPost({sheet:'Invoices',action:'append',row:[inv.ID,inv.InvoiceNo,inv.PatientName,inv.Treatment,inv.Total,inv.Discount,inv.PaymentMethod,inv.Date,inv.Status,inv.AmountPaid||0]});
   closeModal('invoiceModal'); renderAll(); showToast('Invoice saved!','success');
   if(confirm(`Invoice ${invNo} saved! Would you like to print it now?`)){
     printInvoice(STATE.invoices.length-1);
