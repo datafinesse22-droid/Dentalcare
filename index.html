@@ -813,6 +813,7 @@ function formatDOB(d){ if(!d) return '—'; try{ const s=(d||'').split('T')[0]; 
 function isBirthdayToday(d){ if(!d) return false; const t=new Date(); const mm=String(t.getMonth()+1).padStart(2,'0'),dd=String(t.getDate()).padStart(2,'0'); const s=(d||'').split('T')[0]; const p=s.split('-'); return p.length===3&&p[1]===mm&&p[2]===dd; }
 function daysUntilBirthday(d){ if(!d) return 9999; const s=(d||'').split('T')[0]; const p=s.split('-'); if(p.length!==3) return 9999; const t=new Date(); t.setHours(0,0,0,0); let n=new Date(t.getFullYear(),parseInt(p[1])-1,parseInt(p[2])); if(n<=t) n=new Date(t.getFullYear()+1,parseInt(p[1])-1,parseInt(p[2])); return Math.round((n-t)/(1000*60*60*24)); }
 function fmtCurrency(v){ return `${CURRENCY_SYMBOLS[STATE.currency]||'$'}${(parseFloat(v)||0).toLocaleString()}`; }
+function fmt12(t){ if(!t) return ''; const [h,m]=(t||'').split(':').map(Number); const ampm=h>=12?'PM':'AM'; const h12=h%12||12; return `${h12}:${String(m).padStart(2,'0')} ${ampm}`; }
 function statusBadge(s){ return({Scheduled:'bg-blue-100 text-blue-700',Confirmed:'bg-green-100 text-green-700',Completed:'bg-gray-100 text-gray-600',Cancelled:'bg-red-100 text-red-600'})[s]||'bg-gray-100 text-gray-600'; }
 function invStatusBadge(s){ return({Paid:'bg-green-100 text-green-700',Partial:'bg-orange-100 text-orange-700',Pending:'bg-yellow-100 text-yellow-700',Cancelled:'bg-red-100 text-red-600'})[s]||'bg-gray-100 text-gray-600'; }
 function invSubtotal(inv){ if(inv.Items&&Array.isArray(inv.Items)) return inv.Items.reduce((s,i)=>s+(parseFloat(i.price)||0),0); return parseFloat(inv.Amount||inv.Total||0); }
@@ -914,7 +915,7 @@ function renderDashboard(){
   document.getElementById('dashBirthdays').innerHTML=bdays.length?`<div class="birthday-card mb-4"><div class="flex items-center gap-2 mb-2"><span class="text-2xl">🎂</span><h3 class="font-bold text-lg">Birthdays Today!</h3></div>${bdays.map(p=>`<div class="flex items-center gap-2 py-1"><span class="font-medium">${esc(p.Name||'')}</span><span class="text-pink-200 text-sm">· turns ${calcAge(p.DOB||p.dob)}</span></div>`).join('')}</div>`:'';
 
   const upcoming=STATE.appointments.filter(a=>(a.Date||'')>=today&&a.Status!=='Cancelled').sort((a,b)=>(a.Date||'')>(b.Date||'')?1:-1).slice(0,5);
-  document.getElementById('dashAppts').innerHTML=upcoming.length?upcoming.map(a=>`<div class="flex items-center justify-between py-2 border-b border-gray-50 last:border-0"><div><p class="font-medium text-sm">${esc(a.PatientName||'')}</p><p class="text-xs text-gray-400">${a.Date||''} ${a.Time||''} · ${esc(a.Doctor||'')}</p></div><span class="badge ${statusBadge(a.Status)}">${a.Status||''}</span></div>`).join(''):`<p class="text-gray-400 text-center py-4">No upcoming appointments</p>`;
+  document.getElementById('dashAppts').innerHTML=upcoming.length?upcoming.map(a=>`<div class="flex items-center justify-between py-2 border-b border-gray-50 last:border-0"><div><p class="font-medium text-sm">${esc(a.PatientName||'')}</p><p class="text-xs text-gray-400">${a.Date||''} ${fmt12(a.Time||'')} · ${esc(a.Doctor||'')}</p></div><span class="badge ${statusBadge(a.Status)}">${a.Status||''}</span></div>`).join(''):`<p class="text-gray-400 text-center py-4">No upcoming appointments</p>`;
   const recents=[...STATE.patients].reverse().slice(0,5);
   document.getElementById('dashPatients').innerHTML=recents.length?recents.map(p=>`<div class="flex items-center gap-3 py-2 border-b border-gray-50 last:border-0"><div class="w-8 h-8 rounded-full bg-dental-light flex items-center justify-center text-dental font-bold text-sm flex-shrink-0">${esc(String(p.Name||'?').charAt(0).toUpperCase())}</div><div><p class="font-medium text-sm">${esc(p.Name||'')}</p><p class="text-xs text-gray-400">${p.Phone||''}</p></div></div>`).join(''):`<p class="text-gray-400 text-center py-4">No patients yet</p>`;
 }
@@ -1052,7 +1053,7 @@ function openPatientProfile(patientId){
 
   // Appointments tab
   const sortedAppts=[...allAppts].sort((a,b)=>(b.Date||'')>(a.Date||'')?1:-1);
-  document.getElementById('ptAppointments').innerHTML=sortedAppts.length?`<div class="overflow-x-auto"><table class="data-table"><thead><tr><th>Date</th><th>Time</th><th>Doctor</th><th>Treatment</th><th>Status</th></tr></thead><tbody>${sortedAppts.map(a=>`<tr><td>${a.Date||''}</td><td>${a.Time||''}</td><td>${esc(a.Doctor||'')}</td><td>${esc(a.Treatment||'')}</td><td><span class="badge ${statusBadge(a.Status)}">${a.Status||''}</span></td></tr>`).join('')}</tbody></table></div>`:`<p class="text-gray-400 text-center py-8">No appointments found</p>`;
+  document.getElementById('ptAppointments').innerHTML=sortedAppts.length?`<div class="overflow-x-auto"><table class="data-table"><thead><tr><th>Date</th><th>Time</th><th>Doctor</th><th>Treatment</th><th>Status</th></tr></thead><tbody>${sortedAppts.map(a=>`<tr><td>${a.Date||''}</td><td>${fmt12(a.Time||'')}</td><td>${esc(a.Doctor||'')}</td><td>${esc(a.Treatment||'')}</td><td><span class="badge ${statusBadge(a.Status)}">${a.Status||''}</span></td></tr>`).join('')}</tbody></table></div>`:`<p class="text-gray-400 text-center py-8">No appointments found</p>`;
 
   // Invoices tab
   const sortedInvs=[...allInvs].sort((a,b)=>(b.Date||'')>(a.Date||'')?1:-1);
@@ -1082,7 +1083,7 @@ function generateTimeSlots(){
 function toggleRecurringOpts(){ document.getElementById('recurringOpts').style.display=document.getElementById('aRecurring').checked?'block':'none'; }
 function renderAppointments(){
   const sorted=[...STATE.appointments].map((a,i)=>({a,i})).sort((x,y)=>(y.a.Date||'')>(x.a.Date||'')?1:-1);
-  document.getElementById('apptsTbody').innerHTML=sorted.length?sorted.map(({a,i})=>`<tr><td>${a.Date||''}</td><td>${a.Time||''}</td><td class="font-medium">${esc(a.PatientName||'')}</td><td>${esc(a.Doctor||'')}</td><td>${esc(a.Treatment||'')}</td><td>${a.Recurring?`<span class="badge bg-blue-100 text-blue-700">Every ${a.RecurringMonths}m</span>`:'—'}</td><td><span class="badge ${statusBadge(a.Status)}">${a.Status||''}</span></td><td><div class="flex gap-1"><button onclick="editAppt(${i})" class="text-xs text-dental hover:underline px-2 py-1 rounded hover:bg-dental-light">Edit</button><button onclick="deleteAppt(${i})" class="text-xs text-red-500 hover:underline px-2 py-1 rounded hover:bg-red-50">Del</button></div></td></tr>`).join(''):`<tr><td colspan="8" class="text-center text-gray-400 py-8">No appointments yet</td></tr>`;
+  document.getElementById('apptsTbody').innerHTML=sorted.length?sorted.map(({a,i})=>`<tr><td>${a.Date||''}</td><td>${fmt12(a.Time||'')}</td><td class="font-medium">${esc(a.PatientName||'')}</td><td>${esc(a.Doctor||'')}</td><td>${esc(a.Treatment||'')}</td><td>${a.Recurring?`<span class="badge bg-blue-100 text-blue-700">Every ${a.RecurringMonths}m</span>`:'—'}</td><td><span class="badge ${statusBadge(a.Status)}">${a.Status||''}</span></td><td><div class="flex gap-1"><button onclick="editAppt(${i})" class="text-xs text-dental hover:underline px-2 py-1 rounded hover:bg-dental-light">Edit</button><button onclick="deleteAppt(${i})" class="text-xs text-red-500 hover:underline px-2 py-1 rounded hover:bg-red-50">Del</button></div></td></tr>`).join(''):`<tr><td colspan="8" class="text-center text-gray-400 py-8">No appointments yet</td></tr>`;
   renderCalendar();
 }
 function openApptModal(prefillDate){
@@ -1186,7 +1187,7 @@ function renderDaily(){
   const apptMap={};dayApptsWithIdx.forEach(({a,i})=>{const t2=(a.Time||'').slice(0,5);if(!apptMap[t2])apptMap[t2]=[];apptMap[t2].push({a,i});});
   document.getElementById('dailyTimeline').innerHTML=slots.length?slots.map(slot=>{
     const slotAppts=apptMap[slot]||[];
-    return`<div class="time-slot"><div class="time-label">${slot}</div><div class="flex-1 flex flex-col gap-1">${slotAppts.length?slotAppts.map(({a,i})=>`<div class="appt-chip ${esc(a.Status||'Scheduled')}" onclick="editAppt(${i});showTab('appointments',null)"><div class="font-medium">${esc(a.PatientName||'')}</div><div class="flex gap-2 opacity-75"><span>${esc(a.Treatment||'—')}</span>${a.Doctor?`<span>· ${esc(a.Doctor)}</span>`:''}</div></div>`).join(''):'<div class="text-gray-200 text-xs py-2 pl-1">—</div>'}</div></div>`;
+    return`<div class="time-slot"><div class="time-label">${fmt12(slot)}</div><div class="flex-1 flex flex-col gap-1">${slotAppts.length?slotAppts.map(({a,i})=>`<div class="appt-chip ${esc(a.Status||'Scheduled')}" onclick="editAppt(${i});showTab('appointments',null)"><div class="font-medium">${esc(a.PatientName||'')} <span class="opacity-60 text-xs">${fmt12(a.Time||'')}</span></div><div class="flex gap-2 opacity-75"><span>${esc(a.Treatment||'—')}</span>${a.Doctor?`<span>· ${esc(a.Doctor)}</span>`:''}</div></div>`).join(''):'<div class="text-gray-200 text-xs py-2 pl-1">—</div>'}</div></div>`;
   }).join(''):`<p class="text-gray-400 text-center py-8">No appointments this day</p>`;
 }
 
@@ -1270,6 +1271,7 @@ function openInvoiceModal(){
   STATE.invoiceItems=[{treatment:'',price:0}];
   renderInvoiceItems(); openModal('invoiceModal');
 }
+;
 function saveInvoice(){
   const patName=document.getElementById('iPatientName').value||document.getElementById('iPatientSearch').value;
   if(!patName){showToast('Patient required','error');return;}
@@ -1280,9 +1282,10 @@ function saveInvoice(){
   const dtype=document.getElementById('iDiscountType').value;
   const discAmt=dtype==='pct'?sub*disc/100:disc;
   const total=Math.max(0,sub-discAmt);
-  const invNo=getNextInvoiceNo();
-  const inv={ID:Date.now().toString(),InvoiceNo:invNo,PatientID:document.getElementById('iPatientId').value,PatientName:patName,Treatment:filledItems.map(i=>i.treatment).join(', '),Amount:sub,Discount:disc,DiscountType:dtype,DiscountAmount:discAmt,Total:total, AmountPaid: document.getElementById('iStatus').value==='Partial' ? (parseFloat(document.getElementById('iAmountPaid').value)||0) : (document.getElementById('iStatus').value==='Paid' ? total : 0), Items:filledItems,PaymentMethod:document.getElementById('iPaymentMethod').value,Date:document.getElementById('iDate').value,Status:document.getElementById('iStatus').value,CreatedAt:new Date().toISOString()};
- const editIdx=document.getElementById('editInvoiceId').value;
+  const editIdx=document.getElementById('editInvoiceId').value;
+  const invNo=editIdx!==''?(STATE.invoices[parseInt(editIdx)].InvoiceNo||getNextInvoiceNo()):getNextInvoiceNo();
+  const inv={ID:Date.now().toString(),InvoiceNo:invNo,PatientID:document.getElementById('iPatientId').value,PatientName:patName,Treatment:filledItems.map(i=>i.treatment).join(', '),Amount:sub,Discount:disc,DiscountType:dtype,DiscountAmount:discAmt,Total:total,AmountPaid:document.getElementById('iStatus').value==='Partial'?(parseFloat(document.getElementById('iAmountPaid').value)||0):(document.getElementById('iStatus').value==='Paid'?total:0),Items:filledItems,PaymentMethod:document.getElementById('iPaymentMethod').value,Date:document.getElementById('iDate').value,Status:document.getElementById('iStatus').value,CreatedAt:new Date().toISOString()};
+
   if(editIdx!==''){
     inv.ID=STATE.invoices[parseInt(editIdx)].ID||inv.ID;
     inv.InvoiceNo=STATE.invoices[parseInt(editIdx)].InvoiceNo||inv.InvoiceNo;
@@ -1450,7 +1453,7 @@ function selectMsgPatient(id,name,phone){
   // Populate appointment selector for reminder template
   const appts=STATE.appointments.filter(a=>a.PatientID===id||a.PatientName===name).filter(a=>a.Status==='Scheduled'||a.Status==='Confirmed').sort((a,b)=>(a.Date||'')>(b.Date||'')?1:-1);
   const sel=document.getElementById('msgApptSelect');
-  sel.innerHTML='<option value="">-- Pick appointment --</option>'+appts.map((a,i)=>`<option value="${i}">${a.Date||''} ${a.Time||''} · ${esc(a.Treatment||a.Doctor||'')}</option>`).join('');
+  sel.innerHTML='<option value="">-- Pick appointment --</option>'+appts.map((a,i)=>`<option value="${i}">${a.Date||''} ${fmt12(a.Time||'')} · ${esc(a.Treatment||a.Doctor||'')}</option>`).join('');
   updateMsgPreview();
 }
 function selectMsgTemplate(type,btn){
@@ -1611,7 +1614,7 @@ function renderDoctorView(){
   if(period==='today') appts=appts.filter(a=>(a.Date||'').slice(0,10)===today);
   else if(period==='week') appts=appts.filter(a=>(a.Date||'')>=today&&(a.Date||'')<=weekEnd);
   const sorted=appts.sort((a,b)=>((a.Date||'')+(a.Time||''))>((b.Date||'')+(b.Time||''))?1:-1);
-  document.getElementById('doctorViewTbody').innerHTML=sorted.length?sorted.map(a=>`<tr><td>${a.Date||''}</td><td>${a.Time||''}</td><td class="font-medium">${esc(a.PatientName||'')}</td><td>${esc(a.Treatment||'')}</td><td><span class="badge ${statusBadge(a.Status)}">${a.Status||''}</span></td></tr>`).join(''):`<tr><td colspan="5" class="text-center text-gray-400 py-8">No data</td></tr>`;
+  document.getElementById('doctorViewTbody').innerHTML=sorted.length?sorted.map(a=>`<tr><td>${a.Date||''}</td><td>${fmt12(a.Time||'')}</td><td class="font-medium">${esc(a.PatientName||'')}</td><td>${esc(a.Treatment||'')}</td><td><span class="badge ${statusBadge(a.Status)}">${a.Status||''}</span></td></tr>`).join(''):`<tr><td colspan="5" class="text-center text-gray-400 py-8">No data</td></tr>`;
   document.getElementById('doctorStatsBox').textContent=`${sorted.length} appointment${sorted.length!==1?'s':''} · ${filter||'All Doctors'}`;
 }
 
