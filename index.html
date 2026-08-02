@@ -819,7 +819,7 @@ function invSubtotal(inv){ if(inv.Items&&Array.isArray(inv.Items)) return inv.It
 function invTotal(inv){ const sub=invSubtotal(inv); const disc=parseFloat(inv.Discount||0); const dtype=inv.DiscountType||'flat'; const discAmt=dtype==='pct'?sub*disc/100:disc; return Math.max(0,sub-discAmt); }
 function getNextInvoiceNo(){ STATE.invoiceCounter=(parseInt(localStorage.getItem('dental_invoice_counter')||'0'))+1; localStorage.setItem('dental_invoice_counter',STATE.invoiceCounter); return 'INV-'+String(STATE.invoiceCounter).padStart(4,'0'); }
 function getPatientBalance(patientId){   if(!patientId) return 0;   return STATE.invoices     .filter(inv=>(inv.Status==='Pending'||inv.Status==='Partial')&&(inv.PatientID===patientId||inv.PatientName===patientId))     .reduce((s,inv)=>{       if(inv.Status==='Partial'){         const remaining = Math.max(0, invTotal(inv) - (parseFloat(inv.AmountPaid)||0));         return s + remaining;       }       return s + invTotal(inv);     }, 0); }
-function normalizePhone(phone){ let c=(phone||'').replace(/\D/g,''); if(c.startsWith('00')) c=c.slice(2); if(c.startsWith('0')&&c.length===11) c='2'+c.slice(1); return c; }
+function normalizePhone(phone){ let c=(phone||'').replace(/\D/g,''); if(c.startsWith('00')) c=c.slice(2); if(c.startsWith('0')&&c.length===11) c='20'+c.slice(1); return c; }
 function addMonths(dateStr,months){ const d=new Date(dateStr); d.setMonth(d.getMonth()+parseInt(months)); return d.toISOString().slice(0,10); }
 
 // ===== AUTH =====
@@ -1676,7 +1676,9 @@ const UI_STRINGS = {
     fileNo:'File #', name:'Name', phone:'Phone', dob:'DOB', age:'Age', gender:'Gender',
     insurance:'Insurance', balance:'Balance', actions:'Actions',
     date:'Date', time:'Time', patient:'Patient', doctor:'Doctor', treatment:'Treatment',
-    recurring:'Recurring', status:'Status',
+recurring:'Recurring', status:'Status',
+thFileNo:'File #',thName:'Name',thPhone:'Phone',thDOB:'DOB',thAge:'Age',thGender:'Gender',thInsurance:'Insurance',thBalance:'Balance',thActions:'Actions',thDate:'Date',thTime:'Time',thPatient:'Patient',thDoctor:'Doctor',thTreatment:'Treatment',thInvoiceNo:'Invoice #',thTreatments:'Treatments',thTotal:'Total',thDiscount:'Discount',thPayment:'Payment',
+addPatient:'Add Patient',addAppt:'Add Appointment',newInvoice:'New Invoice',save:'Save',cancel:'Cancel',saveInvoice:'Save Invoice',
   },
   ar: {
     navDashboard:'لوحة التحكم', navPatients:'المرضى', navAppointments:'المواعيد',
@@ -1700,7 +1702,9 @@ const UI_STRINGS = {
     fileNo:'رقم الملف', name:'الاسم', phone:'الهاتف', dob:'تاريخ الميلاد', age:'العمر', gender:'الجنس',
     insurance:'التأمين', balance:'الرصيد', actions:'إجراءات',
     date:'التاريخ', time:'الوقت', patient:'المريض', doctor:'الطبيب', treatment:'العلاج',
-    recurring:'متكرر', status:'الحالة',
+recurring:'متكرر', status:'الحالة',
+thFileNo:'رقم الملف',thName:'الاسم',thPhone:'الهاتف',thDOB:'تاريخ الميلاد',thAge:'العمر',thGender:'الجنس',thInsurance:'التأمين',thBalance:'الرصيد',thActions:'إجراءات',thDate:'التاريخ',thTime:'الوقت',thPatient:'المريض',thDoctor:'الطبيب',thTreatment:'العلاج',thInvoiceNo:'رقم الفاتورة',thTreatments:'العلاجات',thTotal:'الإجمالي',thDiscount:'الخصم',thPayment:'طريقة الدفع',
+addPatient:'إضافة مريض',addAppt:'إضافة موعد',newInvoice:'فاتورة جديدة',save:'حفظ',cancel:'إلغاء',saveInvoice:'حفظ الفاتورة',
   }
 };
 
@@ -1767,8 +1771,22 @@ function translateUI(){
   const dashCards=document.querySelectorAll('#tab-dashboard .card h3');
   if(dashCards[0]) dashCards[0].textContent=t('upcoming');
   if(dashCards[1]) dashCards[1].textContent=t('recentPatients');
-  // Re-render tables to pick up translated headers
-  renderPatients(); renderAppointments(); renderInvoices();
+ // Section action buttons
+[['#tab-patients','addPatient'],['#tab-appointments','addAppt'],['#tab-invoices','newInvoice']].forEach(([sec,key])=>{const btn=document.querySelector(sec+' .hidden.md\\:flex');if(btn){const nodes=btn.childNodes;for(let i=nodes.length-1;i>=0;i--){if(nodes[i].nodeType===3){nodes[i].textContent=' '+t(key);break;}}}});
+// Table headers - Patients
+const ptH=document.querySelectorAll('#tab-patients .data-table th');['thFileNo','thName','thPhone','thDOB','thAge','thGender','thInsurance','thBalance','thActions'].forEach((k,i)=>{if(ptH[i])ptH[i].textContent=t(k);});
+// Table headers - Appointments
+const apH=document.querySelectorAll('#tab-appointments .data-table th');['thDate','thTime','thPatient','thDoctor','thTreatment','recurring','status','thActions'].forEach((k,i)=>{if(apH[i])apH[i].textContent=t(k);});
+// Table headers - Invoices
+const inH=document.querySelectorAll('#tab-invoices .data-table th');['thInvoiceNo','thPatient','thTreatments','thTotal','thDiscount','thPayment','thDate','status','thActions'].forEach((k,i)=>{if(inH[i])inH[i].textContent=t(k);});
+// Modal buttons
+document.querySelectorAll('.modal-box button[onclick="savePatient()"]').forEach(b=>b.textContent=t('save'));
+document.querySelectorAll('.modal-box button[onclick="saveAppt()"]').forEach(b=>b.textContent=t('save'));
+document.querySelectorAll('.modal-box button[onclick="saveInvoice()"]').forEach(b=>b.textContent=t('saveInvoice'));
+document.querySelectorAll('.modal-box').forEach(box=>{box.querySelectorAll('button').forEach(b=>{const txt=b.textContent.trim();if(txt==='Cancel')b.textContent=t('cancel');if(txt==='إلغاء')b.textContent=t('cancel');});});
+// Re-render tables to pick up translated headers
+renderPatients(); renderAppointments(); renderInvoices();
+
 }
 // ===== AI ASSISTANT =====
 const GEMINI_KEY = () => localStorage.getItem('dental_gemini_key')||'';
