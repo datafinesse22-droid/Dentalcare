@@ -935,7 +935,7 @@ function renderBirthdays(){
 // ===== PATIENTS =====
 function renderPatients(){
   const q=(document.getElementById('patientSearch').value||'').toLowerCase();
-  const f=STATE.patients.filter(p=>(p.Name||'').toLowerCase().includes(q)||(p.Phone||'').toLowerCase().includes(q)||(p.FileNo||'').toLowerCase().includes(q)||(p.InsuranceCompany||'').toLowerCase().includes(q));
+  const f=STATE.patients.filter(p=>(p.Name||'').toLowerCase().includes(q)||(p.Phone||'').toLowerCase().includes(q)||(p.FileNo||'').toLowerCase().includes(q));
   document.getElementById('patientsTbody').innerHTML=f.length?f.map(p=>{
     const realIdx=STATE.patients.indexOf(p);
     const bal=getPatientBalance(p.ID||p.Name);
