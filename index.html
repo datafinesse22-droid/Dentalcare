@@ -566,9 +566,11 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:#007bff!import
       <button onclick="closeModal('patientModal')" class="p-1 hover:bg-gray-100 rounded-lg">✕</button>
     </div>
     <input type="hidden" id="editPatientId"/>
-    <div class="grid grid-cols-2 gap-3 mb-3">
+       <div class="grid grid-cols-2 gap-3 mb-3">
       <div><label class="text-xs text-gray-500 mb-1 block">Name *</label><input id="pName" type="text" class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm" placeholder="Full name"/></div>
       <div><label class="text-xs text-gray-500 mb-1 block">Phone *</label><input id="pPhone" type="tel" class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm" placeholder="+20..."/></div>
+      <div class="col-span-2"><label class="text-xs text-gray-500 mb-1 block">File # *</label><input id="pFileNo" type="text" class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm" placeholder="e.g. P-001"/></div>
+
       <div class="col-span-2"><label class="text-xs text-gray-500 mb-1 block">Date of Birth</label><input id="pDOB" type="date" class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm"/></div>
       <div><label class="text-xs text-gray-500 mb-1 block">Gender</label><select id="pGender" class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm"><option>Male</option><option>Female</option></select></div>
       <div class="flex items-center gap-2 pt-5">
@@ -819,9 +821,9 @@ function invStatusBadge(s){ return({Paid:'bg-green-100 text-green-700',Partial:'
 function invSubtotal(inv){ if(inv.Items&&Array.isArray(inv.Items)) return inv.Items.reduce((s,i)=>s+(parseFloat(i.price)||0),0); return parseFloat(inv.Amount||inv.Total||0); }
 function invTotal(inv){ const sub=invSubtotal(inv); const disc=parseFloat(inv.Discount||0); const dtype=inv.DiscountType||'flat'; const discAmt=dtype==='pct'?sub*disc/100:disc; return Math.max(0,sub-discAmt); }
 function getNextInvoiceNo(){ STATE.invoiceCounter=(parseInt(localStorage.getItem('dental_invoice_counter')||'0'))+1; localStorage.setItem('dental_invoice_counter',STATE.invoiceCounter); return 'INV-'+String(STATE.invoiceCounter).padStart(4,'0'); }
-function getPatientBalance(patientId){   if(!patientId) return 0;   return STATE.invoices     .filter(inv=>(inv.Status==='Pending'||inv.Status==='Partial')&&(inv.PatientID===patientId||inv.PatientName===patientId))     .reduce((s,inv)=>{       if(inv.Status==='Partial'){         const remaining = Math.max(0, invTotal(inv) - (parseFloat(inv.AmountPaid)||0));         return s + remaining;       }       return s + invTotal(inv);     }, 0); }
+function getPatientBalance(patientId){   if(!patientId) return 0;   return STATE.invoices     .filter(inv=>(inv.Status==='Pending'||inv.Status==='Partial')&&(inv.PatientID===patientId))     .reduce((s,inv)=>{       if(inv.Status==='Partial'){         const remaining = Math.max(0, invTotal(inv) - (parseFloat(inv.AmountPaid)||0));         return s + remaining;       }       return s + invTotal(inv);     }, 0); }
 function normalizePhone(phone){ let c=(phone||'').replace(/[\s\-\+\(\)]/g,'').replace(/\D/g,''); if(c.startsWith('00')) c=c.slice(2); if(c.startsWith('0')&&c.length===11) c='20'+c.slice(1); if(c.length===10&&!c.startsWith('20')) c='20'+c; return c; }
-function addMonths(dateStr,months){ const d=new Date(dateStr); d.setMonth(d.getMonth()+parseInt(months)); return d.toISOString().slice(0,10); }
+function addMonths(dateStr,months){ const d=new Date(dateStr); const targetMonth=d.getMonth()+parseInt(months); const year=d.getFullYear()+Math.floor(targetMonth/12); const month=((targetMonth%12)+12)%12; const lastDay=new Date(year,month+1,0).getDate(); d.setFullYear(year,month,Math.min(d.getDate(),lastDay)); return d.toISOString().slice(0,10); }
 
 // ===== AUTH =====
 function doLogin(){ if(document.getElementById('pwInput').value===CORRECT_PW){ sessionStorage.setItem('dental_auth','1'); document.getElementById('lockScreen').style.display='none'; init(); } else { document.getElementById('pwError').classList.remove('hidden'); document.getElementById('pwInput').value=''; } }
@@ -961,13 +963,13 @@ function openPatientModal(){
   ['pName','pPhone','pNotes','pInsuranceCompany'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('pDOB').value=''; document.getElementById('pDOB').max=new Date().toISOString().split('T')[0];
   document.getElementById('pGender').value='Male'; document.getElementById('pInsurance').checked=false;
-  document.getElementById('insuranceCompanyRow').style.display='none';
+  document.getElementById('insuranceCompanyRow').style.display='none'; document.getElementById('pFileNo').value='';
   document.getElementById('patientModalTitle').textContent='Add Patient'; openModal('patientModal');
 }
 function editPatient(idx){
   const p=STATE.patients[idx];
   document.getElementById('editPatientId').value=idx;
-  document.getElementById('pName').value=p.Name||''; document.getElementById('pPhone').value=p.Phone||'';
+  document.getElementById('pName').value=p.Name||''; document.getElementById('pPhone').value=p.Phone||''; document.getElementById('pFileNo').value=p.FileNo||'';
   document.getElementById('pDOB').value=p.DOB||p.dob||''; document.getElementById('pDOB').max=new Date().toISOString().split('T')[0];
   document.getElementById('pGender').value=p.Gender||'Male';
   document.getElementById('pNotes').value=p.Notes||'';
@@ -982,7 +984,7 @@ function savePatient(){
   const idx=document.getElementById('editPatientId').value;
   const isEdit=idx!=='';
   const existing=isEdit?STATE.patients[parseInt(idx)]:null;
-  const fileNum=isEdit?(existing.FileNo||('P-'+String(parseInt(idx)+1).padStart(3,'0'))):'P-'+String(STATE.patients.length+1).padStart(3,'0');
+  const fileNum=document.getElementById('pFileNo').value.trim()||(isEdit?(existing.FileNo||''):'P-'+String(STATE.patients.length+1).padStart(3,'0'));
   const insured=document.getElementById('pInsurance').checked;
   const p={
     ID:isEdit?(existing.ID||Date.now().toString()):Date.now().toString(),
@@ -995,16 +997,28 @@ function savePatient(){
     InsuranceCompany:insured?document.getElementById('pInsuranceCompany').value:'',
     CreatedAt:isEdit?(existing.CreatedAt||new Date().toISOString()):new Date().toISOString()
   };
-  if(isEdit){STATE.patients[parseInt(idx)]=p;gsPost({sheet:'Patients',action:'update',id:p.ID,row:[p.ID,p.FileNo,p.Name,p.Phone,p.DOB,p.Gender,p.Notes,p.Insurance,p.InsuranceCompany,p.CreatedAt]});}
-  else{STATE.patients.push(p);gsPost({sheet:'Patients',action:'append',row:[p.ID,p.FileNo,p.Name,p.Phone,p.DOB,p.Gender,p.Notes,p.Insurance,p.InsuranceCompany,p.CreatedAt]});}
+  if(isEdit){STATE.patients[parseInt(idx)]=p;gsPost({sheet:'Patients',action:'update',id:p.ID,row:[p.ID,p.FileNo,p.Name,p.Phone,p.DOB||'N/A',p.Gender,p.Notes,p.Insurance,p.InsuranceCompany,p.CreatedAt]});}
+  else{STATE.patients.push(p);gsPost({sheet:'Patients',action:'append',row:[p.ID,p.FileNo,p.Name,p.Phone,p.DOB||'N/A',p.Gender,p.Notes,p.Insurance,p.InsuranceCompany,p.CreatedAt]});}
   localStorage.setItem('dental_patients',JSON.stringify(STATE.patients));
   closeModal('patientModal'); renderAll(); showToast('Patient saved!','success');
 }
 function deletePatient(idx){
-  if(!confirm('Delete this patient?')) return;
-  const p=STATE.patients[idx]; STATE.patients.splice(idx,1); localStorage.setItem('dental_patients',JSON.stringify(STATE.patients));
-  gsPost({sheet:'Patients',action:'delete',id:p.ID}); renderAll(); showToast('Deleted','info');
+  if(!confirm('Delete this patient and ALL their appointments and invoices?')) return;
+  const p=STATE.patients[idx];
+  // Remove linked appointments
+  const apptsBefore=STATE.appointments.length;
+  STATE.appointments=STATE.appointments.filter(a=>a.PatientID!==p.ID&&a.PatientName!==p.Name);
+  if(STATE.appointments.length<apptsBefore) localStorage.setItem('dental_appointments',JSON.stringify(STATE.appointments));
+  // Remove linked invoices
+  const invsBefore=STATE.invoices.length;
+  STATE.invoices=STATE.invoices.filter(i=>i.PatientID!==p.ID&&i.PatientName!==p.Name);
+  if(STATE.invoices.length<invsBefore) localStorage.setItem('dental_invoices',JSON.stringify(STATE.invoices));
+  // Remove patient
+  STATE.patients.splice(idx,1); localStorage.setItem('dental_patients',JSON.stringify(STATE.patients));
+  gsPost({sheet:'Patients',action:'delete',id:p.ID});
+  renderAll(); showToast('Patient and all linked records deleted','info');
 }
+
 function quickWhatsApp(name,phone){
   if(!phone){showToast('No phone number for this patient','error');return;}
   const clean=normalizePhone(phone);
@@ -1019,8 +1033,8 @@ function openPatientProfile(patientId){
   STATE.currentProfilePatientId=patientId;
   document.getElementById('profileModalTitle').textContent=p.Name||'Profile';
   const bal=getPatientBalance(p.ID||p.Name);
-  const allAppts=STATE.appointments.filter(a=>a.PatientID===p.ID||a.PatientName===p.Name);
-  const allInvs=STATE.invoices.filter(i=>i.PatientID===p.ID||i.PatientName===p.Name);
+  const allAppts=STATE.appointments.filter(a=>a.PatientID===p.ID);
+  const allInvs=STATE.invoices.filter(i=>i.PatientID===p.ID);
   const totalSpent=allInvs.filter(i=>i.Status==='Paid').reduce((s,i)=>s+invTotal(i),0);
   const lastVisit=allAppts.filter(a=>a.Status==='Completed').sort((a,b)=>(b.Date||'')>(a.Date||'')?1:-1)[0];
 
@@ -1105,7 +1119,12 @@ function editAppt(idx){
   document.getElementById('aStatus').value=a.Status||'Scheduled'; document.getElementById('aNotes').value=a.Notes||'';
   document.getElementById('aRecurring').checked=!!(a.Recurring); document.getElementById('recurringOpts').style.display=a.Recurring?'block':'none';
   populateDoctorSelects();
-  setTimeout(()=>{document.getElementById('aDoctor').value=a.Doctor||'';document.getElementById('aTreatment').value=a.Treatment||'';document.getElementById('aTime').value=a.Time||'';if(a.RecurringMonths)document.getElementById('aRecurringMonths').value=a.RecurringMonths;},50);
+  generateTimeSlots();
+  document.getElementById('aDoctor').value=a.Doctor||'';
+  document.getElementById('aTreatment').value=a.Treatment||'';
+  document.getElementById('aTime').value=a.Time||'';
+  if(a.RecurringMonths) document.getElementById('aRecurringMonths').value=a.RecurringMonths;
+
   document.getElementById('apptModalTitle').textContent='Edit Appointment'; openModal('apptModal');
 }
 function saveAppt(){
