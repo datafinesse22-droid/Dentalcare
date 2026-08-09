@@ -1107,8 +1107,9 @@ function openApptModal(prefillDate){
   document.getElementById('selectedPatientDisplay').textContent=''; document.getElementById('aStatus').value='Scheduled'; document.getElementById('aNotes').value='';
   document.getElementById('aRecurring').checked=false; document.getElementById('recurringOpts').style.display='none';
   document.getElementById('patientSuggestions').classList.add('hidden');
-  document.getElementById('apptModalTitle').textContent='Add Appointment';
-  populateDoctorSelects(); openModal('apptModal');
+ document.getElementById('apptModalTitle').textContent='Add Appointment';
+  generateTimeSlots(); populateDoctorSelects(); openModal('apptModal');
+
 }
 function editAppt(idx){
   const a=STATE.appointments[idx];
