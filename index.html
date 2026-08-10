@@ -859,13 +859,15 @@ async function gsPost(payload){ if(!STATE.scriptUrl) return false; try{ await fe
 async function loadData(){
   showToast('Syncing data...','info');
   try{
-    const [pts,appts,invs,docs,prices]=await Promise.all([gsGet('Patients'),gsGet('Appointments'),gsGet('Invoices'),gsGet('Doctors'),gsGet('PriceGuide')]);
+    const [pts,appts,invs,docs,prices,plans]=await Promise.all([gsGet('Patients'),gsGet('Appointments'),gsGet('Invoices'),gsGet('Doctors'),gsGet('PriceGuide'),gsGet('TreatmentPlans')]);
     if(pts){const sIds=new Set(pts.filter(r=>r.ID||r.Name).map(r=>String(r.ID||r.Name)));const lo=STATE.patients.filter(p=>!sIds.has(String(p.ID||p.Name)));STATE.patients=[...pts.filter(r=>r.ID||r.Name),...lo];localStorage.setItem('dental_patients',JSON.stringify(STATE.patients));}
     if(appts){const normDate=d=>{if(!d)return '';const s=String(d);if(/^\d{4}-\d{2}-\d{2}/.test(s))return s.slice(0,10);try{const dt=new Date(s);if(!isNaN(dt))return dt.toISOString().slice(0,10);}catch{}return s;};const normTime=t=>{if(!t)return '';const s=String(t).trim();const isoM=s.match(/T(\d{2}):(\d{2})/);if(isoM)return isoM[1]+':'+isoM[2];const num=parseFloat(s);if(!isNaN(num)&&s.indexOf(':')===-1&&num>=0&&num<1){const frac=num;const totalMins=Math.round(frac*24*60);const h=Math.floor(totalMins/60);const mn=totalMins%60;return String(h).padStart(2,'0')+':'+String(mn).padStart(2,'0');}if(/^\d{2}:\d{2}$/.test(s))return s;const m=s.match(/^(\d{1,2}):(\d{2})(?::\d+)?\s*(AM|PM)?$/i);if(m){let h=parseInt(m[1]),mn=m[2],ap=(m[3]||'').toUpperCase();if(ap==='PM'&&h!==12)h+=12;if(ap==='AM'&&h===12)h=0;return String(h).padStart(2,'0')+':'+mn;}try{const d=new Date(s);if(!isNaN(d.getTime())){const h=d.getUTCHours(),mn=d.getUTCMinutes();if(h||mn)return String(h).padStart(2,'0')+':'+String(mn).padStart(2,'0');}}catch(e){}return '';};appts.forEach(r=>{if(r.Date)r.Date=normDate(r.Date);if(r.Time)r.Time=normTime(r.Time);});const sIds=new Set(appts.filter(r=>r.ID).map(r=>String(r.ID)));const lo=STATE.appointments.filter(a=>!sIds.has(String(a.ID)));STATE.appointments=[...appts.filter(r=>r.ID||r.Date),...lo];localStorage.setItem('dental_appointments',JSON.stringify(STATE.appointments));}
     if(invs){const sIds=new Set(invs.filter(r=>r.ID).map(r=>String(r.ID)));const lo=STATE.invoices.filter(i=>!sIds.has(String(i.ID)));STATE.invoices=[...invs.filter(r=>r.ID||r.PatientName),...lo];localStorage.setItem('dental_invoices',JSON.stringify(STATE.invoices));}
     if(docs){STATE.doctors=docs.filter(r=>r.ID||r.Name);localStorage.setItem('dental_doctors',JSON.stringify(STATE.doctors));}
     if(prices&&prices.length){STATE.priceGuide=prices.filter(r=>r.Treatment).map(r=>({treatment:String(r.Treatment),price:parseFloat(r.Price)||0}));localStorage.setItem('dental_prices',JSON.stringify(STATE.priceGuide));}
+    if(plans&&plans.length){plans.forEach(r=>{if(!r.ID||!r.PlanJSON)return;try{const plan=JSON.parse(String(r.PlanJSON));if(!STATE.dentalCharts[r.ID])STATE.dentalCharts[r.ID]={teeth:{},plan:[]};STATE.dentalCharts[r.ID].plan=plan;}catch(e){}});localStorage.setItem('dental_charts',JSON.stringify(STATE.dentalCharts));}
     renderAll();
+
     document.getElementById('connectionStatus').textContent='✅ Connected';
     document.getElementById('connectionStatus').className='text-xs font-medium text-green-600';
     showToast('Data synced!','success');
@@ -1606,7 +1608,23 @@ function renderTreatmentPlan(){
 function addTreatmentPlanRow(){if(!STATE.currentChartPatientId){showToast('Select a patient first','error');return;}const chart=getPatientChart(STATE.currentChartPatientId);chart.plan.push({tooth:'',treatment:'',status:'Planned',notes:''});saveCharts();renderTreatmentPlan();}
 function updatePlanRow(i,field,val){if(!STATE.currentChartPatientId)return;const chart=getPatientChart(STATE.currentChartPatientId);chart.plan[i][field]=val;saveCharts();}
 function deletePlanRow(i){if(!STATE.currentChartPatientId)return;const chart=getPatientChart(STATE.currentChartPatientId);chart.plan.splice(i,1);saveCharts();renderTreatmentPlan();}
-function saveTreatmentPlan(){saveCharts();showToast('Plan saved!','success');}
+function saveTreatmentPlan(){
+  if(!STATE.currentChartPatientId){showToast('No patient selected','error');return;}
+  saveCharts();
+  if(STATE.scriptUrl){
+    const chart=getPatientChart(STATE.currentChartPatientId);
+    const pt=STATE.patients.find(p=>p.ID===STATE.currentChartPatientId);
+    const patName=pt?pt.Name:'';
+    gsPost({
+      sheet:'TreatmentPlans',
+      action:'upsert',
+      id:STATE.currentChartPatientId,
+      row:[STATE.currentChartPatientId, patName, JSON.stringify(chart.plan), new Date().toISOString()]
+    });
+  }
+  showToast('Plan saved!','success');
+}
+
 
 // ===== DOCTORS =====
 function renderDoctorsList(){document.getElementById('doctorsList').innerHTML=STATE.doctors.length?STATE.doctors.map((d,i)=>`<div class="flex items-center justify-between py-2 px-3 bg-gray-50 rounded-xl"><div><p class="font-medium text-sm">${esc(d.Name||'')}</p><p class="text-xs text-gray-400">${esc(d.Specialization||'')}</p></div><button onclick="deleteDoctor(${i})" class="text-red-400 hover:text-red-600 text-xs">✕</button></div>`).join(''):`<p class="text-gray-400 text-sm py-2">No doctors yet</p>`;}
