@@ -1207,7 +1207,7 @@ function renderDaily(){
   const apptMap={};dayApptsWithIdx.forEach(({a,i})=>{const t2=(a.Time||'').slice(0,5);if(!apptMap[t2])apptMap[t2]=[];apptMap[t2].push({a,i});});
   document.getElementById('dailyTimeline').innerHTML=slots.length?slots.map(slot=>{
     const slotAppts=apptMap[slot]||[];
-    return`<div class="time-slot"><div class="time-label">${fmt12(slot)}</div><div class="flex-1 flex flex-col gap-1">${slotAppts.length?slotAppts.map(({a,i})=>`<div class="appt-chip ${esc(a.Status||'Scheduled')}" onclick="editAppt(${i});showTab('appointments',null)"><div class="font-medium">${esc(a.PatientName||'')} <span class="opacity-60 text-xs">${fmt12(a.Time||'')}</span></div><div class="flex gap-2 opacity-75"><span>${esc(a.Treatment||'—')}</span>${a.Doctor?`<span>· ${esc(a.Doctor)}</span>`:''}</div></div>`).join(''):'<div class="text-gray-200 text-xs py-2 pl-1">—</div>'}</div></div>`;
+    return`<div class="time-slot"><div class="time-label">${fmt12(slot)}</div><div class="flex-1 flex flex-col gap-1">${slotAppts.length?slotAppts.map(({a,i})=>`<div class="appt-chip ${esc(a.Status||'Scheduled')}" style="border-left:4px solid ${getDoctorColor(a.Doctor)};background:${getDoctorColor(a.Doctor)}18;" onclick="editAppt(${i});showTab('appointments',null)"><div class="font-medium">${esc(a.PatientName||'')} <span class="opacity-60 text-xs">${fmt12(a.Time||'')}</span>${a.Status==='Cancelled'?'<span style="background:#ef4444;color:#fff;font-size:10px;padding:1px 6px;border-radius:99px;margin-left:4px;font-weight:700;">CANCELLED</span>':''}</div><div class="flex gap-2 opacity-75"><span>${esc(a.Treatment||'—')}</span>${a.Doctor?`<span>· ${esc(a.Doctor)}</span>`:''}</div></div>`).join(''):'<div class="text-gray-200 text-xs py-2 pl-1">—</div>'}</div></div>`;
   }).join(''):`<p class="text-gray-400 text-center py-8">No appointments this day</p>`;
 }
 
@@ -1528,6 +1528,12 @@ if(phone) window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`,'
 }
 
 // ===== DENTAL CHART =====
+const DOCTOR_COLORS = ['#3b82f6','#10b981','#f59e0b','#8b5cf6','#ef4444','#06b6d4','#f97316','#84cc16'];
+function getDoctorColor(doctorName){
+  if(!doctorName) return '#94a3b8';
+  const idx = STATE.doctors.findIndex(d=>(d.Name||'')=== doctorName);
+  return DOCTOR_COLORS[(idx>=0?idx:Math.abs(doctorName.split('').reduce((a,c)=>a+c.charCodeAt(0),0)))%DOCTOR_COLORS.length];
+}
 function getPatientChart(pid){if(!STATE.dentalCharts[pid])STATE.dentalCharts[pid]={teeth:{},plan:[]};return STATE.dentalCharts[pid];}
 function saveCharts(){localStorage.setItem('dental_charts',JSON.stringify(STATE.dentalCharts));}
 function toothColor(pid,num){const chart=getPatientChart(pid),tooth=chart.teeth[num];if(!tooth)return{fill:'#ffffff',stroke:'#94a3b8'};const s=TOOTH_STATUSES.find(ts=>ts.key===tooth.status)||TOOTH_STATUSES[0];return{fill:s.color,stroke:s.border};}
