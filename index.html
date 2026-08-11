@@ -1038,8 +1038,8 @@ function openPatientProfile(patientId){
   STATE.currentProfilePatientId=patientId;
   document.getElementById('profileModalTitle').textContent=p.Name||'Profile';
   const bal=getPatientBalance(p.ID||p.Name);
-  const allAppts=STATE.appointments.filter(a=>a.PatientID===p.ID);
-  const allInvs=STATE.invoices.filter(i=>i.PatientID===p.ID);
+  const allAppts=STATE.appointments.filter(a=>a.PatientID===p.ID||a.PatientName===p.Name);
+  const allInvs=STATE.invoices.filter(i=>i.PatientID===p.ID||i.PatientName===p.Name);
   const totalSpent=allInvs.filter(i=>i.Status==='Paid').reduce((s,i)=>s+invTotal(i),0);
   const lastVisit=allAppts.filter(a=>a.Status==='Completed').sort((a,b)=>(b.Date||'')>(a.Date||'')?1:-1)[0];
 
