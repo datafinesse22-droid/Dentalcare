@@ -209,7 +209,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:#007bff!import
       <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
         <div class="stat-card" style="--from:#007bff;--to:#0056b3"><p class="text-blue-100 text-xs mb-1">Total Patients</p><p class="text-3xl font-bold" id="statPatients">0</p></div>
         <div class="stat-card" style="--from:#10b981;--to:#059669"><p class="text-green-100 text-xs mb-1">Today's Appts</p><p class="text-3xl font-bold" id="statToday">0</p></div>
-        <div class="stat-card" style="--from:#8b5cf6;--to:#6d28d9"><p class="text-purple-100 text-xs mb-1">Revenue</p><p class="text-2xl font-bold" id="statRevenue">0</p></div>
+        <div class="stat-card" style="--from:#8b5cf6;--to:#6d28d9"><p class="text-purple-100 text-xs mb-1">Revenue</p><p class="text-2xl font-bold" id="statRevenue" onclick="unlockRevenue()" style="filter:blur(6px);cursor:pointer;user-select:none;">0</p></div>
         <div class="stat-card" style="--from:#f59e0b;--to:#d97706"><p class="text-yellow-100 text-xs mb-1">Outstanding</p><p class="text-2xl font-bold" id="statOutstanding">0</p></div>
       </div>
       <div id="dashAlerts" class="mb-4"></div>
@@ -754,6 +754,9 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:#007bff!import
 // ===== STATE =====
 const CORRECT_PW = 'MOSTAFA_saad44';
 const CURRENCY_SYMBOLS = {USD:'$', EGP:'ج.م'};
+const BALANCE_PIN = '147258'; let balanceUnlocked = false;
+function unlockRevenue(){ const el=document.getElementById('statRevenue'); if(el.style.filter==='none'){ el.style.filter='blur(6px)'; return; } const entered=prompt('Enter PIN to view revenue:'); if(entered!==BALANCE_PIN){ showToast('Incorrect PIN','error'); return; } el.style.filter='none'; }
+
 
 const STATE = {
   patients:[], appointments:[], invoices:[], doctors:[],
@@ -1679,7 +1682,8 @@ function renderDoctorView(){
 }
 
 // ===== NAVIGATION =====
-function showTab(name,btn){
+function showTab(name,btn){if(name==='balance' && !balanceUnlocked){ const entered = prompt('Enter PIN to access Balance Tracker:'); if(entered !== BALANCE_PIN){ showToast('Incorrect PIN','error'); return; } balanceUnlocked = true; }
+
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
   document.getElementById('tab-'+name).classList.add('active');
   document.querySelectorAll('#sideNav .nav-item').forEach(b=>b.classList.remove('active'));
@@ -1939,7 +1943,7 @@ function updateAIMessage(id, text){
 }
 
 window.addEventListener('DOMContentLoaded',()=>{
-  if(sessionStorage.getItem('dental_auth')==='1'){document.getElementById('lockScreen').style.display='none';init();}
+document.getElementById('lockScreen').style.display='none';init();
   const today=new Date().toISOString().slice(0,10);
   document.getElementById('aDate').value=today;
   document.getElementById('iDate').value=today;
