@@ -4,6 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Finesse Dental Care</title>
+
 <script src="https://cdn.tailwindcss.com"></script>
 <script>tailwind.config={theme:{extend:{colors:{dental:{DEFAULT:'#007bff',dark:'#0056b3',light:'#e8f4ff'}}}}}</script>
 <style>
@@ -171,7 +172,11 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:#007bff!import
       <svg class="nav-icon w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
       <span>Doctors</span>
     </button>
-    <button class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition" onclick="showTab('birthdays',this)">
+   <button class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition" onclick="showTab('reminders',this)">
+  <svg class="nav-icon w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+  <span>Reminders</span>
+</button>
+ <button class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition" onclick="showTab('birthdays',this)">
       <svg class="nav-icon w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
       <span>Birthdays</span>
     </button>
@@ -445,6 +450,17 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:#007bff!import
         </table>
       </div>
     </div>
+<!-- REMINDERS -->
+<div id="tab-reminders" class="section">
+  <h2 class="text-xl font-bold mb-2">Overdue Reminders</h2>
+  <p class="text-gray-500 text-sm mb-5">Patients whose last completed visit was 6+ months ago.</p>
+  <div class="card overflow-x-auto">
+    <table class="data-table">
+      <thead><tr><th>File #</th><th>Name</th><th>Phone</th><th>Last Visit</th><th>Months Overdue</th><th>Actions</th></tr></thead>
+      <tbody id="remindersTbody"><tr><td colspan="6" class="text-center text-gray-400 py-8">No overdue patients</td></tr></tbody>
+    </table>
+  </div>
+</div>
 
     <!-- BIRTHDAYS -->
     <div id="tab-birthdays" class="section">
@@ -881,7 +897,7 @@ async function loadData(){
 }
 
 // ===== RENDER ALL =====
-function renderAll(){ applySettings(); renderDashboard(); renderPatients(); renderAppointments(); renderInvoices(); renderBalance(); renderDoctorView(); renderDoctorsList(); renderDoctorFilter(); renderPriceGuide(); renderTreatmentSelects(); renderCalendar(); renderDaily(); renderDailyDoctorFilter(); renderBirthdays(); }
+function renderAll(){ applySettings(); renderDashboard(); renderPatients(); renderAppointments(); renderInvoices(); renderBalance(); renderDoctorView(); renderDoctorsList(); renderDoctorFilter(); renderPriceGuide(); renderTreatmentSelects(); renderCalendar(); renderDaily(); renderDailyDoctorFilter(); renderBirthdays(); renderReminders(); }
 
 // ===== SETTINGS =====
 function applySettings(){
@@ -931,6 +947,35 @@ function renderDashboard(){
 }
 
 // ===== BIRTHDAYS =====
+function renderReminders(){
+  const sixMonthsAgo=new Date(Date.now()-180*24*60*60*1000).toISOString().slice(0,10);
+  const patientLastVisit={};
+  STATE.appointments.filter(a=>a.Status==='Completed').forEach(a=>{
+    const pid=a.PatientID||a.PatientName;
+    if(!patientLastVisit[pid]||(a.Date||'')>patientLastVisit[pid]) patientLastVisit[pid]=(a.Date||'');
+  });
+  const overdue=STATE.patients.filter(p=>{
+    const pid=p.ID||p.Name;
+    const last=patientLastVisit[pid];
+    return last&&last<=sixMonthsAgo;
+  }).map(p=>{
+    const pid=p.ID||p.Name;
+    const last=patientLastVisit[pid];
+    const months=Math.floor((Date.now()-new Date(last).getTime())/(1000*60*60*24*30));
+    return{...p,lastVisit:last,monthsAgo:months};
+  }).sort((a,b)=>a.lastVisit>b.lastVisit?1:-1);
+  document.getElementById('remindersTbody').innerHTML=overdue.length?overdue.map(p=>`<tr>
+    <td class="text-xs font-mono text-dental font-semibold">${esc(p.FileNo||'—')}</td>
+    <td class="font-medium">${esc(p.Name||'')}</td>
+    <td>${esc(p.Phone||'')}</td>
+    <td>${p.lastVisit||'—'}</td>
+    <td><span class="badge bg-orange-100 text-orange-700">${p.monthsAgo} months ago</span></td>
+    <td><div class="flex gap-1">
+      <button onclick="quickWhatsApp('${esc(p.Name||'')}','${esc(p.Phone||'')}')" class="text-xs text-green-600 hover:underline px-2 py-1 rounded hover:bg-green-50">WhatsApp</button>
+      <button onclick="openPatientProfile('${esc(p.ID||p.Name||'')}')" class="text-xs text-purple-600 hover:underline px-2 py-1 rounded hover:bg-purple-50">Profile</button>
+    </div></td>
+  </tr>`).join(''):`<tr><td colspan="6" class="text-center text-gray-400 py-8">No overdue patients 🎉</td></tr>`;
+}
 function renderBirthdays(){
   const todayBdays=STATE.patients.filter(p=>isBirthdayToday(p.DOB||p.dob));
   document.getElementById('birthdayTodayList').innerHTML=todayBdays.length?todayBdays.map(p=>`<div class="flex items-center gap-2 py-1 border-b border-pink-300 border-opacity-30 last:border-0"><div class="w-8 h-8 rounded-full bg-white bg-opacity-20 flex items-center justify-center font-bold text-sm">${esc(String(p.Name||'?').charAt(0))}</div><div><p class="font-medium">${esc(p.Name||'')}</p><p class="text-pink-200 text-xs">turns ${calcAge(p.DOB||p.dob)} · ${p.Phone||''}</p></div></div>`).join(''):`<p class="text-pink-200 text-sm py-2">No birthdays today 🎈</p>`;
@@ -1689,7 +1734,7 @@ function showTab(name,btn){if(name==='balance' && !balanceUnlocked){ const enter
   document.querySelectorAll('#sideNav .nav-item').forEach(b=>b.classList.remove('active'));
   document.querySelectorAll('#bottomNav .nav-item').forEach(b=>b.classList.remove('active'));
   if(btn) btn.classList.add('active');
-  const titles={dashboard:'Dashboard',patients:'Patients',appointments:'Appointments',daily:'Daily View',invoices:'Invoices',balance:'Balance Tracker',messages:'WhatsApp Messages','dental-chart':'Dental Chart',doctors:'Doctors',settings:'Settings',birthdays:'Birthdays'};
+  const titles={dashboard:'Dashboard',patients:'Patients',appointments:'Appointments',daily:'Daily View',invoices:'Invoices',balance:'Balance Tracker',messages:'WhatsApp Messages','dental-chart':'Dental Chart',doctors:'Doctors',settings:'Settings',birthdays:'Birthdays',reminders:'Reminders'};
   document.getElementById('pageTitle').textContent=titles[name]||name;
   closeSidebar();
   if(name==='appointments') renderCalendar();
@@ -1699,6 +1744,7 @@ function showTab(name,btn){if(name==='balance' && !balanceUnlocked){ const enter
   if(name==='daily'){renderDailyDoctorFilter();renderDaily();}
   if(name==='dental-chart') renderDentalChart();
   if(name==='birthdays') renderBirthdays();
+  if(name==='reminders') renderReminders();
   if(name==='balance') renderBalance();
   if(name==='messages') updateMsgPreview();
 }
@@ -1725,14 +1771,14 @@ const UI_STRINGS = {
     navDashboard:'Dashboard', navPatients:'Patients', navAppointments:'Appointments',
     navDaily:'Daily View', navInvoices:'Invoices', navBalance:'Balance Tracker',
     navMessages:'WhatsApp Messages', navChart:'Dental Chart', navDoctors:'Doctors',
-    navBirthdays:'Birthdays', navSettings:'Settings', navLogout:'Logout',
+    navBirthdays:'Birthdays', navReminders:'Reminders', navSettings:'Settings', navLogout:'Logout',
     btnAddPatient:'Add Patient', btnAddAppt:'Add Appointment', btnNewInvoice:'New Invoice',
     btnSave:'Save', btnCancel:'Cancel', btnDelete:'Del', btnEdit:'Edit',
     btnProfile:'Profile', btnChart:'Chart', btnPrint:'Print',
     secDashboard:'Dashboard', secPatients:'Patients', secAppointments:'Appointments',
     secDaily:'Daily Calendar', secInvoices:'Invoices', secBalance:'Outstanding Balance Tracker',
     secMessages:'WhatsApp Message Templates', secChart:'Dental Chart',
-    secDoctors:'Doctors View', secBirthdays:'Birthdays', secSettings:'Settings',
+    secDoctors:'Doctors View', secBirthdays:'Birthdays', secReminders:'Overdue Reminders', secSettings:'Settings',
     today:'Today', allDoctors:'All Doctors', searchPatient:'Search by name, phone, file # or insurance...',
     unlock:'Unlock', enterPassword:'Enter your password to continue',
     settingsClinic:'Clinic Info', settingsDoctors:'Manage Doctors',
@@ -1751,14 +1797,14 @@ addPatient:'Add Patient',addAppt:'Add Appointment',newInvoice:'New Invoice',save
     navDashboard:'لوحة التحكم', navPatients:'المرضى', navAppointments:'المواعيد',
     navDaily:'العرض اليومي', navInvoices:'الفواتير', navBalance:'متابعة الرصيد',
     navMessages:'رسائل واتساب', navChart:'خريطة الأسنان', navDoctors:'الأطباء',
-    navBirthdays:'أعياد الميلاد', navSettings:'الإعدادات', navLogout:'تسجيل الخروج',
+    navBirthdays:'أعياد الميلاد', navReminders:'التذكيرات', navSettings:'الإعدادات', navLogout:'تسجيل الخروج',
     btnAddPatient:'إضافة مريض', btnAddAppt:'إضافة موعد', btnNewInvoice:'فاتورة جديدة',
     btnSave:'حفظ', btnCancel:'إلغاء', btnDelete:'حذف', btnEdit:'تعديل',
     btnProfile:'الملف', btnChart:'الخريطة', btnPrint:'طباعة',
     secDashboard:'لوحة التحكم', secPatients:'المرضى', secAppointments:'المواعيد',
     secDaily:'التقويم اليومي', secInvoices:'الفواتير', secBalance:'متابعة الأرصدة المستحقة',
     secMessages:'قوالب رسائل واتساب', secChart:'خريطة الأسنان',
-    secDoctors:'عرض الأطباء', secBirthdays:'أعياد الميلاد', secSettings:'الإعدادات',
+    secDoctors:'عرض الأطباء', secBirthdays:'أعياد الميلاد', secReminders:'تذكيرات متأخرة', secSettings:'الإعدادات',
     today:'اليوم', allDoctors:'جميع الأطباء', searchPatient:'بحث بالاسم أو الهاتف أو الملف...',
     unlock:'دخول', enterPassword:'أدخل كلمة المرور للمتابعة',
     settingsClinic:'معلومات العيادة', settingsDoctors:'إدارة الأطباء',
@@ -1784,7 +1830,8 @@ function translateUI(){
     ['dashboard','navDashboard'],['patients','navPatients'],['appointments','navAppointments'],
     ['daily','navDaily'],['invoices','navInvoices'],['balance','navBalance'],
     ['messages','navMessages'],['dental-chart','navChart'],['doctors','navDoctors'],
-    ['birthdays','navBirthdays'],['settings','navSettings']
+['reminders','navReminders'],
+['birthdays','navBirthdays'],
   ];
   document.querySelectorAll('#sideNav .nav-item span').forEach((el,i)=>{
     if(navMap[i]) el.textContent=t(navMap[i][1]);
@@ -1807,7 +1854,7 @@ function translateUI(){
     'tab-appointments':t('secAppointments'),'tab-daily':t('secDaily'),
     'tab-invoices':t('secInvoices'),'tab-balance':t('secBalance'),
     'tab-messages':t('secMessages'),'tab-dental-chart':t('secChart'),
-    'tab-doctors':t('secDoctors'),'tab-birthdays':t('secBirthdays'),'tab-settings':t('secSettings')
+    'tab-doctors':t('secDoctors'),'tab-reminders':t('secReminders'),'tab-birthdays':t('secBirthdays'),'tab-settings':t('secSettings')
   };
   Object.entries(headings).forEach(([id,text])=>{
     const h=document.querySelector(`#${id} h2`);if(h) h.textContent=text;
